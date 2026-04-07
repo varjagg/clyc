@@ -75,7 +75,8 @@ and permission notice:
 
 (defun* reset-clause-struc-id (clause-struc new-id) (:inline t)
   "[Cyc] Primitively change the clause-struc id for CLAUSE-STRUC to NEW-ID."
-  (setf (cls-id clause-struc) new-id))
+  (setf (cls-id clause-struc) new-id)
+  clause-struc)
 
 (defun* clause-struc-cnf (clause-struc) (:inline t)
   "[Cyc] Return the CNF of CLAUSE-STRUC."
@@ -83,7 +84,8 @@ and permission notice:
 
 (defun* reset-clause-struc-assertions (clause-struc new-assertions) (:inline t)
   "[Cyc] Primitively set the assertions for CLAUSE-STRUC to NEW-ASSERTIONS."
-  (setf (cls-assertions clause-struc) new-assertions))
+  (setf (cls-assertions clause-struc) new-assertions)
+  clause-struc)
 
 (defun* find-clause-struc-by-id (id) (:inline t)
   "[Cyc] Return the clause-struc with ID, or NIL if not present."
@@ -108,8 +110,10 @@ and permission notice:
   *clause-struc-from-id*)
 
 (defun setup-clause-struc-table (size exact?)
+  (declare (ignore exact?))
   (unless *clause-struc-from-id*
-    (setf *clause-struc-from-id* (new-id-index size 0))))
+    (setf *clause-struc-from-id* (new-id-index size 0))
+    t))
 
 (defun finalize-clause-strucs (&optional max-clause-struc-id)
   (set-next-clause-struc-id max-clause-struc-id)
@@ -131,11 +135,13 @@ and permission notice:
                            (do-id-index (id clause-struc (clause-struc-table))
                              (setf max (max max (missing-larkc 11338))))
                            max)))))
-    (set-id-index-next-id *clause-struc-from-id* next-id)))
+    (set-id-index-next-id *clause-struc-from-id* next-id)
+    next-id))
 
 (defun register-clause-struc-id (clause-struc id)
   (reset-clause-struc-id clause-struc id)
-  (id-index-enter *clause-struc-from-id* id clause-struc))
+  (id-index-enter *clause-struc-from-id* id clause-struc)
+  clause-struc)
 
 (defun* lookup-clause-struc (id) (:inline t)
   (id-index-lookup *clause-struc-from-id* id))

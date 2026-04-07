@@ -58,8 +58,6 @@ and permission notice:
   ;; TODO - is stringp & length 0 a faster check?
   (string= object *empty-string*))
 
-(deflexical *object-to-string-caching-state* nil)
-
 (defun to-string (value)
   "[Cyc] This is equivalent to princ-to-string; use to-lisp-string if embedded quotes should be retained."
   (princ-to-string value))
@@ -71,23 +69,9 @@ and permission notice:
   "[Cyc] Return first charcter in string."
   (char string 0))
 
-(defun object-to-string-internal (object)
+(defun-cached object-to-string (object) (:test eql :initial-size 1000)
+  "Memoized string representation of OBJECT."
   (princ-to-string object))
-
-;; TODO - this memoization macroexpansion doesn't seem to calculate a hash?
-(defun object-to-string (object)
-  "Memoizes object instances' string representation"
-  (let* ((caching-state (or *object-to-string-caching-state*
-                           (create-global-caching-state-for-name
-                            'object-to-string
-                            '*object-to-string-caching-state*
-                            nil #'eql 1 1000)))
-         (results (caching-state-lookup caching-state object :memoized-item-not-found)))
-    (when (eq :memoized-item-not-found results)
-      (setf results (multiple-value-list (princ-to-string object)))
-      (caching-state-put caching-state object results))
-    ;; Multiple value return
-    (caching-results results)))
 
 (defun replace-substring (string substring new)
   "[Cyc] Performs case-sensitive substitution of NEW for SUBSTRING throughout STRING."
@@ -201,7 +185,7 @@ SAFE?: should we make sure args are legit?"
            (character new-char))
   (when (or (not safe?)
             (length> string n))
-    (set-char string n new-char))
+    (setf (char string n) new-char))
   string)
 
 (defun substring? (little big &optional test (start-index 0) end-index) 
@@ -359,7 +343,7 @@ Note: We *could* use STRING-PROPER and (STRING-SUBST \"\" \" \" ...), but we're 
                           (quoted? nil)
                           (done? nil))
                          ;; Termination test only, no return body
-                         ((or done? (eq in-length pos-now)))
+                         ((or done? (eq in-length pos-find)))
                        ;; Iteration body
                        (push this-character cur-char-list)
                        (setf pos-now pos-find)

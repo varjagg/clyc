@@ -102,7 +102,7 @@ and permission notice:
                                   :cons (when (= i n)
                                           (return nil))
                                   :dotted (if count-dotted-list?
-                                              (= i (1+ n))
+                                              (= (1+ i) n)
                                               (= i n)))
       (= (length seq) n)))
 
@@ -151,7 +151,7 @@ and permission notice:
            (consp seq2))
       (loop
          for c1 = seq1 then (cdr c1)
-         for c2 = seq1 then (cdr c2)
+         for c2 = seq2 then (cdr c2)
          do (cond
               ((null c1) (return (null c2)))
               ((null c2) (return t))))
@@ -218,10 +218,11 @@ and permission notice:
 (declaim (inline mapunion)) ;; compile the test in
 
 (defun mapunion (function list &optional (test #'eql))
-  "FUNCTION is applied to each element of LIST to get a new element X (which is also a list). Then we return the unique elements of X, concatenating over all elements of LIST."
+  "FUNCTION is applied to each element of LIST to get a new list. Then we return the union of all those lists."
   (let ((retval nil))
     (dolist (item list)
-      (pushnew (funcall function item) retval :test test))
+      (dolist (sub-item (funcall function item))
+        (pushnew sub-item retval :test test)))
     retval))
 
 (declaim (inline mapnunion)) ;; compile the test in
@@ -370,8 +371,9 @@ and permission notice:
 
   ;; TODO - see where these are actually used.  If fixnums are simply iterated, then do that instead of this mess.
 
-(defun-memoized num-list-cached (num start)
-    (:doc "[Cyc] Returns a list of length NUM containing the integers START to NUM-1+START. Note we cache this to save space, not time.")
+(defun-cached num-list-cached (num start)
+    (:initial-size 100
+     :doc "[Cyc] Returns a list of length NUM containing the integers START to NUM-1+START. Note we cache this to save space, not time.")
   (new-num-list num start))
 
 (declaim (inline numlist))
@@ -407,7 +409,7 @@ and permission notice:
   "Boolean for if the list contains duplicates."
   (do ((cell list (cdr cell)))
       ((null cell))
-    (when (member (car cell) (cdr cell) :test test :key key)
+    (when (member (funcall key (car cell)) (cdr cell) :test test :key key)
       (return t))))
 
 (declaim (inline duplicates))
@@ -434,7 +436,7 @@ and permission notice:
        (not (dolist (item set1)
               (unless (= (count item set1 :test test)
                          (count item set2 :test test))
-                (return nil))))
+                (return t))))
        ;; And ensure the set of unique elements are the same
        (sets-equal? set1 set2 test)))
 
@@ -495,12 +497,12 @@ and permission notice:
         (nreverse result))))
 
 (defun flip-cons (cons)
-  (cons (car cons) (cdr cons)))
+  (cons (cdr cons) (car cons)))
 
 (defun flip-alist (alist)
   ;; Couldn't get a reference to flip-cons to inline
   (mapcar (lambda (cons)
-            (cons (car cons) (cdr cons)))
+            (cons (cdr cons) (car cons)))
           alist))
 
 (defun self-evaluating-form (object)
@@ -563,7 +565,7 @@ and permission notice:
     ;; TODO - there was other branching that did the plain delete-duplicates, avoiding the hashtable version.
     ;;   suspecting it was something like this start/end detection, but there could be different stuff, too.
     ((or end
-         (eq 0 start)
+         (not (eq 0 start))
          (length<= sequence *magic-hashing-cutoff*))
      (delete-duplicates sequence :test test :key key :start start :end end))
     ;; TODO - Assuming this is what we do with the hashtable parameter
@@ -628,7 +630,7 @@ and permission notice:
 (declaim (inline alist-has-key?))
 (defun alist-has-key? (alist key &optional (test #'eql))
   "[Cyc] Returns whether KEY is a key in the association list ALIST."
-  (member alist key :test test))
+  (member key alist :test test))
 
 (defun alist-enter (alist key value &optional (test #'eql))
   "[Cyc] Note that VALUE is associated with KEY in ALIST (using TEST for key equality).
@@ -701,7 +703,8 @@ and permission notice:
    TEST is the equality test for values in ALIST."
   (let ((hashtable (make-hash-table :test test :size (length alist))))
     (dolist (cons alist)
-      (setf (gethash (cdr cons) hashtable) (car cons)))))
+      (setf (gethash (cdr cons) hashtable) (car cons)))
+    hashtable))
 
 (defun filter-plist (plist pred)
   "[Cyc] Creates a new plist based on PLIST, but only including properties which pass PRED."
@@ -1011,7 +1014,7 @@ START: an optional seed for building the product."
 (defun list-of-type-p (pred object)
   "[Cyc] Returns T if OBJECT is a non-dotted list, and PRED returns non-NIL when applied to any item in OBJECT. Otherwise, returns NIL."
   (when (non-dotted-list-p object)
-    (some pred object)))
+    (every pred object)))
 
 
 

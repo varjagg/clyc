@@ -60,7 +60,7 @@ Returns KEY."
   (let ((current-val (gethash key dictionary)))
     (if (listp current-val)
         (progn
-          (unless (member key current-val :test test :key key-accessor)
+          (unless (member val current-val :test test :key key-accessor)
             (setf (gethash key dictionary) (cons val current-val)))
           key)
         (error "Corrupted dictionary; attempting to push values on a non-LISTP ~a." current-val))))
@@ -86,7 +86,8 @@ Ensures that the current value is a LISTP. If this deletes the last element from
 (defun dictionary-increment (dictionary key &optional (increment 1))
   "[Cyc] Increments the value at KEY in DICTIONARY by INCREMENT.
 Treats NIL a 0."
-  (incf (gethash key dictionary 0) increment))
+  (incf (gethash key dictionary 0) increment)
+  dictionary)
 
 (defun new-dictionary-from-alist (alist &optional (test #'eql))
   (alexandria:alist-hash-table alist :test test :size (length alist)))

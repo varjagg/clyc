@@ -2,20 +2,20 @@
   Copyright (c) 2019 White Flame
 
   This file is part of Clyc
- 
+
   Clyc is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
- 
+
   Clyc is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU Affero General Public License for more details.
- 
+
   You should have received a copy of the GNU Affero General Public License
   along with Clyc.  If not, see <https://www.gnu.org/licenses/>.
- 
+
 This file derives from work covered by the following copyright
 and permission notice:
 
@@ -24,7 +24,7 @@ and permission notice:
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
   http://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
@@ -40,7 +40,11 @@ and permission notice:
 
 (in-package :clyc)
 
-;; TODO - I think I screwed up here, in making a combined interface.  "Memoization" seems to be local to a dynamic state binding, while "Caching" is a singular global cache.  I probably can ignore all the actual implementation guts of these 2 (which spends most its complexity juggling multiple return values, optional params, etc) and just reimplement the exposed interfaces.  But, search for all instances of defun-memoized and check the java to see if it has calls involving "global" in its lazy cache state initialization to distinguish which one is actually being used.
+;; Two distinct caching mechanisms in the Java:
+;;   "Caching" (DEFINE-CACHED-NEW) = global persistent cache in a deflexical *name-caching-state*.
+;;     Always caches. Lisp macro: defun-cached.
+;;   "Memoization" (DEFINE-MEMOIZED) = state-dependent cache inside *memoization-state*.
+;;     Only caches when a memoization state is bound. Lisp macro: defun-memoized.
 
 
 (defconstant *global-caching-lock* (bt:make-lock "global-caching-lock"))
@@ -59,19 +63,29 @@ and permission notice:
 (defparameter *function-caching-enabled?* t
   "[Cyc] Global caching and memoization are disabled when NIL.")
 
-  ;; NOTE - there were a bunch of fixed-arity sxhash_calc_N calls in here?
-
-
-
+;; CL equivalent of the fixed-arity sxhash_calc_N functions from the Java.
+;; The Java used sxhash_rot + logxor with a state vector; we use SBCL's
+;; sb-int::mix which is the same idea (combine two hash codes into one).
 (defmacro multi-hash (&rest hashes)
   "Combine fixnum hashes together, using platform-specific hashing. Should not cons."
-  (reduce (lambda (x y) `(sb-int::mix ,x (sxhash ,y))) hashes))
+  (reduce (lambda (x y) `(sb-int::mix ,x (cl:sxhash ,y))) hashes))
 
-;; DESIGN - as far as I can tell, the entire point of this caching-state stuff is to eliminate the need to cons up a list containing the params as a key to pass to gethash each time the function is called.  So the sxhash of the list of args is manually calculated without consing, then collisions are manually checked with the parameter values directly, using the TEST function on each parameter (note that this allows EQ or EQL slot testing within a composite key).  On a cache miss, the key is consed up to register it.  The zero parameter caching scheme is also broken out to its own storage slot.
+;; DESIGN - The original SubL caching-state used manual sxhash-calc-N + collision lists
+;; for multi-arg functions to avoid consing a list key on every call, since SubL hash
+;; tables couldn't hash list keys with equal. The sxhash was computed without consing,
+;; collisions were walked comparing each arg individually, and the key was only consed
+;; on a cache miss.
+;;
+;; CL SIMPLIFICATION: CL hash tables with :test 'equal natively hash and compare list
+;; keys, so the entire manual sxhash/collision-list mechanism is unnecessary. The macros
+;; (defun-cached, defun-memoized) now use (list arg1 arg2 ...) as the hash key directly.
+;; This does cons a list on every call, but the simplicity gain is worth it — CL
+;; implementations optimize sxhash for lists internally using the same techniques.
+;; The functions multi-hash, sxhash-calc-N, and caching-state-enter-multi-key-n are
+;; retained for backward compatibility but are no longer used by the macros.
+;; The zero-arg caching scheme is still broken out to its own storage slot.
 
 ;; This also stores the multiple-value-list of the calculation, instead of just a single return value.  TODO DESIGN - optimizing a route for single-value returns can save consing & speed
-
-;; If these caches are hit a ton, consing up a list key to pass to gethash would add more GC pressure, and the steps through the code from the java looks shorter than what gethash does,although there is a gethash underlying the key->collisions storage.  The test seems to be part of the generated code (though I don't have a reference macro body to work from), so there's no unnecessary dispatch.  I think it's worth keeping this claptrap instead of just going for gethash for the moment.  As always, profiling needed.
 
 ;; Also, the caches can be selectively cleared, so having knowledge of which global variables hold the cahing states of various usages needs to remain exposed.
 
@@ -89,11 +103,20 @@ and permission notice:
   (declare ((integer 0) initial-size)
            ((or null (integer 1)) capacity)
            ((or symbol function) test))
-  ;; TODO - don't quite understand this
-  (setf test (if (= 1 func-args-length)
-                 (coerce test 'function)
-                 #'eql))
-  (make-caching-state :store (if capacity 
+  ;; CL SIMPLIFICATION: The original SubL used eql with manual sxhash+collision-lists
+  ;; for multi-arg functions because SubL hash tables couldn't hash list keys.
+  ;; In CL, the macros pass (list arg1 arg2 ...) as the key, which requires :test equal.
+  ;;
+  ;; For 1-arg, the caller's test is used directly (matching original SubL behavior).
+  ;; For 2+ args, we force equal regardless of the caller's test. This is slightly
+  ;; more permissive than the original: if the SubL specified :test eq, each element
+  ;; was compared with eq in the collision walk. With equal, eql-but-not-eq values
+  ;; could match. Confirmed safe: all multi-arg :test eq functions use identity objects
+  ;; (FORTs, MTs, keywords, inference structures, small fixnums) — never cons lists or strings.
+  (setf test (if (> func-args-length 1)
+                 #'equal
+                 (coerce test 'function)))
+  (make-caching-state :store (if capacity
                                  (new-cache capacity test)
                                  (make-hash-table :test test :size initial-size))
                       :lock lock
@@ -140,82 +163,152 @@ and permission notice:
     (setf (gethash key store) value)))
 
 (defun caching-state-clear (caching-state)
-  (with-caching-state-lock caching-state
-    (cache-clear store)
-    (clrhash store)))
+  (when caching-state
+    (with-caching-state-lock caching-state
+      (progn (cache-clear store)
+             (setf (caching-state-zero-arg-results caching-state) :&memoized-item-not-found&))
+      (progn (clrhash store)
+             (setf (caching-state-zero-arg-results caching-state) :&memoized-item-not-found&)))))
 
 (defun caching-state-enter-multi-key-n (caching-state sxhash collisions results args-list)
   "[Cyc] Cache in CACHING-STATE under hash code SXHASH the fact that ARGS-LIST returns the list of values RESULTS"
-  ;; Translates :&memoized-item-not-found& back to an empty list.
-  ;; TODO - should we just test for EQ of that instead of LISTP?
   (unless (listp collisions)
     (setf collisions nil))
   (if (not args-list)
       (caching-state-set-zero-arg-results caching-state results)
-      ;; TODO - original code directly hit the slot, not using the locking version.
-      ;; That doesn't seem safe, can it do so?
       (caching-state-put caching-state sxhash (cons (list args-list results) collisions))))
 
 
-;; TODO - detect no-arg as well?  will probably work (suboptimally) without it, though.
-;; TODO - where is clearing of its memoization registered?
-;; This macroexpansion should (assuming list-utilities' num-list-cached is being implemented):
-;;  (defun num-list-cached (num start) ...)
-;;  create the name *num-list-cached-caching-state* to hold the lazily instantiated cache
-;;  hit the cache lookup by hashing the params without consing, and checking the list of collisions
-;;  define the cache-miss expression to generate the value for the params
-
-
-;; draw from calls in java:
-;;  (create-global-caching-state-for-name name cs-variable (capacity nil) (test eql) (args-length auto) size)
-;;  memoization_state.register_hl_store_cache_clear_callback(..) => :clear-when :hl-store-modified
-
-;; kb-mapping-macros simple-term-assertion-list-filtered also registers a clearing parameter from the hl-store being cleared, and :CLEAR-WHEN is in the java stuff here, surrounded by other keywords that we're going to try to use.
-(defmacro defun-memoized (name params (&key (capacity nil) (test 'eql) (initial-size 0) declare doc clear-when) &body calculate-cache-miss)
-  "Define a memoized function.  The body can still have a docstring & declarations."
+;; Reconstructed from compiled Java output. The SubL compiler expanded DEFINE-CACHED-NEW into:
+;;  - a deflexical *name-caching-state* (initialized to NIL)
+;;  - a clear-name function (calls caching-state-clear)
+;;  - the wrapper function with lazy init of global caching state + cache lookup
+;; Results are wrapped in multiple-value-list and unwrapped via caching-results.
+;;
+;; CL SIMPLIFICATION: The Java had two arity-dependent lookup patterns:
+;;  1-arg: direct caching-state-lookup/put with the arg as key
+;;  2+ args: sxhash-calc-N hash + manual collision list (SubL couldn't hash list keys)
+;; In CL, both use the same uniform pattern — the key is the arg for 1-arg, or
+;; (list arg1 arg2 ...) for 2+ args, with an :equal hash table.
+;;
+;; NOTE: This is the GLOBAL caching pattern (Java DEFINE-CACHED-NEW).
+;; For STATE-DEPENDENT memoization (Java DEFINE-MEMOIZED), see defun-memoized below.
+(defmacro defun-cached (name params (&key (capacity nil) (test 'eql) (initial-size 0)
+                                      faccess clear-when declare doc) &body calculate-cache-miss)
+  "[Cyc] Define a globally cached function. Reconstructed from DEFINE-CACHED-NEW.
+   Original SubL lambda list: (NAME (&REST ARGS) (&KEY TEST CAPACITY FACCESS SIZE CLEAR-WHEN) &BODY BODY)
+   FACCESS is ignored (SubL-specific access control). SIZE is renamed INITIAL-SIZE."
+  (declare (ignore faccess))
   (let ((varname (symbolicate "*" name "-CACHING-STATE*"))
-        (clear-name (symbolicate "CLEAR-" name)))
-    (alexandria:with-gensyms (cs key collisions results)
+        (clear-name (symbolicate "CLEAR-" name))
+        (nparams (length params))
+        (test-form (if (symbolp test) (list 'quote test) test)))
+    (alexandria:with-gensyms (cs results)
       `(progn
          (defvar ,varname nil)
-         ;; Might as well create the table early, instead of always doing the lazy check as the Java code did.
+         (defun ,clear-name ()
+           (let ((cs ,varname))
+             (when cs (caching-state-clear cs)))
+           nil)
+         ;; note-globally-cached-function in toplevel matches Java setup_ phase
          (toplevel
-           (create-global-caching-state-for-name ',name ',varname ,capacity
-                                                 ,(if (symbolp test) (list 'quote test) test)
-                                                 ,(length params) ,initial-size)
-           (note-globally-cached-function ',name)
-           ,(when clear-when
-              (case clear-when
-                (:hl-store-modified `(register-hl-store-cache-clear-callback #',clear-name))
-                (otherwise (error "Unknown defun-memoized :clear-when option: ~s" clear-when)))))
-         ;; TODO - this would be the place to inject metrics on memoized functions
+           (note-globally-cached-function ',name))
          (defun ,name ,params
            ,@(when declare `((declare ,@declare)))
            ,@(when doc (list doc))
-           (let* ((,cs ,varname)
-                  ;; Calculate the key by doing a non-consing hash construction
-                  (,key (multi-hash ,@params))
-                  ;; The initial lookup, which will return the list of hash collisions
-                  (,collisions (caching-state-lookup ,cs ,key)))
-             ;; Hash hit. Try to find a matching collision
-             (when (not (eq ,collisions :&memoized-item-not-found&))
-               ;;(format t "~&cache hash hit ~a ~s~%" ',name (list ,@params))
-               (dolist (collision ,collisions)
-                 ;; Each collision is (params results).  Try to match params.
-                 (let ((args (first collision)))
-                   (when (and ,@ (mapcar (lambda (param)
-                                           `(,test ,param (pop args)))
-                                         params))
-                     (return-from ,name (second collision))))))
-             ;; Hash miss, or collision not found.  Compute and store it.
-             (let ((,results (multiple-value-list (progn ,@calculate-cache-miss))))
-               ;;(format t "~&cache miss ~a ~s~%" ',name (list ,@params))
-               (caching-state-enter-multi-key-n ,cs ,key ,collisions ,results (list ,@params))
-               (caching-results ,results))))))))
+           ;; Lazy initialization of caching state, matching Java pattern
+           (let ((,cs ,varname))
+             (when (null ,cs)
+               (setf ,cs (create-global-caching-state-for-name
+                          ',name ',varname ,capacity ,test-form ,nparams ,initial-size))
+               ,@(when clear-when
+                   (case clear-when
+                     (:hl-store-modified
+                      (list `(register-hl-store-cache-clear-callback ',clear-name)))
+                     (otherwise (error "Unknown defun-cached :clear-when option: ~s" clear-when))))) ;; closes case, when-splice
+             ;; Uniform lookup: 1-arg uses param directly, 2+ uses (list ...) as key
+             ,(let ((key-form (if (= 1 nparams)
+                                  (first params)
+                                  `(list ,@params))))
+                `(let ((,results (caching-state-lookup ,cs ,key-form :&memoized-item-not-found&)))
+                   (when (eq ,results :&memoized-item-not-found&)
+                     (setf ,results (multiple-value-list (progn ,@calculate-cache-miss)))
+                     (caching-state-put ,cs ,key-form ,results))
+                   (caching-results ,results)))))))))
 
 
 
-  ;; TODO DESIGN - This doesn't deal with arg-list keys, just a singular key object passed to the hashtable.  Grepping the source code, these always seem to be symbol keys.  This probably maps a function to a cached-state, which seems like a pointless lookup, given that the function name itself can create a symbol-value unique to hold the caching state anyway.  I'm tempted to rip all this out.
+;; Reconstructed from compiled Java output. The SubL compiler expanded DEFINE-MEMOIZED into:
+;;  - a wrapper function that checks *memoization-state*
+;;  - if no memoization state, calls the body directly (no caching)
+;;  - if memoization state is active, looks up/creates a caching-state keyed by function name
+;; The caching-state lives INSIDE the memoization-state, not in a global variable.
+;; This means the cache is scoped to the dynamic extent of with-memoization-state.
+;; Same CL simplification as defun-cached: 2+ args use (list ...) key with :equal hash table.
+(defmacro defun-memoized (name params (&key (test 'eql) capacity faccess
+                                             memoization-state-function
+                                             memoization-state-function-arg-positions)
+                          &body body)
+  "[Cyc] Define a state-dependent memoized function. Reconstructed from DEFINE-MEMOIZED.
+   Original SubL lambda list: (NAME (&REST ARGS) (&KEY TEST CAPACITY FACCESS
+     MEMOIZATION-STATE-FUNCTION MEMOIZATION-STATE-FUNCTION-ARG-POSITIONS) &BODY BODY)
+   FACCESS, MEMOIZATION-STATE-FUNCTION, and MEMOIZATION-STATE-FUNCTION-ARG-POSITIONS
+   are ignored (SubL-specific). CAPACITY is accepted but unused (state-dependent caches
+   don't have fixed capacity). Default TEST is EQL, matching create_caching_state."
+  (declare (ignore capacity faccess memoization-state-function
+                  memoization-state-function-arg-positions))
+  (let ((nparams (length params))
+        (test-form (if (symbolp test) (list 'quote test) test)))
+    (alexandria:with-gensyms (v-memoization-state caching-state results)
+      `(progn
+         (toplevel
+           (note-memoized-function ',name))
+         (defun ,name ,params
+           (let ((,v-memoization-state *memoization-state*))
+             (when (null ,v-memoization-state)
+               (return-from ,name (progn ,@body)))
+             (let ((,caching-state (memoization-state-lookup ,v-memoization-state ',name)))
+               (when (null ,caching-state)
+                 (setf ,caching-state (create-caching-state
+                                       (memoization-state-lock ,v-memoization-state)
+                                       ',name ,nparams nil ,test-form))
+                 (memoization-state-put ,v-memoization-state ',name ,caching-state))
+               ,(if (= 0 nparams)
+                    ;; 0-arg: use zero-arg-results slot
+                    `(let ((,results (caching-state-get-zero-arg-results ,caching-state)))
+                       (when (eq ,results :&memoized-item-not-found&)
+                         (setf ,results (multiple-value-list (progn ,@body)))
+                         (caching-state-set-zero-arg-results ,caching-state ,results))
+                       (caching-results ,results))
+                    ;; 1+ args: uniform lookup; 1-arg uses param directly, 2+ uses (list ...)
+                    (let ((key-form (if (= 1 nparams)
+                                        (first params)
+                                        `(list ,@params))))
+                      `(let ((,results (caching-state-lookup ,caching-state ,key-form :&memoized-item-not-found&)))
+                         (when (eq ,results :&memoized-item-not-found&)
+                           (setf ,results (multiple-value-list (progn ,@body)))
+                           (caching-state-put ,caching-state ,key-form ,results))
+                         (caching-results ,results)))))))))))
+
+(defmacro with-memoization-state (state &body body)
+  "[Cyc] Execute BODY with *memoization-state* bound to STATE."
+  `(let ((*memoization-state* ,state))
+     ,@body))
+
+(defmacro with-new-memoization-state (&body body)
+  "[Cyc] Execute BODY with a fresh memoization state."
+  `(let ((*memoization-state* (create-memoization-state)))
+     ,@body))
+
+(defmacro with-possibly-new-memoization-state (&body body)
+  "[Cyc] Execute BODY with a memoization state, creating one if needed."
+  `(let ((*memoization-state* (possibly-new-memoization-state)))
+     ,@body))
+
+(defmacro without-clearing-mt-dependent-caches (&body body)
+  "[Cyc] Execute BODY with mt-dependent cache clearing suspended."
+  `(let ((*suspend-clearing-mt-dependent-caches?* t))
+     ,@body))
 
 (defstruct memoization-state
   store
@@ -266,8 +359,9 @@ and permission notice:
     (setf (gethash key store) value)))
 
 (defun memoization-state-clear (memoization-state)
-  (with-memoization-state-lock memoization-state
-    (clrhash store)))
+  (when memoization-state
+    (with-memoization-state-lock memoization-state
+      (clrhash store))))
 
 (defparameter *memoization-state* nil
   "[Cyc] Current memoization state. NIL indicates no memoization is occurring.")
@@ -281,10 +375,11 @@ and permission notice:
       (create-memoization-state)))
 
 (defun clear-all-memoization (state)
-  (memoization-state-clear state))
+  (memoization-state-clear state)
+  state)
 
 (defglobal *memoized-functions* nil
-  "[Cyc] The master list of all functiosn defined via define-memoized")
+  "[Cyc] The master list of all functions defined via defun-memoized (state-dependent).")
 
 (defun note-memoized-function (function-symbol)
   (pushnew function-symbol *memoized-functions*)
@@ -340,7 +435,7 @@ and permission notice:
 
 (defun register-hl-store-cache-clear-callback (callback)
   "[Cyc] Registers CALLBACK as a function which will be funcalled each time the HL store changes. CALLBACK is a function-spec-p which should take zero arguments."
-  (check-type callback 'function-spec-p)
+  (declare (type (satisfies function-spec-p) callback))
   (pushnew callback *hl-store-cache-clear-callbacks*)
   callback)
 
@@ -359,14 +454,14 @@ and permission notice:
 
 (defun register-mt-dependent-cache-clear-callback (callback)
   "[Cyc] Registers CALLBACK as a function which will be funcalled each time the microtheory structure changes. CALLBACK should take zero arguments."
-  (check-type callback 'function-spec-p)
+  (declare (type (satisfies function-spec-p) callback))
   (pushnew callback *mt-dependent-cache-clear-callbacks*)
   callback)
 
 (defparameter *suspend-clearing-mt-dependent-caches?* nil)
 
 (defun clear-mt-dependent-caches? ()
-  *suspend-clearing-mt-dependent-caches?*)
+  (not *suspend-clearing-mt-dependent-caches?*))
 
 (defglobal *genl-preds-dependent-cache-clear-callbacks* nil
   "[Cyc] The list of zero-arity function-spec-p's to funcall each time the genlPreds structure changes. These are intended to clear mt-dependent caches.")
@@ -386,4 +481,3 @@ and permission notice:
       (car results)))
 
 (defconstant *caching-n-sxhash-composite-value* 167)
-

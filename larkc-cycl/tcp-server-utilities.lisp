@@ -78,10 +78,18 @@ Otherwise, disable all servers with DESIGNATOR as their type."
     ((tcp-port-p designator) (alexandria:if-let ((tcp-server (find-tcp-server-by-port designator)))
                                (disable-tcp-server tcp-server)
                                0))
-    (t (missing-larkc 31597))))
+    (t (let ((total 0))
+         (dolist (tcp-server (all-tcp-servers))
+           (when (eq designator (missing-larkc 31597))
+             (incf total (disable-tcp-server tcp-server))))
+         total))))
 
 (defun validate-all-tcp-servers ()
-  (missing-larkc 31596))
+  (let ((total 0))
+    (dolist (tcp-server (all-tcp-servers))
+      (unless (valid-process-p (missing-larkc 31596))
+        (incf total (disable-tcp-server tcp-server))))
+    total))
 
 (defstruct (tcp-server (:conc-name "TCPS-"))
   type
@@ -110,7 +118,8 @@ Otherwise, disable all servers with DESIGNATOR as their type."
 
 (defun register-tcp-server (tcp-server)
   (bt:with-lock-held (*tcp-server-lock*)
-    (push tcp-server *all-tcp-servers*)))
+    (push tcp-server *all-tcp-servers*))
+  tcp-server)
 
 (defglobal *tcp-server-type-table* nil)
 
@@ -118,11 +127,13 @@ Otherwise, disable all servers with DESIGNATOR as their type."
   "[Cyc] Register that TCP servers of TYPE use HANDLER with MODE."
   (deregister-tcp-server-type type)
   (bt:with-lock-held (*tcp-server-lock*)
-    (push (list type handler mode) *tcp-server-type-table*)))
+    (push (list type handler mode) *tcp-server-type-table*))
+  type)
 
 (defun deregister-tcp-server-type (type)
   (bt:with-lock-held (*tcp-server-lock*)
-    (deletef type *tcp-server-type-table* :key #'first)))
+    (deletef type *tcp-server-type-table* :key #'first))
+  type)
 
 (defun tcp-server-type-handler (type)
   (second (find type *tcp-server-type-table* :key #'first)))

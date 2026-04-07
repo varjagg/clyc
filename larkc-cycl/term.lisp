@@ -64,7 +64,7 @@ and permission notice:
     ((fort-p object) (relation? object))
     ((naut? object) (missing-larkc 3707))))
 
-(defun reified-skolen-term? (term)
+(defun reified-skolem-term? (term)
   "[Cyc] e.g. (#$SKF-1234 #$Muffet"
   (and (el-formula-p term)
        (missing-larkc 31573)))
@@ -76,7 +76,7 @@ and permission notice:
                       (pred-u-v-holds-in-any-mt #$isa fn #$SkolemFuncN)
                       (pred-u-v-holds-in-any-mt #$isa fn #$SkolemFunction)))
         (and assume?
-             (not (any-subhl-predicate-links-p fn #$isa))
+             (not (any-sbhl-predicate-links-p fn #$isa))
              (has-skolem-name? fn)))))
 
 (defun has-skolem-name? (fort)
@@ -123,7 +123,7 @@ and permission notice:
 (defun ground-naut? (naut &optional (var? #'cyc-var?))
   (and (possibly-naut-p naut)
        (not (sequence-var naut))
-       (cons-tree-find-if var? naut)
+       (not (cons-tree-find-if var? naut))
        (naut? naut var?)))
 
 (defun hl-ground-naut? (object)
@@ -167,11 +167,11 @@ and permission notice:
 (defun represented-first-order-term? (term)
   (and term
        (or (fort-p term)
-           (cl-var? term)
+           (el-var? term)
            (function-term? term))))
 
 (defun sentence? (formula &optional (var? #'el-var?))
-  (when (posibly-sentence-p formula)
+  (when (possibly-sentence-p formula)
     (let* ((predicate (formula-arg0 formula))
            (sentence? (funcall var? predicate)))
       (or sentence?
@@ -202,3 +202,17 @@ and permission notice:
       (generic-arg-var? object)
       (unreified-skolem-term? object)))
 
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'el-fort-p '(object)
+    "Returns t iff OBJECT is a fort or an EL formula."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'hl-term-p '(obj)
+    "Returns T if the OBJ is a valid CycL HL term."
+    'nil
+    '(booleanp))

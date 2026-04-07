@@ -74,7 +74,7 @@ and permission notice:
       (declare (ignore default description))
       (cond
         ((not (boundp symbol)) (warn "The system parameter ~s is not bound." symbol))
-        ((system-parameter-value-unset-p symbol)
+        ((system-parameter-value-unset-p (symbol-value symbol))
          (warn "The system parameter ~s was not initialized." symbol))
         (t (let* ((val (symbol-value symbol)))
              (unless (case type
@@ -154,7 +154,7 @@ and permission notice:
   "[Cyc] Possible values: The name of a constant representing a Cyclist. This is the default Cyclist initially logged into the system.")
 (define-system-parameter *html-image-directory* "/cycdoc/img/" 'string
   "[Cyc] The directory under which Cyc images (.gif or otherwise) are stored")
-(define-system-parameter *html-javacript-directory* "/cycdoc/js/" 'string
+(define-system-parameter *html-javascript-directory* "/cycdoc/js/" 'string
   "[Cyc] The directory under which Javascript files used by the browser are stored")
 (define-system-parameter *html-css-directory* "/cycdoc/css/" 'string
     "[Cyc] The directory under which CSS files used by the browser are stored")

@@ -86,10 +86,10 @@ and permission notice:
   "[Cyc} Return T iff ASSERTION is a ground atomic formula (gaf)."
   assertion-gaf-p)
 
-(define-kb-non-remote assertion-gaf-hl-formula (asssertion)
+(define-kb-non-remote assertion-gaf-hl-formula (assertion)
   "[Cyc] Returns the HL clause of ASSERTION if it's a gaf, otherwise returns NIL.
 Ignores the truth - i.e. returns <blah> instead of (#$not <blah>) for negated gafs."
-  assertion-gaf-formula-internal)
+  assertion-gaf-hl-formula-internal)
 
 (define-kb-non-remote assertion-cons (assertion)
   "[Cyc] Returns a CNF or GAF HL formula.")
@@ -131,7 +131,8 @@ Ignores the truth - i.e. returns <blah> instead of (#$not <blah>) for negated ga
      (,new-func ,@params)))
 
 (define-kb-hl-modifier set-assertion-direction (assertion new-direction)
-  "[Cyc] Change direction of ASSERTION to NEW-DIRECTION.")
+  "[Cyc] Change direction of ASSERTION to NEW-DIRECTION."
+  kb-set-assertion-direction-internal)
 
 (define-kb-hl-modifier set-assertion-truth (assertion new-truth)
   "[Cyc] Change the truth of ASSERTION to NEW-TRUTH."
@@ -171,3 +172,170 @@ Ignores the truth - i.e. returns <blah> instead of (#$not <blah>) for negated ga
 (define-kb-non-remote assertion-dependents (assertion)
   "[Cyc] Return the dependents of ASSERTION.")
 
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'kb-create-assertion '(cnf mt)
+    "Create a new assertion with CNF in MT."
+    '((cnf cnf-p) (mt hlmt-p))
+    '(assertion-p))
+
+
+(register-cyc-api-function 'kb-remove-assertion '(assertion)
+    "Remove ASSERTION from the KB."
+    '((assertion assertion-p))
+    '(null))
+
+
+(register-cyc-api-function 'kb-assertion-cnf '(assertion)
+    "Return the CNF for ASSERTION."
+    '((assertion assertion-p))
+    '(cnf-p))
+
+
+(register-cyc-api-function 'kb-possibly-assertion-cnf '(assertion)
+    "Return the CNF for ASSERTION or NIL."
+    '((assertion assertion-p))
+    '((nil-or cnf-p)))
+
+
+(register-cyc-api-function 'kb-assertion-mt '(assertion)
+    "Return the MT for ASSERTION."
+    '((assertion assertion-p))
+    '(hlmt-p))
+
+
+(register-cyc-api-function 'kb-lookup-assertion '(cnf mt)
+    "Return the assertion with CNF and MT, if it exists.
+   Return NIL otherwise."
+    '((cnf cnf-p) (mt hlmt-p))
+    '((nil-or assertion-p)))
+
+
+(register-cyc-api-function 'kb-gaf-assertion? '(assertion)
+    "Return T iff ASSERTION is a ground atomic formula (gaf)."
+    '((assertion assertion-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'kb-assertion-gaf-hl-formula '(assertion)
+    "Returns the HL clause of ASSERTION if it's a gaf, otherwise returns nil.
+   Ignores the truth - i.e. returns <blah> instead of (#$not <blah>) for negated gafs."
+    '((assertion assertion-p))
+    '(possibly-sentence-p))
+
+
+(register-cyc-api-function 'kb-assertion-cons '(assertion)
+    "Returns a CNF or GAF HL formula."
+    '((assertion assertion-p))
+    '(consp))
+
+
+(register-cyc-api-function 'kb-assertion-direction '(assertion)
+    "Return the direction of ASSERTION (either :backward, :forward or :code)."
+    '((assertion assertion-p))
+    '(direction-p))
+
+
+(register-cyc-api-function 'kb-assertion-truth '(assertion)
+    "Return the current truth of ASSERTION -- either :true :false or :unknown."
+    '((assertion assertion-p))
+    '(truth-p))
+
+
+(register-cyc-api-function 'kb-assertion-strength '(assertion)
+    "Return the current argumentation strength of ASSERTION -- either :monotonic, :default, or :unknown."
+    '((assertion assertion-p))
+    '(el-strength-p))
+
+
+(register-cyc-api-function 'kb-assertion-variable-names '(assertion)
+    "Return the variable names for ASSERTION."
+    '((assertion assertion-p))
+    '(listp))
+
+
+(register-cyc-api-function 'kb-assertion-asserted-by '(assertion)
+    "Return the asserted-by bookkeeping info for ASSERTION."
+    '((assertion assertion-p))
+    '((nil-or fort-p)))
+
+
+(register-cyc-api-function 'kb-assertion-asserted-when '(assertion)
+    "Return the asserted-when bookkeeping info for ASSERTION."
+    '((assertion assertion-p))
+    '((nil-or universal-date-p)))
+
+
+(register-cyc-api-function 'kb-assertion-asserted-why '(assertion)
+    "Return the asserted-why bookkeeping info for ASSERTION."
+    '((assertion assertion-p))
+    '((nil-or fort-p)))
+
+
+(register-cyc-api-function 'kb-assertion-asserted-second '(assertion)
+    "Return the asserted-second bookkeeping info for ASSERTION."
+    '((assertion assertion-p))
+    '((nil-or universal-second-p)))
+
+
+(register-cyc-api-function 'kb-set-assertion-direction '(assertion new-direction)
+    "Change direction of ASSERTION to NEW-DIRECTION."
+    '((assertion assertion-p) (new-direction direction-p))
+    '(assertion-p))
+
+
+(register-cyc-api-function 'kb-set-assertion-truth '(assertion new-truth)
+    "Change the truth of ASSERTION to NEW-TRUTH."
+    '((assertion assertion-p) (new-truth truth-p))
+    '(assertion-p))
+
+
+(register-cyc-api-function 'kb-set-assertion-strength '(assertion new-strength)
+    "Change the strength of ASSERTION to NEW-STRENGTH."
+    '((assertion assertion-p) (new-strength el-strength-p))
+    '(assertion-p))
+
+
+(register-cyc-api-function 'kb-set-assertion-variable-names '(assertion new-variable-names)
+    "Change the variable names for ASSERTION to NEW-VARIABLE-NAMES."
+    '((assertion assertion-p) (new-variable-names listp))
+    '(assertion-p))
+
+
+(register-cyc-api-function 'kb-set-assertion-asserted-by '(assertion assertor)
+    "Set the asserted-by bookkeeping info for ASSERTION to ASSERTOR."
+    '((assertion assertion-p) (assertor (nil-or fort-p)))
+    '(assertion-p))
+
+
+(register-cyc-api-function 'kb-set-assertion-asserted-when '(assertion universal-date)
+    "Set the asserted-when bookkeeping info for ASSERTION to UNIVERSAL-DATE."
+    '((assertion assertion-p) (universal-date (nil-or universal-date-p)))
+    '(assertion-p))
+
+
+(register-cyc-api-function 'kb-set-assertion-asserted-why '(assertion reason)
+    "Set the asserted-why bookkeeping info for ASSERTION to REASON."
+    '((assertion assertion-p) (reason (nil-or fort-p)))
+    '(assertion-p))
+
+
+(register-cyc-api-function 'kb-set-assertion-asserted-second '(assertion universal-second)
+    "Set the asserted-second bookkeeping info for ASSERTION to UNIVERSAL-SECOND."
+    '((assertion assertion-p) (universal-second (nil-or universal-second-p)))
+    '(assertion-p))
+
+
+(register-cyc-api-function 'kb-assertion-arguments '(assertion)
+    "Return the arguments for ASSERTION."
+    '((assertion assertion-p))
+    '(listp))
+
+
+(register-cyc-api-function 'kb-assertion-dependents '(assertion)
+    "Return the dependents of ASSERTION."
+    '((assertion assertion-p))
+    '(listp))

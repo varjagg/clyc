@@ -38,21 +38,22 @@ and permission notice:
 
 (defun canonicalize-hlmt (mt)
   "[Cyc] Returns the mt that MT denotes, in a canonical form. Will reify the monad if it is a closed nat. Returns NIL if MT is ill-formed."
-  (check-type mt #'possibly-mt-p)
+  (declare (type (satisfies possibly-mt-p) mt))
   (multiple-value-bind (mt dummy-mt) (safe-precanonicalizations mt #$BaseKB)
     (declare (ignore dummy-mt))
-    (unless mt
+    (when mt
       (setf mt (reduce-hlmt mt (within-query?)))
       (setf mt (reify-when-closed-naut mt))
       (when (and (within-forward-inference?)
                  (not (within-wff?))
                  (possibly-naut-p (hlmt-monad-mt mt))
                  (tree-find-if #'skolemize-forward? (hlmt-monad-mt mt)))
-        (setf mt (canonicalize-hlmt-int mt))))
+        (setf mt (canonicalize-term mt *mt-mt*)))
+      (setf mt (canonicalize-hlmt-int mt)))
     mt))
 
 (defun canonicalize-hlmt-int (hlmt)
-  (unless (mt-space-naut-p hlmt)
+  (when (mt-space-naut-p hlmt)
     (missing-larkc 12283))
   (unless (and (within-assert?)
                (hlmt-with-anytime-psc-p hlmt))

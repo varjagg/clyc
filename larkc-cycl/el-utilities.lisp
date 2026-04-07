@@ -87,8 +87,8 @@ This is suitable for fast-fails."
 
         ((or (el-implication-p sentence)
              (el-exception-p sentence))
-         (setf result (append result (sentence-free-sequence-variables (sentence-arg1 sentence)
-                                                                       bound-vars var?)))
+         (setf result (append result (nreverse (sentence-free-sequence-variables (sentence-arg1 sentence)
+                                                                                bound-vars var?))))
          (dolist (var (sentence-free-sequence-variables (sentence-arg2 sentence)
                                                         bound-vars var?))
            (pushnew var result))
@@ -132,7 +132,7 @@ This is suitable for fast-fails."
 
 (defun relation-free-sequence-variables (relation &optional old-bound-vars (var? #'cyc-var?))
   (cond
-    ((not (possibly-formula-with-sequence-varaibles? relation))
+    ((not (possibly-formula-with-sequence-variables? relation))
      nil)
 
     ((member? relation old-bound-vars)
@@ -186,7 +186,7 @@ This is suitable for fast-fails."
 (defun naut-free-sequence-variables (naut &optional old-bound-vars (var? #'cyc-var?))
   (relation-free-sequence-variables naut old-bound-vars var?))
 
-(defun designated-sequence (literal)
+(defun designated-sentence (literal)
   "[Cyc] Returns EL-FORMULA-P or NIL; the designated CYcL sentence in LITERAL."
   (literal-arg literal (sentence-designation-argnum literal)))
 
@@ -397,7 +397,7 @@ Note that OBJECT does not need to be well-formed."
 (defun user-defined-bounded-existential-operator-p (object)
   "[Cyc] Return T iff OBJECT is one of the user-defined bounded existential quantifiers."
   (and (fort-p object)
-       (cyc-const-bounded-existential-operator-p object)
+       (not (cyc-const-bounded-existential-operator-p object))
        (bounded-existential-quantifier-p object)))
 
 (defun el-bounded-existential-p (object)
@@ -418,12 +418,13 @@ Note that OBJECT does not need to be well-formed."
 
 (defun possibly-el-quantified-sentence-p (object)
   "[Cyc] Return T iff OBJECT is either a regularly quantified formula or a bounded existential formula."
-  (or (possibly-el-reguarly-quantified-sentence-p object)
+  (or (possibly-el-regularly-quantified-sentence-p object)
       (el-bounded-existential-p object)))
 
 (defun cyc-const-logical-operator-p (object)
   "[Cyc] Return T iff OBJECT is any of the predefined logical operators."
-  (or (cyc-const-unary-logical-op object)
+  (or (cyc-const-unary-logical-op-p object)
+      (cyc-const-binary-logical-op-p object)
       (cyc-const-ternary-logical-op-p object)
       (cyc-const-quaternary-logical-op-p object)
       (cyc-const-quintary-logical-op-p object)
@@ -483,6 +484,7 @@ OBJECT is not required to be well-formed."
 (defun expand-subl-fn-p (object)
   "[Cyc] Return T iff OBJECT is an escape to SUbL using #$ExpandSubLFn."
   (and (eq #$ExpandSubLFn (formula-operator object))
+       (formula-arity= object 2)
        (listp (formula-arg1 object))
        (cyc-subl-template (formula-arg2 object))))
 
@@ -505,6 +507,12 @@ OBJECT is not required to be well-formed."
   (or (eq object #$exceptFor)
       (eq object #$exceptWhen)))
 
+(defun el-exception-p (object)
+  "[Cyc] Assumes that all exception operators are binary.
+Return T iff OBJECT is a binary formula whose arg0 is one of the predefined exception operators."
+  (and (cyc-const-exception-operator-p (formula-operator object))
+       (el-binary-formula-p object)))
+
 (defconstant *cyc-const-pragmatic-requirement-operators* (list #$pragmaticRequirement)
   "[Cyc] Used in the precanonicalizer.")
 
@@ -512,7 +520,7 @@ OBJECT is not required to be well-formed."
   "[Cyc] Return T iff OBJECT is one fo the predefined exception operators."
   (eq object #$pragmaticRequirement))
 
-(defun el-pragmatic-requirement-operator-p (object)
+(defun el-pragmatic-requirement-p (object)
   (and (cyc-const-pragmatic-requirement-operator-p (formula-operator object))
        (el-binary-formula-p object)))
 
@@ -561,7 +569,7 @@ Passing this test should guarantee that applying the sentence accessors will not
 (defun possibly-atomic-sentence-p (object)
   "[Cyc] A quick test for whether OBJECT could possibly be an atomic CycL sentence.
 It is certainly not guaranteed that OBJECT is an atomic CycL sentence just because this function returns T."
-  (el-formula-pl object))
+  (el-formula-p object))
 
 (defun contains-subformula-p (object)
   "[Cyc] Returns T iff OBJECT si an EL formula which contains an EL subformula."
@@ -646,7 +654,7 @@ i.e. (sequence-var (#$and <form1> (<pred> ?X ?Y . ?Z))) will return NIL."
 Returns NIL if there is no such ill-formed thing in RELATION."
   (let ((seqterm (sequence-term relation)))
     (and seqterm
-         (funcall var? seqterm)
+         (not (funcall var? seqterm))
          seqterm)))
 
 (defun maybe-add-sequence-var-to-end (seqvar formula)
@@ -846,7 +854,7 @@ This sentence is destructible at the top level."
 (defun make-negation (sentence)
   "[Cyc] Returns the negation of SENTENCE. Does not perform any simplification.
 i.e. just returns (#$not <sentence>)."
-  (make-formula #$not sentence))
+  (make-unary-formula #$not sentence))
 
 (defun make-disjunction (args)
   "[Cyc] Returns a new disjunction. Each member of the list ARGS is a disjunct in the new disjunction.
@@ -935,7 +943,7 @@ example: (map-formula-args #'el-var? '(#$isa ?X #$Dog . ?Z) t) => (#$isa T NIL .
 Return 1: Boolean, whether FORMULA was altered."
   (if (and (el-negation-p formula)
            (not (opaque-arg? formula 1)))
-      (let ((*within-negation* t))
+      (let ((*within-negation?* (not *within-negation?*)))
         (values (make-negation (funcall function (formula-arg1 formula)))
                 t))
       (values formula nil)))
@@ -1011,7 +1019,7 @@ Return 1: Boolean, whether FORMULA was altered."
   (multiple-value-bind (result changed?) (pass-through-if-logical-op function formula)
     (if changed?
         (values result t)
-        (pass-through-if-bounded-existential function formula))))
+        (pass-through-if-quantified function formula))))
 
 (defun pass-through-if-relation-syntax (function formula)
   "[Cyc] Return 0: FORMULA with FUNCTION applied to all its terms (including the arg0) iff FORMULA is an EL formula with the syntax of a relation as its arg0 and its args are not opaque.
@@ -1284,7 +1292,7 @@ Returns NIL if LITERAL is negative or is not an EL formula."
     ((function-term? term) (let ((nat (reify-when-closed-naut term)))
                              (if (fort-p nat)
                                  (predicate? nat)
-                                 (missing-lakrc 3706))))))
+                                 (missing-larkc 3706))))))
 
 (defun function-spec? (term &optional (var-func #'var-spec?))
   "[Cyc] Returns T iff TERM is a denotational function, a variable, or a NAT whose result is a denotational function."
@@ -1592,3 +1600,12 @@ Note that SubL lists are deprecated except for special cases in the CycL grammar
     ((>= (+ 2 *el-trace-level*) level)
      (warn format-str arg1 arg2 arg3))))
 
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'ground? '(expression &optional (var? (quote cyc-var?)))
+    "Returns whether EXPRESSION is free of any variables?"
+    'nil
+    '(booleanp))

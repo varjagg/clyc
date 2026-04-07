@@ -38,7 +38,7 @@ and permission notice:
 
 ;; Building off the macro from at-vars.lisp
 (defmacro def-gt-state-var (name val &body (&optional docstring (definer 'defparameter)))
-  `(def-state-var ,name ,val *at-state-variables* ,docstring ,definer))
+  `(def-state-var ,name ,val *gt-state-variables* ,docstring ,definer))
 
 
 (def-gt-state-var *gt-dispatch-table*

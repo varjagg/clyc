@@ -42,8 +42,7 @@ and permission notice:
 (defun declare-auxiliary-index (aux-index name)
   (pushnew aux-index *auxiliary-indices*)
   (put aux-index :index-name name)
-  ;; TODO - return value aux-index?
-  )
+  aux-index)
 
 (defun auxiliary-index-p (object)
   (member? object *auxiliary-indices*))
@@ -55,8 +54,7 @@ and permission notice:
   (if new-index
       (put aux-index :index new-index)
       (remprop aux-index :index))
-  ;; TODO - return value aux-index?
-  )
+  aux-index)
 
 (defun num-unbound-rule-index (&optional sense mt direction)
   "[Cyc] Return the unbound rule count at SENSE MT DIRECTION."
@@ -115,8 +113,9 @@ and permission notice:
            (push sense keys)))
        keys))
 
-    (t (when-let ((subindex (get-unbound-rule-subindex sense mt)))
-         (intermediate-index-keys subindex)))))
+    (t (let ((subindex (get-unbound-rule-subindex sense mt)))
+         (when (intermediate-index-p subindex)
+           (intermediate-index-keys subindex))))))
 
 (defun get-unbound-rule-subindex (sense &optional mt direction)
   "[Cyc] Returns NIL or subindex-p."
@@ -154,7 +153,7 @@ and permission notice:
 (defun some-unbound-predicate-literal (clause sense)
   (let ((literals (if (eq sense :pos)
                       (pos-lits clause)
-                      (neg-lits caluse))))
+                      (neg-lits clause))))
     (find-if #'unbound-predicate-literal literals)))
 
 (defun load-auxiliary-indices (stream)

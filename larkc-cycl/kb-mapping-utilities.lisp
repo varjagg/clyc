@@ -114,8 +114,8 @@ Return T if such an assertion exists, otherwise return NIL."
       (when (funcall test assertion)
         ;; TODO bookeeping macro
         (when *mapping-assertion-bookkeeping-fn*
-          (funcall *mapping-assertion-bookkeeping-fn* assertion)))
-      (setf answer t))
+          (funcall *mapping-assertion-bookkeeping-fn* assertion))
+        (setf answer t)))
     answer))
 
 (defun fpred-value-gaf (term pred &optional (index-argnum 1) (truth :true))
@@ -270,3 +270,309 @@ Return a list of tuples formed from the GATHER-ARGS positions of all such assert
         (*mt* #$EverythingPSC))
     (pred-value-tuples term pred index-arg gather-args truth)))
 
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'some-pred-value '(term pred &optional (index-arg ONE_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is in a relevant microtheory (relevance is established outside)
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return T if such an assertion exists, otherwise return NIL."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'some-pred-value-in-mt '(term pred mt &optional (index-arg ONE_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is in microtheory MT
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return T if such an assertion exists, otherwise return NIL."
+    '((term indexed-term-p) (pred fort-p) (mt hlmt-p) (index-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'some-pred-value-in-mts '(term pred mts &optional (index-arg ONE_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is in one of the microtheories in the list MTS
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return T if such an assertion exists, otherwise return NIL."
+    '((term indexed-term-p) (pred fort-p) (mts listp) (index-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'some-pred-value-in-any-mt '(term pred &optional (index-arg ONE_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is allowed to be in any microtheory
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return T if such an assertion exists, otherwise return NIL."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'some-pred-value-in-relevant-mts '(term pred &optional mt (index-arg ONE_INTEGER) (truth :true))
+    "If MT is NIL, behaves like SOME-PRED-VALUE.  Otherwise, behaves like SOME-PRED-VALUE-IN-MT"
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'fpred-value '(term pred &optional (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is in a relevant microtheory (relevance is established outside)
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return the term in the GATHER-ARG position if such an assertion exists.
+ Otherwise, return NIL."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((nil-or hl-term-p)))
+
+
+(register-cyc-api-function 'fpred-value-in-mt '(term pred mt &optional (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is in microtheory MT
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return the term in the GATHER-ARG position if such an assertion exists.
+ Otherwise, return NIL."
+    '((term indexed-term-p) (pred fort-p) (mt hlmt-p) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((nil-or hl-term-p)))
+
+
+(register-cyc-api-function 'fpred-value-in-mts '(term pred mts &optional (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is in one of the microtheories in the list MTS
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return the term in the GATHER-ARG position if such an assertion exists.
+ Otherwise, return NIL."
+    '((term indexed-term-p) (pred fort-p) (mts listp) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((nil-or hl-term-p)))
+
+
+(register-cyc-api-function 'fpred-value-in-any-mt '(term pred &optional (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is allowed to be in any microtheory
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return the term in the GATHER-ARG position if such an assertion exists.
+ Otherwise, return NIL."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((nil-or hl-term-p)))
+
+
+(register-cyc-api-function 'fpred-value-in-relevant-mts '(term pred &optional mt (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "If MT is NIL, behaves like FPRED-VALUE.  Otherwise, looks in all genlMts of MT."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((nil-or hl-term-p)))
+
+
+(register-cyc-api-function 'pred-values '(term pred &optional (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is in a relevant microtheory (relevance is established outside)
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return a list of the terms in the GATHER-ARG position of all such assertions."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-values-in-mt '(term pred mt &optional (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is in microtheory MT
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return a list of the terms in the GATHER-ARG position of all such assertions."
+    '((term indexed-term-p) (pred fort-p) (mt hlmt-p) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-values-in-mts '(term pred mts &optional (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is in one of the microtheories in the list MTS
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return a list of the terms in the GATHER-ARG position of all such assertions."
+    '((term indexed-term-p) (pred fort-p) (mts listp) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-values-in-any-mt '(term pred &optional (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is allowed to be in any microtheory
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return a list of the terms in the GATHER-ARG position of all such assertions."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-values-in-relevant-mts '(term pred &optional mt (index-arg ONE_INTEGER) (gather-arg TWO_INTEGER) (truth :true))
+    "If MT is NIL, behaves like PRED-VALUES.  Otherwise, behaves like PRED-VALUES-IN-MT"
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-refs '(pred &optional (gather-arg ONE_INTEGER) (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is in a relevant microtheory (relevance is established outside)
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ Return a list of the terms in the GATHER-ARG position of all such assertions."
+    '((pred fort-p) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-refs-in-mt '(pred mt &optional (gather-arg ONE_INTEGER) (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is in microtheory MT
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ Return a list of the terms in the GATHER-ARG position of all such assertions."
+    '((pred fort-p) (mt hlmt-p) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-refs-in-mts '(pred mts &optional (gather-arg ONE_INTEGER) (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is in one of the microtheories in the list MTS
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ Return a list of the terms in the GATHER-ARG position of all such assertions."
+    '((pred fort-p) (mts listp) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-refs-in-any-mt '(pred &optional (gather-arg ONE_INTEGER) (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is allowed to be in any microtheory
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ Return a list of the terms in the GATHER-ARG position of all such assertions."
+    '((pred fort-p) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-refs-in-relevant-mts '(pred &optional mt (gather-arg ONE_INTEGER) (truth :true))
+    "If MT is NIL, behaves like PRED-REFS.  Otherwise, behaves like PRED-REFS-IN-MT"
+    '((pred fort-p) (gather-arg integerp) (truth truth-p))
+    '((list hl-term-p)))
+
+
+(register-cyc-api-function 'pred-u-v-holds '(pred u v &optional (u-arg ONE_INTEGER) (v-arg TWO_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is in a relevant microtheory (relevance is established outside)
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) U is the term in the U-ARG position.
+ (e) V is the term in the V-ARG position.
+ Return T if such an assertion exists, otherwise return NIL."
+    '((pred fort-p) (u indexed-term-p) (v hl-term-p) (u-arg integerp) (v-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'pred-u-v-holds-in-mt '(pred u v mt &optional (u-arg ONE_INTEGER) (v-arg TWO_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is in microtheory MT
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) U is the term in the U-ARG position.
+ (e) V is the term in the V-ARG position.
+ Return T if such an assertion exists, otherwise return NIL."
+    '((pred fort-p) (u indexed-term-p) (v hl-term-p) (mt hlmt-p) (u-arg integerp) (v-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'pred-u-v-holds-in-mts '(pred u v mts &optional (u-arg ONE_INTEGER) (v-arg TWO_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is in one of the microtheories in the list MTS
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) U is the term in the U-ARG position.
+ (e) V is the term in the V-ARG position.
+ Return T if such an assertion exists, otherwise return NIL."
+    '((pred fort-p) (u indexed-term-p) (v hl-term-p) (mts listp) (u-arg integerp) (v-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'pred-u-v-holds-in-any-mt '(pred u v &optional (u-arg ONE_INTEGER) (v-arg TWO_INTEGER) (truth :true))
+    "Find the first gaf assertion such that:
+ (a) the assertion is allowed to be in any microtheory
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) U is the term in the U-ARG position.
+ (e) V is the term in the V-ARG position.
+ Return T if such an assertion exists, otherwise return NIL."
+    '((pred fort-p) (u indexed-term-p) (v hl-term-p) (u-arg integerp) (v-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'pred-u-v-holds-in-relevant-mts '(pred u v &optional mt (u-arg ONE_INTEGER) (v-arg TWO_INTEGER) (truth :true))
+    "If MT is NIL, behaves like PRED-U-V-HOLDS.  Otherwise, behaves like PRED-U-V-HOLDS-IN-MT"
+    '((pred fort-p) (u indexed-term-p) (v hl-term-p) (u-arg integerp) (v-arg integerp) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'pred-value-tuples '(term pred index-arg gather-args &optional (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is in a relevant microtheory (relevance is established outside)
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return a list of tuples formed from the GATHER-ARGS positions of all such assertions."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-args listp) (truth truth-p))
+    '((list listp)))
+
+
+(register-cyc-api-function 'pred-value-tuples-in-mt '(term pred index-arg gather-args mt &optional (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is microtheory MT
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return a list of tuples formed from the GATHER-ARGS positions of all such assertions."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-args listp) (mt hlmt-p) (truth truth-p))
+    '((list listp)))
+
+
+(register-cyc-api-function 'pred-value-tuples-in-mts '(term pred index-arg gather-args mts &optional (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is in one of the microtheories in the list MTS
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return a list of tuples formed from the GATHER-ARGS positions of all such assertions."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-args listp) (mts listp) (truth truth-p))
+    '((list listp)))
+
+
+(register-cyc-api-function 'pred-value-tuples-in-any-mt '(term pred index-arg gather-args &optional (truth :true))
+    "Find all gaf assertions such that:
+ (a) the assertion is allowed to be from any microtheory
+ (b) if TRUTH is non-nil, the assertion has TRUTH as its truth value
+ (c) PRED is the predicate used.
+ (d) TERM is the term in the INDEX-ARG position.
+ Return a list of tuples formed from the GATHER-ARGS positions of all such assertions."
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-args listp) (truth truth-p))
+    '((list listp)))
+
+
+(register-cyc-api-function 'pred-value-tuples-in-relevant-mts '(term pred index-arg gather-args &optional mt (truth :true))
+    "If MT is NIL, behaves like PRED-VALUE-TUPLES.  Otherwise, behaves like PRED-VALUE-TUPLES-IN-MT"
+    '((term indexed-term-p) (pred fort-p) (index-arg integerp) (gather-args listp) (truth truth-p))
+    '((list listp)))

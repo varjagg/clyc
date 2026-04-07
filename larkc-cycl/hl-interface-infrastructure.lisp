@@ -109,7 +109,8 @@ and permission notice:
      (when (hl-modify-local?)
        (let ((*override-hl-store-remote-access?* t))
          (bt:with-lock-held (*hl-lock*)
-           ,@body)))))
+           (prog1 (progn ,@body)
+             (define-hl-modifier-postamble)))))))
 
 (defparameter *hl-store-error-handling-mode* nil)
 (defglobal *hl-store-iterators* (make-hash-table))
@@ -117,10 +118,11 @@ and permission notice:
 (defglobal *next-hl-store-iterator-id* 0)
 
 (defun* candidate-next-hl-store-iterator-id () (:inline t)
-  (let* ((retval *next-hl-store-iterator-id*)
-         (next (1+ retval)))
-    (declare (fixnum retval next))
-    (setf *next-hl-store-iterator-id* (if (= most-positive-fixnum next) 0 next))
+  (let ((retval *next-hl-store-iterator-id*))
+    (declare (fixnum retval))
+    (setf *next-hl-store-iterator-id* (1+ retval))
+    (when (= most-positive-fixnum *next-hl-store-iterator-id*)
+      (setf *next-hl-store-iterator-id* 0))
     retval))
 
 (defun new-hl-store-iterator-id ()

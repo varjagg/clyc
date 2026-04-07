@@ -181,7 +181,7 @@ and permission notice:
   (remhash name *invalid-constants*))
 
 (defun make-constant-shell (name &optional use-existing?)
-  (check-type name 'constant-name-spec-p)
+  (declare (type (satisfies constant-name-spec-p) name))
   (or (and use-existing?
            (stringp name)
            (or (constant-shell-from-name name)
@@ -200,7 +200,7 @@ and permission notice:
     (setf (c-name constant) name)
     constant))
 
-(defun reader-make-constant-shell (constant-name use-existing?)
+(defun reader-make-constant-shell (constant-name &optional (use-existing? t))
   "[Cyc] Trampoline called by the #$ reader"
   (make-constant-shell constant-name use-existing?))
 
@@ -235,7 +235,7 @@ and permission notice:
 
 (defun setup-constant-tables (size exact?)
   (setup-constant-guid-table size exact?)
-  (set-constant-suid-table size exact?)
+  (setup-constant-suid-table size exact?)
   (setup-constant-index-table size exact?))
 
 (defun finalize-constants (&optional max-constant-suid)
@@ -246,3 +246,38 @@ and permission notice:
   (clear-constant-suid-table))
 
 
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-macro 'do-constants '((var &optional (progress-message makeString("mapping Cyc constants")) &key done) &body body)
+    "Iterate over all HL constant datastructures, executing BODY within the scope of VAR.
+   VAR is bound to each constant in turn.
+   PROGRESS-MESSAGE is a progress message string.
+   Iteration halts early as soon as DONE becomes non-nil.")
+
+
+(register-cyc-api-function 'constant-count 'nil
+    "Return the total number of constants."
+    'nil
+    '(integerp))
+
+
+(register-cyc-api-function 'constant-p '(object)
+    "Return T iff the argument is a CycL constant"
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'valid-constant? '(constant &optional robust)
+    "Return T if CONSTANT is a valid, fully-formed constant."
+    'nil
+    '(booleanp))
+
+
+(register-obsolete-cyc-api-function 'valid-constant '(valid-constant?) '(constant &optional robust)
+    "Deprecated in favor of valid-constant?
+   Return T if CONSTANT is a valid constant."
+    'nil
+    '(booleanp))

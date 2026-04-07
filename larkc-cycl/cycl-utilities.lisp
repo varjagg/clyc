@@ -180,7 +180,7 @@ Note: Careful: the result is not destructible!"
   (let ((result (when (funcall pred (funcall key expression))
                   (list expression))))
     (when (or subs-too?
-              result)
+              (not result))
       (cond
         ((and penetrate-hl-structures?
               (hl-term-with-el-counterpart-p expression))
@@ -188,7 +188,7 @@ Note: Careful: the result is not destructible!"
                                               pred t key subs-too?)
                      result))
         
-        ((el-formula-p expression) nil)
+        ((not (el-formula-p expression)) nil)
 
         (t (dolistn (argnum term (formula-terms expression :regularize))
              (unless (opaque-arg? expression argnum)
@@ -257,7 +257,7 @@ Returns the singleton list containing EXPRESSION if EXPRESSION is a nart."
             (hl-term-with-el-counterpart-p expression))
        (expression-find-if-int test (careful-hl-term-to-el-term expression) t key))
 
-      ((el-formula-p expression) nil)
+      ((not (el-formula-p expression)) nil)
 
       (t (dolistn (argnum term (formula-terms expression :regularize))
            (unless (opaque-arg? expression argnum)
@@ -326,7 +326,7 @@ See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$E
                   (setf transformed-expression expression)))
             (setf transformed-expression expression)))
     (unless (el-formula-p transformed-expression)
-      transformed-expression)
+      (return-from expression-ntransform-int transformed-expression))
     (let* ((seqvar (sequence-var transformed-expression))
            (transformed-seqvar (if (and seqvar
                                         transform-sequence-variables?
@@ -363,10 +363,12 @@ See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$E
 (defun expression-nsublis-free-vars-int (alist expression test)
   "[Cyc] Replaces free vars in the EXPRESSION. Takes quoting into account. *CANONICALIZE-VARIABLES?* determines whether #$EscapeQuotes will be removed / reduced from the quoted terms. If variables are to be canonicalized then the #$EscapeQuotes will already contain HL variables due to the various czer steps before. This step just removes the #$EscapeQuotes to complete the canonicalization of the variables."
   ;; TODO - this was oldXnew in the java, not sure what the punc was supposed to be
-  (when-let ((old-new (assoc expression alist :test test)))
-    (if *inside-quote*
-        expression
-        (cdr old-new)))
+  (let ((old-new (assoc expression alist :test test)))
+    (when old-new
+      (return-from expression-nsublis-free-vars-int
+        (if *inside-quote*
+            expression
+            (cdr old-new)))))
   (cond
     ((not (el-formula-p expression)) expression)
     
@@ -423,7 +425,7 @@ See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$E
 (defun* expression-nsublis-free-vars (alist expression &optional (test #'eql)) (:inline t)
   (expression-nsublis-free-vars-int alist expression test))
 
-;; TODO - probably from a missing-larkc defun-memoized?
+;; TODO - probably from a missing-larkc defun-cached?
 (deflexical *permute-list-cached-caching-state* nil)
 
 (defun canonical-commutative-permutations (formula &optional (var? #'cyc-var?) penetrate-args?)
@@ -451,23 +453,24 @@ See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$E
     (let ((argnums nil))
       (dolistn (argnum arg (formula-args formula :ignore))
         (when (funcall var? arg)
-          (push argnum argnums)))
+          (push (1+ argnum) argnums)))
       argnums)))
                                                      
 (defun args-canonical-commutative-permutations (formula var?)
   "[Cyc] Result is destructible. If any of the arg of the formula has a commutative relation formula, the commutative permutations for those args are generated."
   (let ((target-formulas (list (copy-formula formula))))
     (dolistn (argnum arg (formula-args formula :ignore))
-      (cond 
-        ((subl-escape-p arg)
-         nil)
-        ((naut? arg)
-         (missing-larkc 29803))
-        ((el-relation-expression? arg)
-         (dolist (formula-permutation (canonical-commutative-permutations arg var? t))
-           (unless (equal formula-permutation arg)
-             (push (nreplace-formula-arg argnum formula-permutation (copy-formula formula))
-                   target-formulas))))))
+      (let ((argnum (1+ argnum)))
+        (cond
+          ((subl-escape-p arg)
+           nil)
+          ((naut? arg)
+           (missing-larkc 29803))
+          ((el-relation-expression? arg)
+           (dolist (formula-permutation (canonical-commutative-permutations arg var? t))
+             (unless (equal formula-permutation arg)
+               (push (nreplace-formula-arg argnum formula-permutation (copy-formula formula))
+                     target-formulas)))))))
     target-formulas))
 
 (defun formulas-canonical-permutations (source-formulas)
@@ -505,7 +508,7 @@ See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$E
     target-formula))
 
 (defun split-list-set (l)
-  (let ((splits (list l nil))
+  (let ((splits (list (list l nil)))
         (length (length l)))
     (loop for i from 1 below length
        do (multiple-value-bind (list1 list2) (split-list l i)
@@ -798,3 +801,18 @@ but  (nat-arg (<func> <arg1> . ?SEQ) 2 :REGULARIZE) -> ?SEQ"
 
 (defun* atomic-sentence-arg3 (asent &optional (seqvar-handling :ignore)) (:inline t)
   (formula-arg3 asent seqvar-handling))
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'negated? '(form)
+    "Assuming FORM is a valid CycL formula, return T IFF it is negated."
+    '((form el-formula-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'negate '(form)
+    "Assuming FORM is a valid CycL formula, return a negated version of it."
+    '((form el-formula-p))
+    '(el-formula-p))

@@ -59,7 +59,8 @@ and permission notice:
   (destroy-graphl-search (ghl-search-graphl-search graph-search))
   (setf (ghl-search-graphl-search graph-search) :free)
   (setf (ghl-search-predicates graph-search) :free)
-  (setf (ghl-search-tv graph-search) :free))
+  (setf (ghl-search-tv graph-search) :free)
+  nil)
 
 ;; Renamed getters
 (symbol-mapping ghl-graphl-search ghl-search-graphl-search
@@ -96,7 +97,8 @@ and permission notice:
       (when value
         (set-ghl-search-property search prop value))))
   (do-plist (prop val plist)
-    (set-ghl-search-property search prop val)))
+    (set-ghl-search-property search prop val))
+  search)
 
 (defun set-ghl-search-property (search property value)
   (unless value
@@ -117,7 +119,8 @@ and permission notice:
       (:satisfy-fn (missing-larkc 31970))
       (:map-fn (missing-larkc 31968))
       (:justify? (set-graphl-search-justify? graphl-search value))
-      (:add-to-result? (missing-larkc 31964)))))
+      (:add-to-result? (missing-larkc 31964))))
+  search)
 
 ;; Setters, called from set-ghl-search-property. TODO - are these use elsewhere?  Could wrap them into the above to shorten this up.
 
@@ -161,7 +164,7 @@ and permission notice:
 (defun ghl-uses-spec-preds-p ()
   *ghl-uses-spec-preds-p*)
 
-(defparameter *gt-args-swapped-p* t)
+(defparameter *gt-args-swapped-p* nil)
 
 (defun gt-args-swapped-p ()
   *gt-args-swapped-p*)

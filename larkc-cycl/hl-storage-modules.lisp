@@ -248,9 +248,8 @@ Result is destructible"
     (register-hl-storage-module name plist)))
 
 (defun register-hl-storage-module (name plist)
-  (let ((hl-module (progn
-                     (setup-module name :storage plist)
-                     *hl-storage-modules*)))
+  (let ((hl-module (setup-module name :storage plist)))
+    (set-add hl-module *hl-storage-modules*)
     (classify-hl-storage-module hl-module
                                 (getf plist :predicate)
                                 (getf plist :argument-type))
@@ -298,8 +297,13 @@ Result is destructible"
   argument-spec)
 
 (defun hl-add-assertible (hl-assertible)
-  ;; TODO - probably should build an easy structure destructuring macro, when these aren't in order.
-  (apply #'hl-add-argument hl-assertible))
+  (let* ((argument-spec (hl-assertible-argument-spec hl-assertible))
+         (hl-assertion-spec (hl-assertible-hl-assertion-spec hl-assertible))
+         (cnf (hl-assertion-spec-cnf hl-assertion-spec))
+         (mt (hl-assertion-spec-mt hl-assertion-spec))
+         (direction (hl-assertion-spec-direction hl-assertion-spec))
+         (variable-map (hl-assertion-spec-variable-map hl-assertion-spec)))
+    (hl-add-argument argument-spec cnf mt direction variable-map)))
 
 (defun hl-add-argument (argument-spec cnf mt direction &optional variable-map)
   "[Cyc] Returns NIL if the argument specified by ARGUMENT-SPEC was /not/ added as an argument for CNF, and non-NIL otherwise."
@@ -337,7 +341,11 @@ Result is destructible"
           (setf success? (hl-perform-action-with-storage-modules-int action predicate-specific-modules argument-spec cnf mt direction variable-map)))))
     (unless success?
       (unless solely-specific?
-        (missing-larkc 31629)))
+        (let ((predicate-generic-modules (if argument-type
+                                             (hl-storage-modules-for-argument-type argument-type)
+                                             (missing-larkc 31629))))
+          (when predicate-generic-modules
+            (setf success? (hl-perform-action-with-storage-modules-int action predicate-generic-modules argument-spec cnf mt direction variable-map))))))
     success?))
 
 

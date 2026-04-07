@@ -67,7 +67,8 @@ and permission notice:
 
 (defun* declare-index (index plist) (:inline t)
   "[Cyc] See below for an explanation of what fields go in the plist, what they mean, and a bunch of examples."
-  (add-index-to-kb-indexing-declaration-store index plist))
+  (add-index-to-kb-indexing-declaration-store index plist)
+  index)
 
 (defun index-equality-test-for-keys (keys)
   "[Cyc] Return the test appropriate for distinguishing the last key in KEYS.

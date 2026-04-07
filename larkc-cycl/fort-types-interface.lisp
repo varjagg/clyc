@@ -49,7 +49,7 @@ and permission notice:
     ;; TODO - this is very obviously a macro expansion that encompasses these bindings
     (let ((*mt* (update-inference-mt-relevance-mt mt))
           (*relevant-mt-function* (update-inference-mt-relevance-function mt))
-          (*relevant-mts* (update-inference-mt-relevance-function mt))
+          (*relevant-mts* (update-inference-mt-relevance-mt-list mt))
           (*sbhl-justification-search-p* nil)
           (*sbhl-apply-unwind-function-p* nil)
           (*suspend-sbhl-cache-use?* nil))
@@ -64,7 +64,7 @@ and permission notice:
 
 (defun fort-has-type-in-any-mt? (fort type)
   (with-all-mts
-    (fort-has-type? fort #$Collection)))
+    (fort-has-type? fort type)))
 
 (defun collection-in-any-mt? (fort)
   "[Cyc] Is FORT a collection in any mt?"
@@ -109,7 +109,7 @@ and permission notice:
 (defun function-in-any-mt? (fort)
   "[Cyc] Is FORT in the *FORTS-TYPED-FUNCTION-DENOTATIONAL*"
   (with-all-mts
-      (fort-has-type fort #$Function-Denotational)))
+      (fort-has-type? fort #$Function-Denotational)))
 
 (defun functor? (fort)
   "[Cyc] Is FORT a non-predicate function?"
@@ -127,7 +127,7 @@ and permission notice:
   "[Cyc] Return T iff FORT is a microtheory in any mt.
 Note Currently (2/00) we assume that microtheories must be defined as such in the *MT-MT*."
   (with-all-mts
-      (fort-has-type fort #$Microtheory)))
+      (fort-has-type? fort #$Microtheory)))
 
 (defun mt? (fort)
   "[Cyc] Is FORT a microtheory?"
@@ -212,7 +212,7 @@ Note Currently (2/00) we assume that microtheories must be defined as such in th
 
 (defun logical-connective-p (fort)
   "[Cyc] Is FORT a logical connective?"
-  (fort-has-type-in-ny-mt? fort #$LogicalConnective))
+  (fort-has-type-in-any-mt? fort #$LogicalConnective))
 
 (defun isa-logical-connective? (term &optional mt)
   "[Cyc] Is TERM a logical connective?"
@@ -268,7 +268,7 @@ Note Currently (2/00) we assume that microtheories must be defined as such in th
 
 (defun skolem-function-p (fort)
   "[Cyc] Is FORT a skolem function?"
-  (fort-has-typein-any-mt? fort #$SkolemFunction))
+  (fort-has-type-in-any-mt? fort #$SkolemFunction))
 
 (defun symmetric-binary-predicate-p (fort)
   "[Cyc] Is FORT a symmetric binary predicate?"
@@ -300,3 +300,12 @@ Note Currently (2/00) we assume that microtheories must be defined as such in th
 (deflexical *proprietary-constant?-caching-state* nil)
 
 
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'commutative-relation? '(relation)
+    "Return T iff RELATION is a commutative relation."
+    'nil
+    '(booleanp))

@@ -103,7 +103,7 @@ and permission notice:
 (deflexical *estimated-assertions-per-clause-struc* 39.3d0)
 (deflexical *estimated-assertions-per-meta-assertion* 30.3d0)
 (deflexical *estimated-arguments-per-assertion* 1.12d0)
-(deflexical *estimated-assertions-per-unrepresented-term* 7.97)
+(deflexical *estimated-assertions-per-unrepresented-term* 7.97d0)
 (deflexical *estimated-deductions-per-hl-support* 10)
 (deflexical *kb-table-padding-multiplier* 1.05)
 

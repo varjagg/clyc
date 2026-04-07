@@ -84,7 +84,8 @@ This function transforms as it iterates down the CDR of transformations and recu
              (transformed-list-tail initial-transformed-object))
         (until (atom transformed-list-tail)
           (rplaca transformed-list-tail (ntransform-recursive (car transformed-list-tail) pred transform key recursion-limit (1+ recursion-level)))
-          (rplacd transformed-list-tail (ntransform-perform-transform (cdr transformed-list-tail) pred transform key)))
+          (rplacd transformed-list-tail (ntransform-perform-transform (cdr transformed-list-tail) pred transform key))
+          (setf transformed-list-tail (cdr transformed-list-tail)))
         initial-transformed-object)))
 
 
@@ -154,7 +155,9 @@ TRANSFORMATION-MAX: The maximum number of transformations to be performed before
                                               quiescence
                                               transformation-max new-transformation-count)
               (setf transformed-object obj)
-              (setf new-transformation-count count)))
+              (setf new-transformation-count count))
+            (rplacd transformed-list-tail transformed-object)
+            (setf transformed-list-tail (cdr transformed-list-tail)))
           (values initial-transformed-object new-transformation-count)))))
 
 (defun shy-ntransform-perform-quiescent-transform (object pred transform key quiescence
@@ -175,6 +178,9 @@ TRANSFORMATION-MAX: The maximum number of transformations to be performed before
                 ((or (eq previous-transformation transformation)
                      (equal previous-transformation transformation))
                  (values transformation transformation-count))
+              (when (>= transformation-count transformation-max)
+                (throw :transformation-limit-exceeded
+                  (list :transformation-limit-exceeded transformation-count transformation-max)))
               (incf transformation-count)
               (setf previous-transformation transformation)))
           ;; key = identity
@@ -182,7 +188,7 @@ TRANSFORMATION-MAX: The maximum number of transformations to be performed before
             (do ((transformation (if (transform-pred-funcall pred object)
                                      (copy-tree (transform-transform-funcall transform object))
                                      object)
-                                 (if (transform-pred-funcall pred object)
+                                 (if (transform-pred-funcall pred transformation)
                                      (copy-tree (transform-transform-funcall transform transformation))
                                      transformation)))
                 ((or (eq previous-transformation transformation)
@@ -224,7 +230,8 @@ TRANSFORMATION-MAX: The maximum number of transformations to be performed before
                                                  transform (missing-larkc 7721)))
                                      transformation)))
                 ((or (eq previous-transformation transformation)
-                     (missing-larkc 7723)))
+                     (missing-larkc 7723))
+                 (values transformation transformation-count))
               (when (>= transformation-count transformation-max)
                 (throw :transformation-limit-exceeded
                   (list :transformation-limit-exceeded transformation-count transformation-max)))

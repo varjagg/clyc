@@ -1,76 +1,72 @@
 # Clyc: A port of Cyc to Common Lisp
 
-Project Intent
---------------
+## Project Intent
 
-The primary purpose of Clyc is to explore the internals of Cyc, a uniquely mature and scalable commercial inference engine, from its only known open source release. Cycorp provided source code portions of a [circa 2009 Java version of Cyc](https://sourceforge.net/p/larkc/code/HEAD/tree/trunk/platform/src/main/java/com/cyc/cycjava/cycl/) to [LarKC](https://larkc.org), released under the permissive Apache License 2.0.  Random documentation publicly found on cyc.com (live or through archive.org) is also consulted.
+The primary purpose of Clyc is to explore the internals of Cyc, a uniquely mature and scalable commercial inference engine, from its only known open source release. Cycorp donated source code portions of a [circa 2009 Java version of Cyc](https://sourceforge.net/p/larkc/code/HEAD/tree/trunk/platform/src/main/java/com/cyc/cycjava/cycl/) to the Large Knowledge Collider project ("LarKC", [larkc.eu](https://web.archive.org/web/20141217165050/http://larkc.org/) archived), released under the permissive Apache License 2.0.  Random documentation publicly found on cyc.com (live or through archive.org) is also consulted.
 
-This native Common Lisp version will be refactored, documented, and modernized yielding a much smaller and easier to modify system. It should also run inferences faster than the layered and semi-interpreted Java version, which emulates a Lisp-like environment (SubL/CycL).
+This native Common Lisp version will be refactored, documented, and modernized yielding a much smaller and easier to modify system. It should also run inferences faster than the layered and semi-interpreted Java version, which emulates a Lisp-like environment (SubL).
 
 100% compatibility with Cyc is not sought, and this will not be a drop-in replacement for any of Cycorp's offerings, but rather a reimplementation of open source raw inference tools. The Cyc "common sense" knowledge base is also not open source, nor available to or through this project, beyond the minimal ["cyc-tiny"](https://sourceforge.net/p/larkc/code/HEAD/tree/trunk/platform/src/main/resources/cyc-tiny/) subset included in LarKC. However, OpenCyc's larger KB subset is also Apache licensed and will be integrated into Clyc at some point.
 
-"Clyc" is pronounced as if "clock" rhymed with "like".
+"Clyc" is pronounced `klaɪk`, as if "clock" rhymed with "like".
 
+## License
 
-License
----
 Clyc is licensed under the GNU Affero General Public License v3. Some files derive from LarKC's Apache v2 licensed files, with the modifications licensed under the AGPL v3.
 
 The AGPL is the most forced-open major license of which we're aware. If there was a standardized "no commercial use allowed" open source software license[*], we would use it here to respect Cycorp's commercial interests. The Clyc developers have no affiliation with Cycorp, its employees, or its customers.
 
 [*]: Creative Commons is [not recommended](https://creativecommons.org/faq/#can-i-apply-a-creative-commons-license-to-software) for software, and does not mandate making source code available.
 
+## Current Status
+All of the files have been converted to Lisp. The project loads without errors and with many warnings, but has not been tested much.
 
+Many of the macro sites remain expanded as they were in Java, and need to be reconstructed back to their macro call forms. References to dynamic variable bindings can usually roughly indicate which macro is in use, and many of the defmacros have already been reconstructed.
 
-Current Status
--------
+The original LarKC distribution has most of its Cyc source code in a flat directory, which is reflected here in `larkc-cycl` (named after the `com/cyc/cycjava/cycl/` originating directory). This will be reorganized after things are up & running.
 
-Still in Step 1 of the plan below, with most SubL stdlib datastructure and utility code converted but untested. File-by-file conversion from Java is ongoing. Many function and variable references are still unmet.
+### AI Slop
 
-The original LarKC distribution has most of its Cyc source code in a flat directory, which is reflected here in `larkc-cycl`. This will be reorganized after things are up & running.
+AI assistance has gotten this project past the automation complexity humps, and all AI ported files are meticulously (at least the earlier ones) human-reviewed. AI is commonly munging some Cyc-originated comments, which will be mechanically fixed later, but also commenting ideas for some of the redacted function calls, and successfully reconstructing `defmacro`s from leftover internal constant literals and corresponding expanded instances. While it's catching some macroexpansions and reverting them back to their original forms, I'm leaving most of the missed ones to be scanned individually after everything has had its initial port. It simply can't keep all of them "in mind" as it ports each file, and the more visible Lisp examples the better.
 
+## Rough Plan
 
-Rough Plan
-----------
-
-1. Convert code as-is to working-ish Common Lisp
-   - leave as-is dependency ordering errors, repetitive complexity, orphaned vars/funs, etc
-   - implement basic stdlib file, thread, networking, etc functions from SubL and/or Java layers
-   - sparingly prune code that references missing-larkc features to untangle some problematic dependencies and references
-   - hopefully get cyc-tiny .cfasl files loading and assertions & queries working at this stage, even if manual intervention is required
+1. Convert code as-is to loadable, hopefully runnable Common Lisp
+  - leave as-is dependency ordering problems, repetitive complexity, orphaned vars/funs, etc
+  - implement basic stdlib file, thread, networking, etc functions from SubL and/or Java layers
+  - sparingly prune code that references missing-larkc features to untangle some problematic dependencies and references
+  - hopefully get cyc-tiny .cfasl files loading and assertions & queries working at this stage, even if manual intervention is required
 2. Resolve load order dependencies
-   - finish & use cross-referencing tools
-   - hoist necessary declarations and move some functions around
-   - organize into subdirectories
-   - maybe eliminate degenerately small functions to make source code more orthogonally readable
-   - hopefully load & operate without any warnings at this stage
+  - finish & use cross-referencing tools
+  - hoist necessary declarations and move some functions around
+  - organize into subdirectories
+  - maybe eliminate degenerately small functions to make source code more orthogonally readable
+  - hopefully load & operate without any warnings at this stage
 3. Refactor
-   - utilize lambdas and closures instead of toplevel `-INT` DEFUNs, symbolic function names, and dynamic bindings
-   - reevaluate what macros should be written and where they're needed
-   - separate intended-public APIs from internal functions based on the Java declarations
-   - apply deprecations, eliminate redundancies, and pare down protocols
-   - create more technical documentation
+  - utilize lambdas and closures instead of toplevel `-INT` DEFUNs, symbolic function names, and dynamic bindings
+  - reevaluate what macros should be written and where they're needed
+  - separate intended-public APIs from internal functions based on the Java declarations
+  - apply deprecations, eliminate redundancies, and pare down protocols
+  - create more technical documentation
 4. Profile and optimize particularly egregious sections
-   - major refactoring of algorithms and infrastructure is allowable
+  - major refactoring of algorithms and infrastructure is allowable
+  - eliminate some source-heavy optimizations that might not be necessary on modern hardware
 5. Add new code, including based on commented-out function/macro names
 
-
-Requirements
-------------
+## Requirements
 
 Clyc currently loads only on SBCL, as a small number of its extensions and low-level implementation details are used. In the future these dependencies could be refactored out as the codebase matures past the specifics of the initial direct port, or else portability shims for other Common Lisp implementations will be added.
 
 Compilation warnings can be made visible by evaluating the following before quickloading:
+
 ```
 (setf quicklisp-client:*quickload-verbose* t)
 ```
 
 [The modern Common Lisp + Quicklisp modus operandi is to add a symlink in `~/quicklisp/local-projects/` to projects like Clyc, and run `(ql:quickload "clyc")` from the REPL to load a project.]
 
+## Data Structures
 
-
-Data Structures
---------------------
 *These are listed by their* `.java`/`.lisp` *filenames.*
 
 `tries` - Character-based trie used to intern and prefix-complete Constant names from strings.
@@ -110,28 +106,24 @@ Data Structures
 `glob` - Some dual-indexed data container.  
 `bag` - A multi-set. Possible to recreate.  
 `accumulation` - A data accumulation interface that can append its values to various different concrete datastructures.  Probably reconstructable.  
-`red-*` - Some form of generic on-disk data repository, maybe similar to the Windows registry?  
+`red-`* - Some form of generic on-disk data repository, maybe similar to the Windows registry?  
 `file-hash-table` - On-disk key/value store. Huge function list.  
 `sparse-matrix` `sparse-vector` `heap` - Self explanatory.  
 
-Utilities
----------
+## Utilities
+
 `structure resourcing` - Object pooling for reusing structure instances. Generally missing-larkc, but took a while to figure out what the term meant.
 
 `cfasl` - Serialization & deserialization tools.
 
 `memoization-state.lisp` - Memoizes function calls.
- 
+
 `special-variable-state.lisp` - Snapshots a list of CL special variables.
- 
+
 `misc-utilities.lisp` - Startup code.
 
+## Glossary
 
-
-
-
-Glossary
---------
 **Cyc:**  
 `Term` = a constant, NAT, variable, others.  
 `Constant` = atomic vocabulary word, in a flat global namespace.  Prefixed with `#$`.  
@@ -145,29 +137,36 @@ Glossary
 `Sequence` = a cons list.  
 `Sequence term` = a term holding the remainder of a sequence, as in a dotted list. Also `sequence variable` if the term is a variable.  
 `Shell` = an empty structure, possibly for filling in structure resourcing pools.
+`Cyc API` = a subset of SubL which is intended to be the public API. It is not a separate language. The actual validation of the Cyc API subset is missing-larkc, but all the API declarations are present.
 
 **Clyc:**  
 `missing-larkc` = specific term for things in Cyc that were not provided to the LarKC project, distinguished from unimplemented or unfinished things in Clyc.  
 
+## Acronyms & Abbreviations
 
-Acronyms & Abbreviations
---------
 `MT` = MicroTheory.  
+`PSC` = Problem Solving Context, related to which microtheories are in view.  
 `GAF` = Ground Atomic Formula, a sentence that contains no variables or logical connectives.  
 `NAT` = Non-Atomic Term, a parameterized function representing a term. `(#$FruitFn #$AppleTree)` is the collection of fruit from apple trees, as opposed to the atomic term `#$Apples` or something.  
 `NAUT` = Non-Atomic Unreified Term. A function NAT, before reification, having only the Fn and args.  
 `NART` = Non-Atomic Reified Term. Internal identifier that a NAUT resolved to.  
-`WFF` = Well-Formed Formula.  
+`TOU` = Term Of Unit, predicate that maps a NART to a NAUT.  
+`FORT` = First-Order Reified Term, which is a constant or a NART.  
+`WFF` = Well-Formed Formula.  Arity, argument types, connectives, MT it's in, semantics are all checked, valid, and coherent.
 `EL` = Epistemological Level, expressive human-editable form.  
 `HL` = Heuristic Level, efficient low-level form.  
+`TL` = Transcript Level, a serializable transform of HL for transcripts.
+`SBHL` = Subsumption Based HL, meta predicates like `#$isa`, `#$genls`, `#$genlAttributes`.  
 `FOL` = First-Order Logic, the full sentence style of EL.  
 `CNF` = Conjunctive Normal Form, the style of HL. `(#$and (#$or ?term+)+)`, where terms may also be negated.  
-`FORT` = First-Order Reified Term, which is a constant or a NART.  
-`SBHL` = Subsumption Based HL, meta predicates like `#$isa`, `#$genls`, `#$genlAttributes`.  
-`PSC` = Problem Solving Context, related to which microtheories are in view.  
 `GUID` = Globally Unique ID, external identifier.  
 `SUID` = (System?) Unique ID, internal identifier.  
-`TOU` = Term Of Unit, predicate that maps a NART to a NAUT.  
 `TV` = Truth value. Default or monotonically true or false, unknown truth, etc.  
-`CZER` = Canonicalizer.  
-`AT` = the `arg-type` mechanisms.  
+`CZER` = Canonicalizer.
+`AT` = the `arg-type` mechanisms.
+`GT` = General Transitivity, the transitive predicate reasoning dispatch layer.
+`GHL` = Graph Hierarchy Link, the abstract general graph search infrastructure underlying GT.
+`ASENT` = Atomic Sentence, a sentence that contains no variables or logical connectives.
+`KE` = Knowledge Editor, high-level API for KB modifications.
+`FI` = Functional Interface, older interface for KB operations, superseded by KE and Cyc API.
+

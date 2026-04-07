@@ -175,7 +175,8 @@ and permission notice:
 (defun register-kb-object-content (kbom id kb-object-content)
   "[Cyc] Note that ID will be used as the id for KB-OBJECT-CONTENT."
   (bt:with-lock-held ((kbom-content-lock kbom))
-    (id-index-enter (kb-object-manager-content-table kbom) id kb-object-content)))
+    (id-index-enter (kb-object-manager-content-table kbom) id kb-object-content))
+  kb-object-content)
 
 (defun deregister-kb-object-content (kbom id)
   "[Cyc] Note that ID is not in use as an KB-OBJECT-CONTENT id."
@@ -209,19 +210,22 @@ and permission notice:
   (let ((lru-information (kb-object-manager-lru-information kbom)))
     (when (and (cache-p lru-information)
                (is-lru-cachable-kb-object-content-id? kbom id))
-      (cache-get-without-values lru-information id))))
+      (cache-get-without-values lru-information id)))
+  id)
 
 (defun drop-kb-object-usage (kbom id)
   (let ((lru-information (kb-object-manager-lru-information kbom)))
     (when (and (cache-p lru-information)
                (is-lru-cachable-kb-object-content-id? kbom id))
-      (cache-remove lru-information id))))
+      (cache-remove lru-information id)))
+  id)
 
 (defun mark-kb-object-content-as-muted (kbom id)
   (let ((lru-information (kb-object-manager-lru-information kbom)))
     (when (and (cache-p lru-information)
                (is-lru-cachable-kb-object-content-id? kbom id))
-      (cache-remove lru-information id))))
+      (cache-remove lru-information id)))
+  id)
 
 (defun swap-in-kb-object-content (kbom id)
   (let ((*cfasl-constant-handle-lookup-func* nil)
@@ -232,7 +236,8 @@ and permission notice:
         (*cfasl-clause-struc-handle-lookup-func* nil))
     (if (kb-object-manager-meter-swap-time? kbom)
         (missing-larkc 32087)
-        (swap-in-kb-object-content-internal kbom id))))
+        (swap-in-kb-object-content-internal kbom id)))
+  id)
 
 (defun swap-in-kb-object-content-internal (kbom id)
   (let ((*cfasl-common-symbols* nil))
@@ -246,7 +251,8 @@ and permission notice:
       (swap-out-pristine-kb-object-content kbom loser))))
 
 (defun swap-out-pristine-kb-object-content (kbom loser)
-  (id-index-remove (kb-object-manager-content-table kbom) loser))
+  (id-index-remove (kb-object-manager-content-table kbom) loser)
+  loser)
 
 (defun swap-out-all-pristine-kb-objects-int (kbom)
   (let ((pristine-ids nil)
@@ -268,6 +274,7 @@ and permission notice:
            (new-counter (if old-counter
                             (1+ old-counter)
                             1)))
-      (id-index-enter usage-table id new-counter))))
+      (id-index-enter usage-table id new-counter)))
+  id)
 
 

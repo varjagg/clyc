@@ -42,7 +42,7 @@ and permission notice:
 (deflexical *deduction-lru-size-percentage* 8
     "[Cyc] This is a guess based on *ASSERTION-LRU-SIZE-PERCENTAGE*.")
 
-(defun setup-deduction-content-tagle (size exact?)
+(defun setup-deduction-content-table (size exact?)
   (setf *deduction-content-manager* (new-kb-object-manager "deduction" size *deduction-lru-size-percentage*
                                                            #'load-deduction-def-from-cache exact? )))
 

@@ -89,11 +89,13 @@ and permission notice:
 
 (defun set-contents-add (element set-contents)
   "[Cyc] Add this ELEMENT into the SET-CONTENTS. TEST is the assumed equality test."
-  (setf (gethash element set-contents) t))
+  (setf (gethash element set-contents) t)
+  set-contents)
 
 (defun set-contents-delete (element set-contents)
   "[Cyc] If ELEMENT is present in SET-CONTENTS, then take it out of SET-CONTENTS. TEST is the assumed equality test."
-  (remhash element set-contents))
+  (remhash element set-contents)
+  set-contents)
 
 (defun clear-set-contents (set-contents)
   "[Cyc] Reset SET-CONTENTS to the status of being just allocated."

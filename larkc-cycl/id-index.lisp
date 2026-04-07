@@ -197,7 +197,7 @@ If the insert fills up the old objects vector, grow the vector."
   (let ((threshold (id-index-new-id-threshold id-index)))
     (declare (fixnum threshold id))
     (when (>= (the fixnum (1+ id)) threshold)
-      (optimize-id-index id-index (+ 2 (max threshold id))))))
+      (optimize-id-index id-index (* 2 (max threshold id))))))
 
 (defun id-index-remove (id-index id)
   (declare (fixnum id))
@@ -259,7 +259,7 @@ If the insert fills up the old objects vector, grow the vector."
                    ,@body)))
              ;; Hashtable (new contents)
              (unless (id-index-new-objects-empty-p ,id-index)
-               ;; Ordered must iterate the index values
+               ;; Ordered must iterate the index values sequentially
                ,(if ordered
                    `(loop with ,new-ht = (id-index-new-objects ,id-index)
                        for ,id from (id-index-new-id-threshold ,id-index)
@@ -271,10 +271,10 @@ If the insert fills up the old objects vector, grow the vector."
                             (note-percent-progress ,sofar ,total)
                             (incf ,sofar)
                             ,@body))
-                   ;; Unordered can just hit the hashtable entries
-                   ;; but only if we're skipping tombstones
-                   (if tombstone-p
-                       (error ":ORDERED + :TOMBSTONE can't both be used in DO-ID-INDEX.")
+                   ;; Unordered: dohash over new objects (tombstones not in hash table)
+                   ;; Non-:skip :tombstone values require :ordered t
+                   (if (and tombstone-p (not (eq tombstone :skip)))
+                       (error "Setting :TOMBSTONE to ~A requires that :ORDERED be set to T" tombstone)
                        `(dohash (,id ,object (id-index-new-objects ,id-index))
                           (note-percent-progress ,sofar ,total)
                           (incf ,sofar)
@@ -307,8 +307,7 @@ If the insert fills up the old objects vector, grow the vector."
         (new-objects (id-index-new-objects id-index)))
     ;; The original loop did strange things with tombstone values that seem degenerate.
     ;; There are a ton of do-* macros declared, so probably an effect from those.
-    (loop for id from 0 below (min (length old-objects)
-                                   (id-index-count id-index))
+    (loop for id from 0 below (length old-objects)
        do (let ((object (aref old-objects id)))
             (unless (id-index-tombstone-p object)
               (push object values))))

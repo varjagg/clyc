@@ -80,7 +80,8 @@ and permission notice:
              (*sbhl-suspend-new-spaces?* t))
          (dolist (result-isa (result-isa meta-functor mt))
            (setf meta-result-isa (nconc meta-result-isa (gather-all-genls #'mapping-funcall-arg result-isa mt)))))
-       meta-result-isa))
+       ;; TODO - Java also calls (min-cols (remove-duplicate-forts meta-result-isa) ...) but min-cols is not ported
+       (remove-duplicate-forts meta-result-isa)))
 
     ((naut-with-corresponding-nart? meta-functor)
      (meta-result-isa (find-nart meta-functor) mt))))
@@ -188,7 +189,7 @@ and permission notice:
   (and (fort-p relation)
        (numberp argnum)
        (> argnum 0)
-       (pred-u-v-holds-in-any-mt #$quotedArgnument relation argnum)))
+       (pred-u-v-holds-in-any-mt #$quotedArgument relation argnum)))
 
 (defun complete-extent-asserted-gaf (predicate &optional mt)
   "[Cyc] If PREDICATE's extent has been completely asserted, returns an assertion justifying this claim."
@@ -246,7 +247,7 @@ and permission notice:
 (defun* backchain-required? (predicate mt) (:inline t)
   (some-pred-value-in-relevant-mts predicate #$backchainRequired mt))
 
-(defun* backchain-forbidden (predicate &optional mt) (:inline t)
+(defun* backchain-forbidden? (predicate &optional mt) (:inline t)
   (some-pred-value-in-relevant-mts predicate #$backchainForbidden mt))
 
 (defun* collection-isa-backchain-required? (collection &optional mt) (:inline t)
@@ -331,10 +332,9 @@ and permission notice:
     (when (some-arg-and-rest-isa-assertion-somewhere? relation)
       (missing-larkc 6808))
     (when (positive-integer-p argnum)
-      (setf result (nconc result
-                          (if-let ((arg-isa-pred (arg-isa-pred-int argnum)))
-                            (cached-arg-isas-in-mt relation argnum mt)
-                            (pred-values-in-relevant-mts relation arg-isa-pred mt)))))
+      (let ((arg-isa-pred (arg-isa-pred-int argnum)))
+        (when arg-isa-pred
+          (setf result (nconc result (pred-values-in-relevant-mts relation arg-isa-pred mt))))))
     (delete-duplicate-forts result)))
 
 (defun argn-quoted-isa-int (relation argnum mt)
@@ -484,7 +484,7 @@ By convention (isa-pred-arg #$argsIsa) -> 0."
                               (missing-larkc 6803))
                              ((isa? arg-genl-pred #$ArgGenlBinaryPredicate)
                               (setf result (nconc result (pred-values-in-relevant-mts relation arg-genl-pred mt))))
-                             ((isa? arg-genl-pred #$ArgGenlTermaryPredicate)
+                             ((isa? arg-genl-pred #$ArgGenlTernaryPredicate)
                               (missing-larkc 6804))
                              (t (el-error 3 "Illegal arg-genl-pred encountered in argn-genl: ~s" arg-genl-pred))))
                          (remove-duplicate-forts result)))
@@ -652,7 +652,7 @@ By convention (isa-pred-arg #$argsIsa) -> 0."
 (defun non-skolem-indeterminate-term-denoting-function? (object)
   (and (fort-p object)
        (function? object)
-       (skolem-function-p object)
+       (not (skolem-function-p object))
        (isa? object #$IndeterminateTermDenotingFunction)))
 
 (defun fast-non-skolem-indeterminate-term? (term)
@@ -676,3 +676,206 @@ By convention (isa-pred-arg #$argsIsa) -> 0."
 
 
 
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'relation? '(relation)
+    "Return T iff RELATION is a relationship."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'reflexive-predicate? '(predicate)
+    "Return T iff PREDICATE is a reflexive predicate."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'irreflexive-predicate? '(predicate)
+    "Return T iff PREDICATE is an irreflexive predicate."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'symmetric-predicate? '(predicate)
+    "Return T iff PREDICATE is a symmetric predicate."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'asymmetric-predicate? '(predicate)
+    "Return T iff PREDICATE is an asymmetric predicate."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'anti-symmetric-predicate? '(predicate)
+    "Return T iff PREDICATE is an anti-symmetric predicate."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'transitive-predicate? '(predicate)
+    "Return T iff PREDICATE is a transitive predicate."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'commutative-function? '(function)
+    "Return T iff FUNCTION is a commutative function."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'binary-predicate? '(predicate)
+    "Return T iff PREDICATE is a predicate of arity 2."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'individual? '(term)
+    "Return T iff TERM is an individual (i.e., *not* a collection)."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'set-or-collection? '(term)
+    "Return T iff TERM is a set or collection (i.e., *not* an individual)."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'argn-isa '(relation argnum &optional mt)
+    "Returns a list of the local isa constraints applied to the ARGNUMth argument of 
+RELATION (#$argsIsa conjoins with #$arg1Isa et al)."
+    '((argnum integerp))
+    'nil)
+
+
+(register-cyc-api-function 'argn-quoted-isa '(relation argnum &optional mt)
+    "Returns a list of the local isa constraints applied to the ARGNUMth argument of 
+RELATION (#$argsIsa conjoins with #$arg1Isa et al)."
+    '((argnum integerp))
+    'nil)
+
+
+(register-cyc-api-function 'min-argn-isa '(relation n &optional mt)
+    "Returns a list of the most specific local isa-constraints applicable 
+to argument N of RELATION."
+    '((relation indexed-term-p) (n integerp))
+    '((list indexed-term-p)))
+
+
+(register-cyc-api-function 'argn-isa-of '(collection argnum &optional mt)
+    "Returns the relations for which COLLECTION is a 
+local isa constraint applied to argument ARGNUM."
+    '((argnum integerp))
+    '((list indexed-term-p)))
+
+
+(register-cyc-api-function 'argn-genl '(relation argnum &optional mt)
+    "Returns the local genl constraints applied to the ARGNUMth argument of RELATION."
+    '((argnum integerp))
+    '((list indexed-term-p)))
+
+
+(register-cyc-api-function 'min-argn-genl '(relation n &optional mt)
+    "Return a list of the most specific local genl constraints applicable 
+to the argument N of RELATION."
+    '((n integerp))
+    '((list fort-p)))
+
+
+(register-cyc-api-function 'argn-genl-of '(collection argnum &optional mt)
+    "Returns a list of the predicates for which COLLECTION is a 
+local genl constraint applied to the Nth argument."
+    '((argnum integerp))
+    '((list fort-p)))
+
+
+(register-cyc-api-function 'inter-arg-isa1-2 '(relation &optional mt)
+    "return a list of pairs of (<arg1-isa> <arg2-isa>) that are 
+the #$interArgIsa1-2 constraints of RELATION"
+    'nil
+    '((list listp)))
+
+
+(register-cyc-api-function 'defining-defns '(col &optional mt)
+    "Return a list of the local defining (necessary and sufficient definitions) of collection COL."
+    'nil
+    '((list fort-p)))
+
+
+(register-cyc-api-function 'necessary-defns '(col &optional mt)
+    "Return a list of the local necessary definitions of collection COL."
+    'nil
+    '((list fort-p)))
+
+
+(register-cyc-api-function 'sufficient-defns '(col &optional mt)
+    "Return a list of the local sufficient definitions of collection COL."
+    'nil
+    '((list fort-p)))
+
+
+(register-cyc-api-function 'all-sufficient-defns '(col &optional mt)
+    "Return a list of all sufficient definitions of collection COL."
+    'nil
+    '((list fort-p)))
+
+
+(register-cyc-api-function 'result-isa '(functor &optional mt)
+    "Return a list of the collections that include as instances 
+the results of non-predicate function constant FUNCTOR."
+    'nil
+    '((list fort-p)))
+
+
+(register-cyc-api-function 'evaluation-result-quoted-isa '(functor &optional mt)
+    "return the collections that include as quoted instances the evaluation results of non-predicate function constant FUNCTOR."
+    'nil
+    '((list fort-p)))
+
+
+(register-cyc-api-function 'result-quoted-isa '(functor &optional mt)
+    "return the collections that include as quoted instances the results of non-predicate function constant FUNCTOR."
+    'nil
+    '((list fort-p)))
+
+
+(register-cyc-api-function 'reviewer '(fort &optional (mt constant_handles.reader_make_constant_shell(makeString("BookkeepingMt"))))
+    "Identify the cyclist who reviewed FORT."
+    '((fort fort-p) (mt hlmt-p))
+    '(fort-p))
+
+
+(register-cyc-api-function 'comment '(fort &optional mt)
+    "Return the comment string for FORT."
+    '((fort fort-p))
+    '(stringp))
+
+
+(register-cyc-api-function 'all-term-assertions '(term &optional remove-duplicates?)
+    "Return a list of all the assertions indexed via the indexed term TERM."
+    '((term indexed-term-p))
+    '((list assertion-p)))
+
+
+(register-cyc-api-function 'isa-relevant-assertions '(term &optional mt)
+    "Return a list of all (e.g., inheritance) rules relevant to TERM 
+by virtue of the collections of which it is an instance."
+    'nil
+    '((list assertion-p)))
+
+
+(register-cyc-api-function 'isa-relevant-assertions-wrt-type '(term collection &optional mt)
+    "Returns a list of all (e.g., inheritance) rules that may apply 
+to TERM by virtue of it being an instance of COLLECTION."
+    'nil
+    '((list assertion-p)))
+
+
+
+(register-cyc-api-macro 'do-gafs-wrt-pred-type '((assertion-var term pred-type &key mt truth done) &body body)
+    "iterate over every gaf assertion mentioning TERM and having as a predicate some instance of PRED-TYPE")

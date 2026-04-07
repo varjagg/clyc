@@ -55,7 +55,8 @@ and permission notice:
 
 (defun evaluatable-expression? (object)
   (and (el-formula-p object)
-       (missing-larkc 30349)))
+       (missing-larkc 30349)
+       (evaluatable-relation? (formula-operator object))))
 
 (defun evaluation-defn (fort &optional mt)
   (cycl-subl-symbol-symbol (fpred-value-in-relevant-mts fort #$evaluationDefn mt)))
@@ -109,7 +110,7 @@ A third returned value is T iff the evaluation included evaluation of a contextu
       (missing-larkc 30342))
     (let ((evaluation-function (evaluation-function relation)))
       (unless (or (possibly-cyc-api-function-spec-p evaluation-function)
-                  (and (consider-expansion?)
+                  (and consider-expansion?
                        (missing-larkc 8857)))
         (missing-larkc 30343))
       (let ((input-args (formula-args formula))
@@ -134,7 +135,7 @@ A third returned value is T iff the evaluation included evaluation of a contextu
 
 (defun* cyc-evaluate-args (args) (:inline t)
   "[Cyc] Recursively evaluate any evaluatable ARGS."
-  (mapcar #'cyc-evaluate-args args))
+  (mapcar #'cyc-evaluate-arg args))
 
 (defun* cyc-evaluate-arg (input-arg) (:inline t)
   (cyc-evaluate-if-evaluatable input-arg t))
@@ -157,11 +158,11 @@ A third returned value is T iff the evaluation included evaluation of a contextu
 (defun evaluation-arity (relation)
   "[Cyc] Return the expected evaluation arity for RELATION."
   (cond
-    ((fort-p relation) (arity-relation))
+    ((fort-p relation) (arity relation))
     ((function-to-arg-function-p relation) (missing-larkc 29793))
     ((lambda-function-p relation) (missing-larkc 30575))))
 
-(defun-memoized cached-evaluation-function (relation)
+(defun-cached cached-evaluation-function (relation)
     (:initial-size 10
      :clear-when :hl-store-modified)
   (with-all-mts

@@ -131,3 +131,36 @@ and permission notice:
 
 (defun* find-nart-by-id (id) (:inline t)
   (lookup-nart id))
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-macro 'do-narts '((var &optional (progress-message makeString("mapping Cyc NARTs")) &key done) &body body)
+    "Iterate over all HL NART datastructures, executing BODY within the scope of VAR.
+   VAR is bound to the NART.
+   PROGRESS-MESSAGE is a progress message string.
+   Iteration halts early as soon as DONE becomes non-nil.")
+
+
+(register-cyc-api-function 'nart-count 'nil
+    "Return the total number of NARTs."
+    'nil
+    '(integerp))
+
+
+(register-cyc-api-function 'nart-p '(object)
+    "Return T iff OBJECT is a datastructure implementing a non-atomic reified term (NART)."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'nart-id '(nart)
+    "Return the id of this NART."
+    '((nart nart-p))
+    '(integerp))
+
+
+(register-cyc-api-function 'find-nart-by-id '(id)
+    "Return the NART with ID, or NIL if not present."
+    '((id integerp))
+    '((nil-or nart-p)))

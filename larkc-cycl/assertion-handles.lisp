@@ -109,7 +109,8 @@ and permission notice:
 
 (defun* free-assertion (assertion) (:inline t)
   "[Cyc] Invalidate ASSERTION."
-  (setf (as-id assertion) nil))
+  (setf (as-id assertion) nil)
+  assertion)
 
 (defun valid-assertion-handle? (object)
   "[Cyc] Return T iff OBJECT is a valid assertion handle."
@@ -124,7 +125,7 @@ and permission notice:
 (defun make-assertion-shell (&optional id)
   (unless id
     (setf id (make-assertion-id)))
-  (check-type id #'fixnump)
+  (check-type id (satisfies fixnump))
   (let ((assertion (get-assertion)))
     (register-assertion-id assertion id)
     assertion))
@@ -146,7 +147,8 @@ and permission notice:
 
 (defun* reset-assertion-id (assertion new-id) (:inline t)
   "[Cyc] Primitively change the assertion id for ASSERTION to NEW-ID."
-  (setf (as-id assertion) new-id))
+  (setf (as-id assertion) new-id)
+  assertion)
 
 (defun* assertion-handle-valid? (assertion) (:inline t)
   (integerp (as-id assertion)))
@@ -155,3 +157,37 @@ and permission notice:
   "[Cyc] Return the assertion with ID, or NIL if not present."
   (lookup-assertion id))
 
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-macro 'do-assertions '((var &optional (progress-message makeString("mapping Cyc assertions")) &key done) &body body)
+    "Iterate over all HL assertion datastructures, executing BODY within the scope of VAR.
+   VAR is bound to the assertion.
+   PROGRESS-MESSAGE is a progress message string.
+   Iteration halts early as soon as DONE becomes non-nil.")
+
+
+(register-cyc-api-function 'assertion-count 'nil
+    "Return the total number of assertions."
+    'nil
+    '(integerp))
+
+
+(register-cyc-api-function 'assertion-p '(object)
+    "Return T iff OBJECT is an HL assertion"
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'assertion-id '(assertion)
+    "Return the id of this ASSERTION."
+    '((assertion assertion-p))
+    '(integerp))
+
+
+(register-cyc-api-function 'find-assertion-by-id '(id)
+    "Return the assertion with ID, or NIL if not present."
+    '((id integerp))
+    '((nil-or assertion-p)))

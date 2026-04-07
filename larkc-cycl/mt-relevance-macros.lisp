@@ -78,7 +78,7 @@ and permission notice:
           ((and spec-core? genl-core?) (core-genl-mt? mt *mt*))
           (genl-core? t)
           (spec-core? nil)
-          (t (basemt? *mt*))))))
+          (t (basemt? *mt* mt))))))
 
 (defun relevant-mt? (mt)
   "[Cyc] Return T iff MT is relevant with respect to the current dynamic mt scope."
@@ -88,6 +88,7 @@ and permission notice:
         (case function
           (relevant-mt-is-genl-mt (relevant-mt-is-genl-mt mt))
           (relevant-mt-is-any-mt (relevant-mt-is-any-mt mt))
+          (relevant-mt-is-everything (relevant-mt-is-everything mt))
           (relevant-mt-is-eq (relevant-mt-is-eq mt))
           (relevant-mt-is-in-list (missing-larkc 31127))
           (relevant-mt-is-genl-mt-of-list-member (missing-larkc 31125))
@@ -113,7 +114,7 @@ and permission notice:
   (relevant-mt-function-eq 'relevant-mt-is-genl-mt-of-list-member))
 
 (defun any-time-is-relevant? ()
-  (relevant-mt-function-eq 'relevant-mt-is-gnl-mt-with-any-time))
+  (relevant-mt-function-eq 'relevant-mt-is-genl-mt-with-any-time))
 
 (defun only-specified-mt-is-relevant? ()
   (relevant-mt-function-eq 'relevant-mt-is-eq))
@@ -150,7 +151,7 @@ and permission notice:
 ;; Taken from many uses in kb-mapping, and inlined
 (defmacro possibly-with-just-mt ((mt) &body body)
   (once-only (mt)
-    `(let ((*relevant-mt-function* (if ,mt *relevant-mt-function* #'relevant-mt-is-eq))
+    `(let ((*relevant-mt-function* (if ,mt #'relevant-mt-is-eq *relevant-mt-function*))
            (*mt* (if ,mt ,mt *mt*)))
        ,@body)))
 
@@ -199,8 +200,8 @@ and permission notice:
 
 (defun mt-info (&optional mt)
   (cond
-    ((all-mts-are-relevant?) #$EverythingPSC)
-    ((any-mt-is-relevant?) #$InferencePSC)
+    ((all-mts-are-relevant?) *relevant-mt-function*)
+    ((any-mt-is-relevant?) *relevant-mt-function*)
     ((genl-mts-of-listed-mts-are-relevant?) (make-formula #$MtUnionFn *relevant-mts*))
     (mt mt)
     (t *mt*)))
@@ -238,3 +239,48 @@ and permission notice:
            (*relevant-mts* (update-inference-mt-relevance-mt-list mt-var)))
        ,@body)
      ))
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-macro 'with-genl-mts '(mt &body body)
+    "MT and all its genl mts are relevant within BODY.")
+
+
+
+(register-cyc-api-macro 'with-mt '(mt &body body)
+    "MT and all its genl mts are relevant within BODY.")
+
+
+
+(register-cyc-api-macro 'with-all-mts '(&body body)
+    "All mts are relevant within BODY.")
+
+
+
+(register-cyc-api-macro 'with-any-mt '(&body body)
+    "Any mt can be used for relevance for a particular inference within &BODY.")
+
+
+
+(register-cyc-api-macro 'with-just-mt '(mt &body body)
+    "Only MT is relevant within BODY (no genl mts).")
+
+
+
+(register-cyc-api-macro 'with-mt-list '(mt-list &body body)
+    "Each mt in the list MT-LIST is relevant within BODY (no genl mts).")
+
+
+
+(register-cyc-api-macro 'with-inference-mt-relevance '(mt &body body)
+    "BODY evaluated with the same relevance used for inferences in MT.
+   This is like @xref with-genl-mts, except it is special-cased to
+   @xref with-all-mts when the mt is #$EverythingPSC,
+   @xref with-any-mt when the mt is #$InferencePSC.
+   Also, with-inference-mt-relevance errors if passed NIL for an mt.")
+
+
+
+(register-cyc-api-macro 'map-mts '((var) &body body)
+    "Iterate over all microtheories, binding VAR to an mt and executing BODY.")

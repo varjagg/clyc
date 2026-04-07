@@ -126,7 +126,7 @@ and permission notice:
   (multiple-value-bind (significand exponent sign) (integer-decode-float float)
     (let ((tersest-length most-positive-fixnum)
           (tersest-float nil))
-      (loop for delta from 2 below 3
+      (loop for delta from -2 below 3
          do (let* ((candidate-significand (+ significand delta))
                    (candidate-float (* sign (scale-float (float candidate-significand)
                                                          exponent)))
@@ -177,7 +177,7 @@ The answer is limited to SIGNIFICANT-DIGITS, when non-NIL."
     (t (< num1 num2))))
 
 (defun* potentially-infinite-number-> (num1 num2) (:inline t)
-  (not (potentially-infinite-number-< num1 num2)))
+  (potentially-infinite-number-< num2 num1))
 
 (defun potentially-infinite-number-plus (num1 num2)
   (cond
@@ -296,6 +296,7 @@ KEY: A unary function that will return a NUMBERP when applied to any item in ITE
       (multiple-value-bind (whole mod) (truncate integer multiple)
         (push mod answer)
         (setf integer whole)))
+    (push integer answer)
     (nreverse answer)))
 
 ;; TODO - not constants?
@@ -386,3 +387,11 @@ KEY: A unary function that will return a NUMBERP when applied to any item in ITE
                                    (#\E 14)
                                    (#\f 15)
                                    (#\F 15)))
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'nil-or-integer-p '(object)
+    "Return T iff OBJECT is either an integer or NIL"
+    'nil
+    '(booleanp))

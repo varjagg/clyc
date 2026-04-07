@@ -61,7 +61,8 @@ Otherwise, the operation is a NO-OP."
 
 (defun* cache-metrics-note-miss (metrics) (:inline t)
   "[Cyc] Update the metrics to reflect that the cache lookup resulted in a miss."
-  (incf (cachemtr-miss-count metrics)))
+  (incf (cachemtr-miss-count metrics))
+  metrics)
 
 (defun* cache-strategy-note-reference (strategy object) (:inline t)
   "[Cyc] Inform the cache strategy tracking system that the object mentioned was referenced. Objects that are not currently being tracked will be ignored."
@@ -184,7 +185,7 @@ Otherwise the operation is a NO-OP."
   (setf (mcache-metrics mcache) metrics)
   mcache)
 
-(defstruct recording-cache-strategy-facade
+(defstruct (recording-cache-strategy-facade (:conc-name "REC-CACHSTRAT-FACADE-"))
   cache-strategy
   records
   timestamper)

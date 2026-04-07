@@ -54,7 +54,7 @@ and permission notice:
   map-fn
   justify?
   add-to-result?
-  unwind-fn-tobble
+  unwind-fn-toggle
   result
   graph)
 

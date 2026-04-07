@@ -43,6 +43,11 @@ and permission notice:
 
 
 
+(defun do-sequence-index-done? (index end-index sequence)
+  (if (listp sequence)
+      (null sequence)
+      (= index end-index)))
+
 (deflexical *ignore-assert-types?* t
   "[Cyc] When non-NIL, ASSERT-TYPE and ASSERT-MUST statements are ignored. Otherwise, they expand into CHECK-TYPE and MUST statements, respectively.")
 

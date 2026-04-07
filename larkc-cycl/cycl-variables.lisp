@@ -115,7 +115,11 @@ and permission notice:
     (let* ((length (length object))
            (last (1- length))
            (subseq-check-start 1))
+      (unless (> length 1)
+        (return-from valid-el-var-name? nil))
       (when (has-dont-care-var-prefix? object)
+        (unless (> length 2)
+          (return-from valid-el-var-name? nil))
         (setf subseq-check-start 2))
       (when (<= last subseq-check-start)
         (setf last (1+ subseq-check-start)))
@@ -166,8 +170,7 @@ and permission notice:
 
 (defun generic-arg-var? (thing)
   "[Cyc] Return T iff THING is deemed a generic-arg variable."
-  (declare (ignore thing))
-  (and *permit-generic-arg-variables*
+  (and *permit-generic-arg-variables?*
        (missing-larkc 3473)))
 
 (defun variable-predicate-fn (var)
@@ -188,3 +191,12 @@ and permission notice:
 
 (defun* hl-var? (thing) (:inline t)
   (variable-p thing))
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'el-var? '(object)
+    "Return T iff OBJECT is a symbol which can be interpreted as an EL variable."
+    'nil
+    '(booleanp))

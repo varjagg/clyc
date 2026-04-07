@@ -107,7 +107,8 @@ and permission notice:
 (defun register-unrepresented-term-suid (term suid)
   "[Cyc] Note that SUID will be used as the suid for UNREPRESENTED-TERM."
   (id-index-enter *unrepresented-term-from-suid* suid term)
-  (setf (gethash term *unrepresented-term-to-suid*) suid))
+  (setf (gethash term *unrepresented-term-to-suid*) suid)
+  term)
 
 (defun deregister-unrepresented-term-suid (suid)
   "[Cyc] Note that SUID is not in use as an unrepresented term suid."
@@ -150,7 +151,8 @@ If BOOTSTRAP? is non-NIL, then a new SUID will be created for TERM if one does n
       (when-let ((suid (if bootstrap?
                            (find-or-create-unrepresented-term-suid term)
                            (unrepresented-term-suid term))))
-        (register-unrepresented-term-index suid new-index))))
+        (register-unrepresented-term-index suid new-index)))
+  term)
 
 (defparameter *unrepresented-term-dump-id-table* nil)
 

@@ -63,15 +63,19 @@
 ;;  defconstant  = plain variable, but the binding is immutable
 
 (defmacro defglobal (name val &optional doc)
-  "Plain variable."
-  `(#+sbcl sb-ext:defglobal #-sbcl cl:defvar ,name ,val ,@ (and doc (list doc))))
+  "Plain variable.  Like defvar — only sets on first load, preserves on reload."
+  `(cl:defvar ,name ,val ,@ (and doc (list doc))))
 
 (defmacro deflexical (name val &optional doc)
   "Reinitialized variable.  The 'lexical' in the name implies this file 'owns' the var, since it is in charge of setting its value."
-  ;; SBCL's defglobal works like defvar, so we need to manually update it if it exists
-  #+sbcl `(progn
-            (sb-ext:defglobal ,name nil ,@ (and doc (list doc)))
-            (setf ,name ,val))
+  ;; Evaluate val BEFORE defglobal binds the variable, so that reload guards
+  ;; like (if (boundp '*foo*) *foo* (init-form)) see the correct boundp state.
+  ;; SBCL's defglobal works like defvar (only sets on first definition),
+  ;; so we manually setf on reload.
+  #+sbcl (let ((g (gensym "DEFLEXICAL-VAL")))
+           `(let ((,g ,val))
+              (sb-ext:defglobal ,name nil ,@ (and doc (list doc)))
+              (setf ,name ,g)))
   #-sbcl `(cl:defparameter ,name ,val ,@ (and doc (list doc))))
 
 
@@ -99,6 +103,11 @@
 
 ;; Left as a macro to hook in file-load behavior, if necessary
 (defmacro toplevel (&body rest) `(progn ,@rest))
+
+;; SubL `fif` is a functional if: (fif test then else). In SubL all args are
+;; evaluated eagerly (function-call semantics), but since the return is the
+;; then-or-else value, a macro wrapping CL IF gives the same result.
+(defmacro fif (test then else) `(if ,test ,then ,else))
 
 (defparameter *file-defs* (make-hash-table :test #'eq)
   "symbol -> declaration in the form of (<filename> <defintion-type> <symbol>).")
@@ -177,8 +186,15 @@
 ;; Random stuff to fill in stdlib, accreted as needed.  TODO - organize when it's settled in.
 
 
-(defmacro missing-larkc (num)
-  `(error ,(format nil "This call was replaced for LarKC purposes. Originally a method was called. Refer to number ~a" num)))
+(defun declare-defglobal (global)
+  "Mark GLOBAL as a world-reinitialized variable. No-op in the CL port."
+  (declare (ignore global))
+  nil)
+
+(defmacro missing-larkc (id)
+  `(error ,(if (stringp id)
+               id
+               (format nil "This call was replaced for LarKC purposes. Originally a method was called. Refer to number ~a" id))))
 
 (defmacro missing-function-implementation (name)
   `(defun ,name (&rest args)
@@ -245,9 +261,12 @@
 (defun put (symbol key val)
   (setf (get symbol key) val))
 
+(defvar *ignore-musts?* nil)
+
 (defmacro must (expr &rest error-stuff)
-  `(unless ,expr
-     (funcall #'error ,@error-stuff)))
+  `(unless *ignore-musts?*
+     (unless ,expr
+       (error ,@error-stuff))))
 
 (defmacro must-not (expr &rest rest)
   `(must (not ,expr) ,@rest))
@@ -265,6 +284,13 @@
 (declaim (inline doublep))
 (defun doublep (expr)
   (typep expr 'double-float))
+
+(defun function-spec-p (object)
+  "SubL isFunctionSpec() — true if OBJECT is a valid function specifier:
+either a function object or a symbol naming a bound function."
+  (or (functionp object)
+      (and (symbolp object)
+           (fboundp object))))
 
 (defmacro do-plist ((key val list) &body body)
   `(loop for (,key ,val) on ,list by #'cddr
@@ -386,10 +412,7 @@
      (cl:defgeneric ,name ,args)
      (cl:defmethod ,name ,args ,@body)))
 
-(defun function-spec-p (obj)
-  (or (functionp obj)
-      (and (symbolp obj)
-           (fboundp obj))))
+;; duplicate function-spec-p removed — already defined at line 288
 
 (defmacro prog1-let (((name val)) &body body)
   "Creates a single LET binding for a value to be returned."
@@ -420,4 +443,50 @@
 (defmacro with-rw-write-lock ((rw-lock) &body body)
   `(bt:with-lock-held ((rw-lock-lock ,rw-lock))
      ,@body))
+
+;;; SubL process-wait — condition-variable based replacement for SubL's
+;;; polling process_wait. The original SubL runtime polled with 1s sleeps;
+;;; this implementation blocks on a condition variable so callers that signal
+;;; the CV get instant wakeup, while a timeout handles periodic checks.
+
+(defvar *process-wait-lock* (bt:make-lock "Process Wait Lock"))
+(defvar *process-wait-cv* (bt:make-condition-variable :name "Process Wait CV"))
+
+(defun process-wait (whostate predicate)
+  "Block the calling thread until PREDICATE (a zero-arg function) returns non-NIL.
+WHOSTATE is a descriptive string for debugging (ignored at present).
+The predicate is polled, not run in a separate thread.
+
+Implementation uses a condition variable (*process-wait-cv*) with a 1s fallback
+timeout.  Code that changes state the predicate tests should call
+  (bt:condition-notify *process-wait-cv*)
+to wake the waiter immediately instead of waiting up to 1s."
+  (declare (ignore whostate))
+  (unless (funcall predicate)
+    (bt:with-lock-held (*process-wait-lock*)
+      (loop until (funcall predicate)
+            do (bt:condition-wait *process-wait-cv* *process-wait-lock*
+                                  :timeout 1))))
+  t)
+
+(defun process-wait-with-timeout (timeout whostate predicate)
+  "Like PROCESS-WAIT, but gives up after TIMEOUT seconds.
+Returns T if predicate became true, NIL on timeout.
+Same condition-variable wakeup mechanism as process-wait."
+  (declare (ignore whostate))
+  (when (funcall predicate)
+    (return-from process-wait-with-timeout t))
+  (let ((deadline (+ (get-internal-real-time)
+                     (* timeout internal-time-units-per-second))))
+    (bt:with-lock-held (*process-wait-lock*)
+      (loop
+        (when (funcall predicate)
+          (return t))
+        (let ((remaining (/ (- deadline (get-internal-real-time))
+                            internal-time-units-per-second)))
+          (when (<= remaining 0)
+            (return nil))
+          (bt:condition-wait *process-wait-cv* *process-wait-lock*
+                             :timeout (min remaining 1)))))))
+
 

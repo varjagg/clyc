@@ -68,9 +68,10 @@ and permission notice:
 (defun* lookup-deduction-supports (id) (:inline t)
   (d-content-supports (lookup-deduction-content id)))
 
-(defun* se-deduction-tv (id new-tv) (:inline t)
+(defun* set-deduction-tv (id new-tv) (:inline t)
   (setf (d-content-tv (lookup-deduction-content id)) new-tv)
-  (mark-deduction-content-as-muted id))
+  (mark-deduction-content-as-muted id)
+  id)
 
 (defun load-deduction-content (deduction stream)
   (let* ((id (deduction-id deduction))
@@ -103,23 +104,27 @@ and permission notice:
   (dolist (support (deduction-supports-internal deduction))
     (cond
       ((assertion-p support) (add-assertion-dependent support deduction))
-      ((kb-hl-support-p support) (kb-hl-support-add-dependent support deduction)))))
+      ((kb-hl-support-p support) (kb-hl-support-add-dependent support deduction))))
+  deduction)
 
 (defun kb-remove-deduction-internal (deduction)
   (let ((id (deduction-id deduction)))
     (destroy-deduction-content id)
     (deregister-deduction-id id))
-  (free-deduction deduction))
+  (free-deduction deduction)
+  t)
 
 (defun remove-deduction-dependents (deduction)
   (dolist (support (deduction-supports-internal deduction))
     (cond
       ((valid-assertion? support) (remove-assertion-dependent support deduction))
-      ((valid-kb-hl-support? support) (kb-hl-support-remove-dependent support deduction)))))
+      ((valid-kb-hl-support? support) (kb-hl-support-remove-dependent support deduction))))
+  deduction)
 
 (defun* reset-deduction-tv (deduction new-tv) (:inline t)
   "[Cyc] Primitively change the tv of DEDUCTION to NEW-TV."
-  (set-deduction-tv (deduction-id deduction) new-tv))
+  (set-deduction-tv (deduction-id deduction) new-tv)
+  deduction)
 
 (defun kb-set-deduction-strength-internal (deduction new-strength)
   (let* ((truth (argument-truth deduction))

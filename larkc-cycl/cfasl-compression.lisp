@@ -50,7 +50,7 @@ and permission notice:
 (defglobal *cfasl-compression-not-found* (make-symbol "NOT-FOUND"))
 (defparameter *cfasl-output-compression-options* nil)
 (defparameter *cfasl-output-compression-table* nil)
-(defparameter *cfasl-outputcompression-code-isg* nil)
+(defparameter *cfasl-output-compression-code-isg* nil)
 (defparameter *within-cfasl-compression-analysis?* nil)
 (deflexical *cfasl-compression-options-properties* '(:all? :analyze :not :verbose?)
     "[Cyc] The valid properties for the CFASL compression options property list.")

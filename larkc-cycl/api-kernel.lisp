@@ -60,16 +60,22 @@ and permission notice:
 (defparameter *default-api-input-protocol* 'default-api-input-protocol
     "[Cyc] The default API input protocol to use.")
 (defparameter *api-input-protocol* *default-api-input-protocol*)
-(defparameter *default-api-validate-method* 'default-api-validate-api-request
+(defparameter *default-api-validate-method* 'default-validate-api-request
     "[Cyc] The default API input validator to use.")
 (defparameter *api-validate-method* *default-api-validate-method*
     "[Cyc] When non-NIL, a function which is called to validate any API request before evaluation.")
 (deflexical *default-api-result-method* nil)
-(defparameter *api-result-method* *default-api-validate-method*
+(defparameter *api-result-method* *default-api-result-method*
     "[Cyc] When non-NIL, a function which is called to transform any API result before returning the output.")
 (defparameter *default-api-output-protocol* 'default-api-output-protocol
     "[Cyc] The default API output protocol to use.")
 (defparameter *api-output-protocol* *default-api-output-protocol*)
+(defun api-input-protocol ()
+  *api-input-protocol*)
+
+(defun api-output-protocol ()
+  *api-output-protocol*)
+
 (defparameter *api-in-stream* nil
     "[Cyc] The API input stream (for use by the java-api-kernel).")
 (defparameter *api-out-stream* nil
@@ -102,14 +108,18 @@ and permission notice:
         (api-request nil)
         (api-result nil))
     (setf-error error-message
-      (setf api-request (read-api-request in-stream))
-      (validate-api-request api-request)
-      (record-api-request api-request))
+      (setf api-request (read-api-request in-stream)))
+    (unless error-message
+      (setf-error error-message
+        (validate-api-request api-request)))
+    (unless error-message
+      (setf-error error-message
+        (record-api-request api-request)))
     (if (eq 'task-processor-request (car api-request))
         (progn
           (bt:with-lock-held (*api-task-process-pool-lock*)
             (unless (api-task-processors-initialized-p)
-              (initialise-api-task-processors)))
+              (initialize-api-task-processors)))
           (destructuring-bind (function request id priority requestor client-bindings uuid-string)
               api-request
             (declare (ignore function))
@@ -189,7 +199,7 @@ and permission notice:
   (let ((result-code (if error? *api-error-code* *api-success-code*)))
     (format out-stream "~d ~s" result-code api-result))
   (missing-larkc 7458)
-  ;;(force-output out-stream)
+  (force-output out-stream)
   api-result)
 
 (defparameter *new-api-input-protocol* nil)
@@ -214,3 +224,17 @@ and permission notice:
   (+ *base-tcp-port* *fi-port-offset*))
 
 (deflexical *cyc-api-eof-exception* :eof)
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'api-quit 'nil
+    "Explicitly quit this api connection."
+    'nil
+    'nil)
+
+
+(register-cyc-api-function 'cyc-api-remote-eval '(api-request machine port)
+    "Evaluate API-REQUEST on MACHINE using the CYC-API server at TCP PORT"
+    '((api-request consp) (machine stringp) (port integerp))
+    'nil)

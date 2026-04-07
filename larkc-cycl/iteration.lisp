@@ -137,9 +137,28 @@ The second value returned is non-NIL iff the value returned is valid."
         (if halted-prematurely invalid-token raw-item))
       invalid-token))
 
-;; TODO - make macro
+;; Macro helper for do-iterator-without-values-internal
 (defun iteration-next-without-values-macro-helper (iterator &optional invalid-token)
   (iteration-next-without-values iterator invalid-token))
+
+;; Reconstructed from iteration.java constants:
+;; $list48 arglist: ((var iterator &key invalid-token done) &body body)
+;; $sym52-55 gensyms: ITERATOR-VAR, DONE-VAR, TOKEN-VAR, VALID
+;; $sym30 ITERATION-NEXT-WITHOUT-VALUES-MACRO-HELPER
+;; Expansion confirmed by inline expansions across kb-mapping.lisp, assertion-utilities.lisp, etc.
+(defmacro do-iterator-without-values-internal ((var iterator &key invalid-token done) &body body)
+  "Iterate over ITERATOR, binding VAR to each value. DONE is evaluated each iteration and halts when non-nil."
+  (with-temp-vars (done-var token-var valid)
+    `(let ((,done-var nil)
+           (,token-var ,invalid-token))
+       (loop until ,done-var do
+         (let* ((,var (iteration-next-without-values-macro-helper ,iterator ,token-var))
+                (,valid (not (eq ,token-var ,var))))
+           (when ,valid
+             ,@(when done
+                 `((when ,done (return))))
+             ,@body)
+           (setf ,done-var (not ,valid)))))))
 
 (defun iteration-finalize (iterator)
   (funcall (it-finalize iterator) (it-state iterator)))
@@ -214,7 +233,7 @@ Values returned are tuples of the form (<key> <value>)."
   ;; Thus, this degenerates to a list iterator.
   ;; But we'll keep the function identities unique so it won't pass LIST-ITERATOR-P.
   (let ((pairs nil))
-    (maphash (lambda (k v) (list k v)) hash-table)
+    (maphash (lambda (k v) (push (list k v) pairs)) hash-table)
     pairs))
 
 (defun iterator-hash-table-done (state)
@@ -261,8 +280,6 @@ Values returned are tuples of the form (<key> <value>)."
         (if (iterator-done current)
             (progn
               (pop working-state)
-              (unless working-state
-                (return))
               (setf premature-end? (not working-state)))
             (multiple-value-bind (value valid?) (iteration-next current)
               (when valid?

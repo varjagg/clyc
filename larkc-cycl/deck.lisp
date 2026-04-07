@@ -56,9 +56,9 @@ and permission notice:
 
 (defun clear-deck (deck)
   "[Cyc] Clear DECK and return it."
-  (setf (deck-data deck) (case (deck-type deck)
-                           (:queue (create-queue))
-                           (:stack (create-stack))))
+  (case (deck-type deck)
+    (:queue (clear-queue (deck-data deck)))
+    (:stack (clear-stack (deck-data deck))))
   deck)
 
 (defun deck-empty-p (deck)

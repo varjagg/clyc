@@ -2,20 +2,20 @@
   Copyright (c) 2019-2020 White Flame
 
   This file is part of Clyc
- 
+
   Clyc is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
- 
+
   Clyc is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU Affero General Public License for more details.
- 
+
   You should have received a copy of the GNU Affero General Public License
   along with Clyc.  If not, see <https://www.gnu.org/licenses/>.
- 
+
 This file derives from work covered by the following copyright
 and permission notice:
 
@@ -24,7 +24,7 @@ and permission notice:
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
   http://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
@@ -36,74 +36,115 @@ and permission notice:
 
 (in-package :clyc)
 
+;; Internal Constants orphans (used only in stripped functions):
+;;   $int2$148 = 148            -- CFASL opcode for assertion-content structs (dump/load)
+;;   $kw25$NOT_FOUND = :not-found -- sentinel value for stripped lookup variants
+;;   $str36 = "mapping Cyc assertions" -- progress string in rebuild-rule-set (stripped)
+;;   $kw38$SKIP = :skip         -- iteration control in stripped functions
+;;   $str40 = "Rebuilding the Rule Set" -- progress string in rebuild-rule-set (stripped)
+;;   $sym48$VALID_ARGUMENT      -- used in valid-assertion-robust? (stripped)
+;;   $sym54$DEDUCTION_P         -- used in mark-dependent-deduction (stripped)
 
-(defstruct (assertion-content (:conc-name "AS-CONTENT-"))
+(defstruct (assertion-content (:constructor make-assertion-content
+                                            (&key formula-data mt (flags 0) arguments plist))
+                              (:conc-name "AS-CONTENT-"))
   formula-data
   mt
   (flags 0 :type (or null fixnum))
   arguments
   plist)
 
+
+(defconstant *dtp-assertion-content* 'assertion-content)
+
+(defun assertion-content-p (object)
+  (typep object 'assertion-content))
+
 (deflexical *default-assertion-flags* 0)
 
 (defun create-assertion-content (mt)
-  (make-assertion-content :formula-data nil
-                          :mt mt
-                          :flags *default-assertion-flags*
-                          :arguments nil
-                          :plist nil))
+  (make-assertion-content :mt mt :flags *default-assertion-flags*))
 
 (defun destroy-assertion-content (id)
-  (when-let ((assertion-content (lookup-assertion-content id)))
-    (deregister-assertion-content id)
-    ;; The flags field is omitted as as a fixnum it's not a pointer.
-    (setf (as-content-formula-data assertion-content)
-          (setf (as-content-mt assertion-content)
-                (setf (as-content-arguments assertion-content)
-                      (setf (as-content-plist assertion-content)
-                            nil))))))
+  (let ((assertion-content (lookup-assertion-content id)))
+    (when (assertion-content-p assertion-content)
+      (deregister-assertion-content id)
+      (setf (as-content-formula-data assertion-content) nil)
+      (setf (as-content-mt assertion-content) nil)
+      (setf (as-content-flags assertion-content) nil)
+      (setf (as-content-arguments assertion-content) nil)
+      (setf (as-content-plist assertion-content) nil)
+      (return-from destroy-assertion-content t)))
+  nil)
 
-;; TODO - all these readers dereference the ID
-(macrolet ((define-reader (field)
-             `(defun* ,(symbolicate 'lookup-assertion- field) (id) (:inline t)
-                (when-let ((contents (lookup-assertion id)))
-                  (,(symbolicate 'as-content- field) contents)))))
+(defun* lookup-assertion-formula-data (id) (:inline t)
+  (let ((contents (lookup-assertion-content id)))
+    (when contents (as-content-formula-data contents))))
 
-  (define-reader formula-data)
-  (define-reader mt)
-  (define-reader flags)
-  (define-reader arguments)
-  (define-reader plist))
+(defun* lookup-assertion-mt (id) (:inline t)
+  (let ((contents (lookup-assertion-content id)))
+    (when contents (as-content-mt contents))))
 
-(macrolet ((define-writer (field)
-             (let ((data-var (symbolicate 'new- field)))
-               `(defun* ,(symbolicate 'set-assertion- field) (id ,data-var) (:inline t)
-                  (setf (,(symbolicate 'as-content- field) (lookup-assertion-content id))
-                        ,data-var)
-                  (mark-assertion-content-as-muted id)))))
-  (define-writer formula-data)
-  (define-writer mt)
-  (define-writer flags)
-  (define-writer arguments)
-  (define-writer plist))
+(defun* lookup-assertion-flags (id) (:inline t)
+  (let ((contents (lookup-assertion-content id)))
+    (when contents (as-content-flags contents))))
+
+(defun* lookup-assertion-arguments (id) (:inline t)
+  (let ((contents (lookup-assertion-content id)))
+    (when contents (as-content-arguments contents))))
+
+(defun* lookup-assertion-plist (id) (:inline t)
+  (let ((contents (lookup-assertion-content id)))
+    (when contents (as-content-plist contents))))
+
+(defun* set-assertion-formula-data (id new-formula-data) (:inline t)
+  (setf (as-content-formula-data (lookup-assertion-content id)) new-formula-data)
+  (mark-assertion-content-as-muted id)
+  id)
+
+(defun* set-assertion-flags (id new-flags) (:inline t)
+  (setf (as-content-flags (lookup-assertion-content id)) new-flags)
+  (mark-assertion-content-as-muted id)
+  id)
+
+(defun* set-assertion-arguments (id new-arguments) (:inline t)
+  (setf (as-content-arguments (lookup-assertion-content id)) new-arguments)
+  (mark-assertion-content-as-muted id)
+  id)
+
+(defun* set-assertion-plist (id new-plist) (:inline t)
+  (setf (as-content-plist (lookup-assertion-content id)) new-plist)
+  (mark-assertion-content-as-muted id)
+  id)
+
+;; (defun dump-assertion-content (assertion stream) ...) -- no body
+;; (defun bundle-assertion-content-for-dumping (assertion) ...) -- no body
+;; (defun bundle-assertion-content (formula-data mt flags arguments plist) ...) -- no body
+;; (defun dump-assertion-content-to-fht (id assertion-content &optional table) ...) -- no body
+;; (defun dump-assertion-content-bundle-to-fht (id bundle table) ...) -- no body
 
 (defun load-assertion-content (assertion stream)
-  ;; Relying on left-to-right parameter evaluation order, guaranteed by 3.1.2.1.2.3
-  (load-assertion-content-int (assertion-id assertion)
-                              (cfasl-input stream)
-                              (cfasl-input stream)
-                              (cfasl-input stream)
-                              (cfasl-input stream)
-                              (cfasl-input stream)))
+  ;; Left-to-right parameter evaluation guaranteed by 3.1.2.1.2.3
+  (let* ((id (assertion-id assertion))
+         (formula-data (cfasl-input stream))
+         (mt (cfasl-input stream))
+         (flags (cfasl-input stream))
+         (v-arguments (cfasl-input stream))
+         (plist (cfasl-input stream)))
+    (load-assertion-content-int id formula-data mt flags v-arguments plist))
+  assertion)
 
-(defun load-assertion-content-int (id formula-data mt flags arguments plist)
-  ;; TODO - would have liked this to bypass create-assertion-content to use make- keywords easier
+;; (defun load-assertion-content-as-bundle (assertion stream) ...) -- no body
+;; (defun load-assertion-content-from-fht (assertion table) ...) -- no body
+
+(defun load-assertion-content-int (id formula-data mt flags v-arguments plist)
   (let ((assertion-content (create-assertion-content mt)))
     (setf (as-content-formula-data assertion-content) formula-data)
     (setf (as-content-flags assertion-content) flags)
-    (setf (as-content-arguments assertion-content) arguments)
+    (setf (as-content-arguments assertion-content) v-arguments)
     (setf (as-content-plist assertion-content) plist)
-    (register-assertion-content id assertion-content)))
+    (register-assertion-content id assertion-content))
+  id)
 
 (defun assertion-cnf-internal (assertion)
   (let ((hl-cnf (assertion-hl-cnf assertion)))
@@ -112,10 +153,8 @@ and permission notice:
         hl-cnf)))
 
 (defun possibly-assertion-cnf-internal (assertion)
-  (and (valid-assertion-with-content? assertion)
-       (assertion-cnf-internal assertion)))
-
-;; TODO - and this is where we look up info by assertion ID for each field accessor.  That seems kind of nuts.  Cache the assertion-content struct on the assertion handle itself.
+  (when (valid-assertion-with-content? assertion)
+    (assertion-cnf-internal assertion)))
 
 (defun* assertion-mt-internal (assertion) (:inline t)
   (lookup-assertion-mt (assertion-id assertion)))
@@ -136,156 +175,185 @@ and permission notice:
   (decode-direction (assertion-flags-direction-code (assertion-flags assertion))))
 
 (defun assertion-truth-internal (assertion)
+  (tv-truth (assertion-tv assertion)))
+
+(defun assertion-strength-internal (assertion)
   (tv-strength (assertion-tv assertion)))
 
 (defun assertion-tv (assertion)
-  "[Cyc] Return the HL TV of ASSERTION."
-  (decode-tv (assertion-flags-tv-decode (assertion-flags assertion))))
+  "[Cyc] Return the hl tv of ASSERTION."
+  (decode-tv (assertion-flags-tv-code (assertion-flags assertion))))
 
 (defun* assertion-variable-names-internal (assertion) (:inline t)
   "[Cyc] Return the list of names for the variables in ASSERTION."
   (get-assertion-prop assertion :variable-names))
 
 (defun asserted-by-internal (assertion)
-  (and (asserted-assertion? assertion)
-       (assert-info-who (assertion-assert-info assertion))))
+  (when (asserted-assertion? assertion)
+    (assert-info-who (assertion-assert-info assertion))))
 
 (defun asserted-when-internal (assertion)
-  (and (asserted-assertion? assertion)
-       (assert-info-when (assertion-assert-info assertion))))
+  (when (asserted-assertion? assertion)
+    (assert-info-when (assertion-assert-info assertion))))
 
 (defun asserted-why-internal (assertion)
-  (and (asserted-assertion? assertion)
-       (assert-info-why (assertion-assert-info assertion))))
+  (when (asserted-assertion? assertion)
+    (assert-info-why (assertion-assert-info assertion))))
 
 (defun asserted-second-internal (assertion)
-  (and (asserted-assertion? assertion)
-       (assert-info-second (assertion-assert-info assertion))))
+  (when (asserted-assertion? assertion)
+    (assert-info-second (assertion-assert-info assertion))))
 
-;; TODO - assertion lookup by id
 (defun* assertion-arguments-internal (assertion) (:inline t)
   (lookup-assertion-arguments (assertion-id assertion)))
 
 (defun* assertion-dependents-internal (assertion) (:inline t)
   (get-assertion-prop assertion :dependents))
 
-;; TODO - assertion lookup by id
 (defun assertion-formula-data (assertion)
   "[Cyc] Return the HL structure used to implement the formula for ASSERTION.
-This will either be a clause struc containing a cnf, a cnf, or a gaf formula." ;; Or an ATM machine.
+This will either be a clause struc containing a cnf, a cnf, or a gaf formula."
   (lookup-assertion-formula-data (assertion-id assertion)))
 
-;; TODO - assertion lookup by id
 (defun reset-assertion-formula-data (assertion new-formula-data)
   "[Cyc] Primitively sets the HL structure used to implement the formula for ASSERTION.
 This should either be a clause struc containing a cnf, a cnf, or a gaf formula."
-  (set-assertion-formula-data (assertion-id assertion) new-formula-data))
+  (declare (type assertion assertion))
+  (set-assertion-formula-data (assertion-id assertion) new-formula-data)
+  assertion)
 
 (defun assertion-hl-cnf (assertion)
   "[Cyc] Return the HL structure used to implement the CNF clause for ASSERTION.
-This will either be a clause struc containing a cnf, or a cnf. GAF formulas are expanded into CNFs."
+This will either be a clause struc containing a cnf, or a cnf.
+gaf formulas are expanded into CNFs."
+  (declare (type assertion assertion))
   (let ((formula-data (assertion-formula-data assertion)))
-    (if (or (clause-struc-p formula-data)
-              (not formula-data)
-              (not (assertion-gaf-p assertion)))
-        formula-data
-        (gaf-formula-to-cnf formula-data))))
+    (cond
+      ((clause-struc-p formula-data) formula-data)
+      ((not formula-data)            formula-data)
+      ((not (assertion-gaf-p assertion)) formula-data)
+      (t (gaf-formula-to-cnf formula-data)))))
 
 (defun update-assertion-formula-data (assertion new-formula-data)
-  "[Cyc] Primitively change the formula data of ASSERTION to NEW-FORMULA-DATA, and update the GAF flag. Assumes that NEW-FORMULA-DATA is either a CNF clause, a gaf formula, a clause-struc, or NIL."
+  "[Cyc] Primitively change the formula data of ASSERTION to NEW-FORMULA-DATA,
+and update the GAF flag. Assumes that NEW-FORMULA-DATA is either a CNF clause,
+a gaf formula, a clause-struc, or NIL."
   (cond
     ((clause-struc-p new-formula-data) (missing-larkc 32000))
     ((not new-formula-data) (annihilate-assertion-formula-data assertion))
     ((cnf-p new-formula-data) (reset-assertion-cnf assertion new-formula-data))
     ((el-formula-p new-formula-data) (reset-assertion-gaf-formula assertion new-formula-data))
-    (t (error "Unexpected formula-data type: ~s" new-formula-data))))
+    (t (error "Unexpected formula-data type: ~S" new-formula-data)
+       (return-from update-assertion-formula-data nil)))
+  assertion)
 
 (defun assertion-clause-struc (assertion)
-  "[Cyc] If ASSERTION has a clause struc as its HL CNF implementation, return it. Otherwise, return NIL."
+  "[Cyc] If ASSERTION has a clause struc as its HL CNF implementation, return it.
+Otherwise, return NIL."
   (let ((formula-data (assertion-formula-data assertion)))
     (when (clause-struc-p formula-data)
       formula-data)))
 
 (defun reset-assertion-cnf (assertion new-cnf)
-  "[Cyc] Primitively change the formula data of ASSERTION to NEW-CNF, and update the GAF flag. Shrinks NEW-CNF to a gaf formula if possible."
+  "[Cyc] Primitively change the formula data of ASSERTION to NEW-CNF,
+and update the GAF flag. Shrinks NEW-CNF to a gaf formula if possible."
   (let ((gaf? (determine-cnf-gaf-p new-cnf)))
     (reset-assertion-formula-data assertion
                                   (if gaf?
                                       (cnf-to-gaf-formula new-cnf)
                                       new-cnf))
-    (set-assertion-gaf-p assertion gaf?)))
+    (set-assertion-gaf-p assertion gaf?)
+    assertion))
+
+;; (defun reset-assertion-clause-struc (assertion new-clause-struc) ...) -- no body
 
 (defun reset-assertion-gaf-formula (assertion new-gaf-formula)
-  "[Cyc] Primitively change the formula data of ASSERTION to NEW-GAF-FORMULA, and set the GAF flag to T. Assumes the NEW-GAF-FORMULA is a valid gaf formula."
+  "[Cyc] Primitively change the formula data of ASSERTION to NEW-GAF-FORMULA,
+and set the GAF flag to t. Assumes that NEW-GAF-FORMULA is a valid gaf formula."
   (reset-assertion-formula-data assertion new-gaf-formula)
-  (set-assertion-gaf-p assertion t))
+  (set-assertion-gaf-p assertion t)
+  assertion)
 
 (defun annihilate-assertion-formula-data (assertion)
-  "[Cyc] Primitivly change the formula data of ASSERTION to NIL, and update the GAF flag to T (why not?)."
-  (reset-assertion-formula assertion nil)
-  (set-assertion-gaf-p assertion t))
+  "[Cyc] Primitively change the formula data of ASSERTION to nil,
+and update the GAF flag to t (why not?)"
+  (reset-assertion-formula-data assertion nil)
+  (set-assertion-gaf-p assertion t)
+  assertion)
 
-;; TODO - assertion lookup by id
 (defun* assertion-flags (assertion) (:inline t)
   "[Cyc] Return the bit-flags for ASSERTION."
   (lookup-assertion-flags (assertion-id assertion)))
 
-;; TODO - assertion lookup by id
 (defun reset-assertion-flags (assertion new-flags)
-  ;; TODO - equality check before write.  It could be faster in RAM-only scenarios to write always, but cache effects might dominate.
+  (declare (type assertion assertion))
   (let ((flags (assertion-flags assertion)))
     (unless (eql flags new-flags)
-      (set-assertion-flags (assertion-id assertion) new-flags))))
+      (set-assertion-flags (assertion-id assertion) new-flags)))
+  assertion)
 
+(defconstant *assertion-flags-gaf-byte* (byte 1 0))
 
-
-;;  All this is gaf flag stuff.
-
-
-;; TODO - fixnum declarations for speedup
+;; (defun assertion-flags-gaf-code (flags) ...) -- no body
 
 (defun* set-assertion-flags-gaf-code (flags code) (:inline t)
-  (dpb code (byte 1 0) flags))
+  (dpb code *assertion-flags-gaf-byte* flags))
+
+(defconstant *assertion-flags-direction-byte* (byte 2 1))
 
 (defun* assertion-flags-direction-code (flags) (:inline t)
-  (ldb (byte 2 1) flags))
+  (ldb *assertion-flags-direction-byte* flags))
+
+(defun* set-assertion-flags-direction-code (flags code) (:inline t)
+  (dpb code *assertion-flags-direction-byte* flags))
+
+(defconstant *assertion-flags-tv-byte* (byte 3 3))
 
 (defun* assertion-flags-tv-code (flags) (:inline t)
-  (ldb (byte 3 3) flags))
+  (ldb *assertion-flags-tv-byte* flags))
 
 (defun* set-assertion-flags-tv-code (flags code) (:inline t)
-  (dpb code (byte 3 3) flags))
+  (dpb code *assertion-flags-tv-byte* flags))
 
 (defun* assertion-flags-gaf-p (assertion) (:inline t)
   "[Cyc] Return T iff ASSERTION is a GAF according to its internal flag bits."
   (oddp (assertion-flags assertion)))
 
-(defun set-assertion-flags-gaf-p (assertion gaf-p)
+(defun set-assertion-flags-gaf-p (assertion gaf?)
   "[Cyc] Primitively set the gaf flag of ASSERTION."
-  ;; TODO - this checked the return value of ENCODE-BOOLEAN for non-NILness which makes no sense
-  (reset-assertion-flags assertion (set-assertion-flags-gaf-code (assertion-flags assertion)
-                                                                 (encode-boolean gaf-p))))
+  (let ((gaf-code (encode-boolean gaf?)))
+    (when gaf-code
+      (reset-assertion-flags assertion
+                             (set-assertion-flags-gaf-code (assertion-flags assertion)
+                                                           gaf-code))))
+  assertion)
 
-(defglobal *rule-set* nil
+(deflexical *rule-set* nil
     "[Cyc] When non-NIL, a cache of all the rule assertions in the KB.")
 
-(defglobal *prefer-rule-set-over-flags?* nil
-    "[Cyc] When non-NIL, the rule-set cache is used to compute GAF vs Rule rather than using the bit in the flags.")
+(deflexical *prefer-rule-set-over-flags?* nil
+    "[Cyc] When non-NIL, the rule-set cache is used to compute GAF vs Rule rather than
+using the bit in the flags.")
 
-;; TODO - eliminate hash table size estimates
 (deflexical *estimated-assertions-per-rule* 60)
 
 (defun setup-rule-set (estimated-assertion-size)
+  (declare (type (integer 0) estimated-assertion-size))
   (let ((estimated-rule-count (ceiling (/ estimated-assertion-size
                                           *estimated-assertions-per-rule*))))
-    (setf *rule-set* (new-set #'eq estimated-rule-count))))
+    (setf *rule-set* (new-set #'eq estimated-rule-count))
+    t))
+
+;; (defun kb-rule-set () ...) -- no body; registered as macro helper for do-rules
 
 (defun assertion-gaf-p (assertion)
-  (if *prefer-rule-set-over-flags?*
-      (when *rule-set*
-        ;; TODO - why use this instead of the flags?
-        (not (set-member? assertion *rule-set*)))
+  (if (and *prefer-rule-set-over-flags?* *rule-set*)
+      (not (set-member? assertion *rule-set*))
       (assertion-flags-gaf-p assertion)))
+
+;; (defun assertion-rule-p (assertion) ...) -- no body
+;; (defun rule-count () ...) -- no body
+;; (defun gaf-count () ...) -- no body
 
 (defun set-assertion-gaf-p (assertion gaf?)
   "[Cyc] Primitively set the gaf flag of ASSERTION."
@@ -295,18 +363,20 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
         (set-add assertion *rule-set*)))
   (set-assertion-flags-gaf-p assertion gaf?))
 
+;; (defun possibly-rule-set-delete (assertion) ...) -- no body
+;; (defun recompute-assertion-gaf-p (assertion) ...) -- no body
+
 (defun* determine-cnf-gaf-p (cnf) (:inline t)
   "[Cyc] Return the recomputed value for the gaf flag of ASSERTION."
   (gaf-cnf? cnf))
 
-
-
-
-
+;; (defun dump-rule-set-to-stream (stream) ...) -- no body
 
 (defun load-rule-set-from-stream (stream)
   (setf *rule-set* (cfasl-input stream))
   (set-size *rule-set*))
+
+;; (defun rebuild-rule-set () ...) -- no body
 
 (defun* gaf-formula-to-cnf (gaf) (:inline t)
   "[Cyc] Converts a gaf formula to a CNF clause."
@@ -322,12 +392,27 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
       (progn
         (remove-assertion-indices assertion)
         (reset-assertion-direction assertion new-direction)
-        (add-assertion-indices assertion))))
+        (add-assertion-indices assertion)))
+  assertion)
+
+(defun reset-assertion-direction (assertion new-direction)
+  "[Cyc] Primitively change direction of ASSERTION to NEW-DIRECTION."
+  (declare (type assertion assertion))
+  (let ((direction-code (encode-direction new-direction)))
+    (when direction-code
+      (reset-assertion-flags assertion
+                             (set-assertion-flags-direction-code (assertion-flags assertion)
+                                                                 direction-code))))
+  assertion)
 
 (defun reset-assertion-tv (assertion new-tv)
-  "[Cyc] Primitively change the HL TV of ASSERTION to NEW-TV."
-  (when-let ((tv-code (encode-tv new-tv)))
-    (reset-assertion assertion (set-assertion-flags-tv-code (assertion-flags assertion) tv-code))))
+  "[Cyc] Primitively change the hl tv of ASSERTION to NEW-TV."
+  (declare (type assertion assertion))
+  (let ((tv-code (encode-tv new-tv)))
+    (when tv-code
+      (reset-assertion-flags assertion
+                             (set-assertion-flags-tv-code (assertion-flags assertion) tv-code))))
+  assertion)
 
 (defun reset-assertion-truth (assertion new-truth)
   (let* ((existing-strength (assertion-strength assertion))
@@ -339,32 +424,39 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
          (new-tv (tv-from-truth-strength existing-truth new-strength)))
     (reset-assertion-tv assertion new-tv)))
 
-;; TODO - assertion lookup by id
 (defun assertion-plist (assertion)
+  "[Cyc] Return the plist for ASSERTION."
   (lookup-assertion-plist (assertion-id assertion)))
 
-;; TODO - assertion lookup by id
 (defun* reset-assertion-plist (assertion plist) (:inline t)
-  (set-assertion-plist (assertion-id assertion) plist))
+  "[Cyc] Primitively set the plist of ASSERTION to PLIST."
+  (declare (type assertion assertion))
+  (declare (type list plist))
+  (set-assertion-plist (assertion-id assertion) plist)
+  assertion)
 
 (defun* get-assertion-prop (assertion indicator &optional default) (:inline t)
   (getf (assertion-plist assertion) indicator default))
 
 (defun set-assertion-prop (assertion indicator value)
-  (reset-assertion-plist assertion
-                         (putf (assertion-plist assertion) indicator value)))
+  (reset-assertion-plist assertion (putf (assertion-plist assertion) indicator value))
+  assertion)
 
 (defun rem-assertion-prop (assertion indicator)
   (let ((old-plist (assertion-plist assertion)))
-    (reset-assertion-plist assertion
-                           (remf old-plist indicator))))
+    (reset-assertion-plist assertion (remf old-plist indicator)))
+  assertion)
 
 (defun reset-assertion-variable-names (assertion new-variable-names)
   "[Cyc] Primitively change the variable names for ASSERTION to NEW-VARIABLE-NAMES."
-  ;; TODO - check that NEW-VARIABLE-NAMES is a proper list of all strings, but type checks are diabled
+  (declare (type assertion assertion))
+  (declare (type list new-variable-names))
+  (dolist (elem new-variable-names)
+    (declare (type string elem)))
   (if new-variable-names
       (set-assertion-prop assertion :variable-names new-variable-names)
-      (rem-assertion-prop assertion :variable-names)))
+      (rem-assertion-prop assertion :variable-names))
+  assertion)
 
 (defun* assertion-index (assertion) (:inline t)
   "[Cyc] Return the indexing structure for ASSERTION."
@@ -372,78 +464,89 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
 
 (defun reset-assertion-index (assertion new-index)
   "[Cyc] Primitively change the indexing structure for ASSERTION to NEW-INDEX."
+  (declare (type assertion assertion))
   (if (eq new-index (new-simple-index))
-      ;; TODO - this is probably an optimization that we can ignore and safely continue.
       (missing-larkc 31913)
-      (assertion-indexing-store-set assertion new-index)))
+      (assertion-indexing-store-set assertion new-index))
+  assertion)
 
-(defun* asertion-assert-info (assertion) (:inline t)
+;; (defun clear-assertion-index (assertion) ...) -- no body
+
+(defmacro destructure-assert-info ((who when why second) assert-info &body body)
+  `(destructuring-bind (&optional ,who ,when ,why ,second) ,assert-info
+     ,@body))
+
+(defun* assertion-assert-info (assertion) (:inline t)
   "[Cyc] Return the assert timestamping info for ASSERTION."
   (get-assertion-prop assertion :assert-info))
 
 (defun reset-assertion-assert-info (assertion new-info)
+  "[Cyc] Primitively change the assert timestamping info for ASSERTION to NEW-INFO."
+  (declare (type assertion assertion))
   (if new-info
       (set-assertion-prop assertion :assert-info new-info)
-      (rem-assertion-prop assertion :assert-info)))
+      (rem-assertion-prop assertion :assert-info))
+  assertion)
 
 (defun asserted-assertion-timestamped? (assertion)
+  (declare (type assertion assertion))
   (when (asserted-assertion? assertion)
-    (assertion-assert-info assertion)))
+    (if (assertion-assert-info assertion) t nil)))
 
-;; Cheap way to make accessors
+;; assert-info is a plain list; use a (:type list) struct for free accessors
 (defstruct (assert-info (:type list)
-                        (:constructor nil))
+                        (:constructor make-assert-info (&optional who when why second)))
   who
   when
   why
   second)
 
-(defun make-assert-info (&optional who when why second)
-  ;; TODO - this might be more effective as a macro, unless NILs are passed in.
-  (cond
-    (second (list who when why second))
-    (why (list who when why))
-    (when (list who when))
-    (who (list who))))
-
-;; HACK - faster, simpler versions, but they assume the list format.
 (defun set-assertion-asserted-by (assertion assertor)
-  (list* assertor (cdr (assertion-assert-info assertion))))
+  (destructure-assert-info (who when why second) (assertion-assert-info assertion)
+    (setq who assertor)
+    (reset-assertion-assert-info assertion (make-assert-info who when why second))))
 
 (defun set-assertion-asserted-when (assertion universal-date)
-  (let ((ai (copy-list (assertion-assert-info assertion))))
-    (setf (assert-info-when ai) universal-date)
-    ai))
+  (destructure-assert-info (who when why second) (assertion-assert-info assertion)
+    (setq when universal-date)
+    (reset-assertion-assert-info assertion (make-assert-info who when why second))))
 
 (defun set-assertion-asserted-why (assertion reason)
-  (let ((ai (copy-list (assertion-assert-info assertion))))
-    (setf (assert-info-why ai) reason)
-    ai))
+  (destructure-assert-info (who when why second) (assertion-assert-info assertion)
+    (setq why reason)
+    (reset-assertion-assert-info assertion (make-assert-info who when why second))))
 
 (defun set-assertion-asserted-second (assertion universal-second)
-  (let ((ai (copy-list (assertion-assert-info assertion))))
-    (setf (assert-info-second ai) universal-second)))
+  (destructure-assert-info (who when why second) (assertion-assert-info assertion)
+    (setq second universal-second)
+    (reset-assertion-assert-info assertion (make-assert-info who when why second))))
+
+;; (defun valid-assertion-robust? (assertion) ...) -- no body
 
 (defun valid-assertion-with-content? (assertion)
   "[Cyc] Does ASSERTION have content?"
-  (let ((id (assertion-id assertion)))
-    (ignore-errors
-      (lookup-assertion-content id))))
+  (let* ((id (assertion-id assertion))
+         (content (ignore-errors (lookup-assertion-content id))))
+    (if content t nil)))
 
 (defun kb-create-assertion-kb-store (cnf mt)
   (let ((assertion (find-assertion-internal cnf mt)))
     (if assertion
         (assertion-id assertion)
-        (let ((internal-id (make-assertion-id)))
-          (kb-create-assertion-int (make-assertion-shell internal-id)
-                                   internal-id cnf mt)
+        (let* ((internal-id (make-assertion-id))
+               (shell-assertion (make-assertion-shell internal-id)))
+          (kb-create-assertion-int shell-assertion internal-id cnf mt)
           internal-id))))
 
 (defun kb-create-assertion-int (assertion internal-id cnf mt)
   (let ((assertion-content (create-assertion-content mt)))
     (register-assertion-content internal-id assertion-content)
     (reset-assertion-tv assertion :unknown)
-    (connect-assertion assertion (find-cnf-formula-data-hook cnf))))
+    (let ((formula-data-hook (find-cnf-formula-data-hook cnf)))
+      (connect-assertion assertion formula-data-hook)
+      nil)))
+
+;; (defun kb-create-assertion-cyc (assertion) ...) -- no body
 
 (defun find-cnf-formula-data-hook (cnf)
   (if (gaf-cnf? cnf)
@@ -453,74 +556,106 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
 (defun find-hl-cnf-hook (cnf)
   (let ((assertion (find-assertion-any-mt cnf)))
     (if assertion
-        (or (assertion-clause-struc assertion)
-            assertion)
+        (or (assertion-clause-struc assertion) assertion)
         cnf)))
 
 (defun find-gaf-formula-hook (gaf)
   (let ((assertion (find-gaf-any-mt gaf)))
     (if assertion
-        (or (assertion-clause-struc assertion)
-            assertion)
+        (or (assertion-clause-struc assertion) assertion)
         gaf)))
 
 (defun connect-assertion (assertion formula-data-hook)
   "[Cyc] Connect ASSERTION to FORMULA-DATA-HOOK and all its relevant indexes."
   (connect-assertion-formula-data assertion formula-data-hook)
-  (add-assertion-indices assertion))
+  (add-assertion-indices assertion)
+  assertion)
 
 (defun connect-assertion-formula-data (assertion formula-data-hook)
   (let ((formula-data formula-data-hook))
     (cond
-      ((clause-struc-p formula-data-hook) (missing-larkc 11315))
-      ((assertion-p formula-data-hook) (missing-larkc 11343))
-      ((or (cnf-p formula-data-hook)
-           (el-formula-p formula-data-hook) nil))
-      (t (error "Unexpected formula data hook: ~s" formula-data-hook)))
-    (update-assertion-formula-data assertion formula-data)))
+      ((clause-struc-p formula-data-hook)
+       (missing-larkc 11315))
+      ((assertion-p formula-data-hook)
+       (let* ((cnf (assertion-cnf formula-data-hook))
+              (new-clause-struc (missing-larkc 11343)))
+         (missing-larkc 11316)
+         (missing-larkc 11317)
+         (setq formula-data new-clause-struc)
+         (missing-larkc 32001)))
+      ((cnf-p formula-data-hook))
+      ((el-formula-p formula-data-hook))
+      (t (error "Unexpected formula data hook: ~S" formula-data-hook)
+         (return-from connect-assertion-formula-data nil)))
+    (update-assertion-formula-data assertion formula-data))
+  assertion)
 
 (defun kb-remove-assertion-internal (assertion)
   (let ((id (assertion-id assertion)))
     (disconnect-assertion assertion)
     (destroy-assertion-content id)
     (deregister-assertion-id id))
-  (free-assertion assertion))
+  (free-assertion assertion)
+  nil)
+
+;; (defun reconnect-assertion (assertion formula-data-hook) ...) -- no body
 
 (defun disconnect-assertion (assertion)
   "[Cyc] Disconnect ASSERTION from all its connections."
   (remove-assertion-indices assertion)
-  (disconnect-assertion-formula-data assertion))
+  (disconnect-assertion-formula-data assertion)
+  assertion)
 
 (defun disconnect-assertion-formula-data (assertion)
   (when (assertion-clause-struc assertion)
     (missing-larkc 11355))
-  (annihilate-assertion-formula-data assertion))
+  (annihilate-assertion-formula-data assertion)
+  assertion)
 
 (defun add-new-assertion-argument (assertion new-argument)
   (set-assertion-arguments (assertion-id assertion)
-                           (cons new-argument
-                                 (assertion-arguments assertion))))
+                           (cons new-argument (assertion-arguments assertion)))
+  assertion)
 
 (defun remove-assertion-argument (assertion argument)
-  (setf (assertion-arguments (assertion-id assertion))
-       (delete-first argument (assertion-arguments assertion))))
+  (set-assertion-arguments (assertion-id assertion)
+                           (delete-first argument (assertion-arguments assertion)))
+  assertion)
 
 (defun reset-assertion-dependents (assertion new-dependents)
   "[Cyc] Primitively set the dependent arguments of ASSERTION to NEW-DEPENDENTS."
+  (declare (type list new-dependents))
   (if new-dependents
       (set-assertion-prop assertion :dependents new-dependents)
-      (rem-assertion-prop assertion :dependents)))
+      (rem-assertion-prop assertion :dependents))
+  assertion)
 
 (defun add-assertion-dependent (assertion argument)
-  "[Cyc] Add ARGUMENT as an argument depending on ASSERTION. Return ASSERTION."
+  "[Cyc] Add ARGUMENT as an argument depending on ASSERTION.  Return ASSERTION."
+  (declare (type assertion assertion))
+  (declare (type argument argument))
   (reset-assertion-dependents assertion (cons argument (assertion-dependents assertion)))
   assertion)
 
 (defun remove-assertion-dependent (assertion argument)
-  "[Cyc] Remove ARGUMENT as an argument depending on ASSERTION. Return ASSERTION."
-  (reset-assertion-dependents assertion (delete-first argument (assertion-dependents assertion)))
+  "[Cyc] Remove ARGUMENT as an argument depending on ASSERTION.  Return ASSERTION."
+  (declare (type assertion assertion))
+  (declare (type argument argument))
+  (reset-assertion-dependents assertion
+                              (delete-first argument (assertion-dependents assertion)))
   assertion)
+
+;; (defun assertion-dependencies (assertion) ...) -- no body
+;; (defun mark-dependent-assertion (assertion) ...) -- no body
+;; (defun mark-dependent-deduction (deduction) ...) -- no body
+;; (defun verify-assertion-content-table (&optional verbose?) ...) -- no body
 
 (defparameter *dependent-deduction-table* nil)
 (defparameter *dependent-assertion-table* nil)
 
+;;; Setup phase
+
+(toplevel
+  (declare-defglobal '*rule-set*)
+  (declare-defglobal '*prefer-rule-set-over-flags?*)
+  (register-macro-helper 'kb-rule-set 'do-rules))

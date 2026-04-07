@@ -51,7 +51,7 @@ and permission notice:
 (defglobal *hl-lock* (bt:make-lock "HL Store Lock")
   "[Cyc] Controls modification of the HL store")
 (defparameter *bootstrapping-kb?* nil)
-(deflexical *keywords-package* (find-package "KEYWORD"))
+(deflexical *keyword-package* (find-package "KEYWORD"))
 (deflexical *sublisp-package* (find-package "SUBLISP")) ;; TODO - clyc? subl?
 (deflexical *cyc-package* (find-package "CYC")) ;; TODO - clyc?
 (defparameter *cnf-matching-predicate* 'equal
@@ -80,7 +80,8 @@ and permission notice:
 (defparameter *mapping-path* nil)
 (defparameter *mapping-data-1* nil)
 (defparameter *mapping-data-2* nil)
-(defparameter *mapping-pivot-arg* #'identity)
+(defparameter *mapping-pivot-arg* nil)
+(defparameter *mapping-gather-key* #'identity)
 (defparameter *mapping-gather-key-args* nil)
 (defparameter *mapping-assertion-selection-fn* nil)
 (defparameter *mapping-assertion-bookkeeping-fn* nil)
@@ -108,7 +109,7 @@ and permission notice:
 (defparameter *standard-indent-string* " ")
 (defparameter *term-functional-complexity-cutoff* nil
   "[Cyc] The maximum function complexity of CycL allowed by the system. NIL means 'no limit'.")
-(defparameter *term-relational-complexiy-cutoff* nil
+(defparameter *term-relational-complexity-cutoff* nil
   "[Cyc] The maximum relational complexity of CycL allowed by the system. NIL means 'no limit'.")
 (defparameter *collect-justification-compilations?* nil
   "[Cyc] compile successful inference chains into macro rules?")
@@ -177,7 +178,7 @@ and permission notice:
   "[Cyc] When a goal node is rejected, do we mark all its semantically invalid ancestors as doomed, thereby cutting off large chunks of search which will fail.")
 (defparameter *inference-search-strategy* :heuristic)
 (defparameter *unique-inference-result-bindings* t)
-(defparameter *inference-answer-handlers* t
+(defparameter *inference-answer-handler* 'inference-return-blists
   "[Cyc] The handler function to use when generating the results to return from inference searches.")
 (defparameter *hl-module-simplification-cost* 0.1
   "[Cyc] The cost value used for performing an HL module simplification step.")
@@ -189,9 +190,9 @@ and permission notice:
   "[Cyc] The cost value used for performing typical fully-bound HL module checks.")
 (deflexical *expensive-hl-module-check-cost* 1.5
   "[Cyc] The cost value used for performing expensive fully-bound HL module checks.")
-(deflexical *expensive-hl-module-singleton-generate-costs* *expensive-hl-module-check-cost*
+(deflexical *expensive-hl-module-singleton-generate-cost* *expensive-hl-module-check-cost*
   "[Cyc] The cost value used for performing expensive HL module generations.")
-(deflexical *maximum-hl-module-check-cost* nil
+(defparameter *maximum-hl-module-check-cost* nil
   "[Cyc] When non-NIL, the maximum cost value allowable for fully-bound HL module checks.")
 (defparameter *average-all-isa-count* 38
   "[Cyc] An estimate of the total number of types for the average term.")
@@ -250,7 +251,8 @@ and permission notice:
 (defun set-build-kb-loaded (kb)
   (when kb
     (check-type kb 'integerp))
-  (setf *build-kb-loaded* kb))
+  (setf *build-kb-loaded* kb)
+  (set-kb-loaded kb))
 
 (defglobal *kb-loaded* nil)
 

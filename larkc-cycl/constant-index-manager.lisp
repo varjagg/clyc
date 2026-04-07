@@ -68,6 +68,9 @@ and permission notice:
                                                         #$genls)
     "[Cyc] We never want to swap out the indices of these constants.")
 
+(defun mark-constant-index-as-muted (id)
+  (mark-kb-object-content-as-muted *constant-index-manager* id))
+
 (defun mark-constant-index-as-permanently-cached (id)
   "[Cyc] Firstly make sure it's swapped in. Then make sure it won't ever get swapped out."
   (lookup-constant-index id)

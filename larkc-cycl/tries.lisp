@@ -137,7 +137,8 @@ and permission notice:
 
 (defun trie-key-= (key1 key2 case-sensitive)
   (if case-sensitive
-      (char= key1 key2)))
+      (char= key1 key2)
+      (char-equal key1 key2)))
 
 (defun trie-key-< (key1 key2 case-sensitive)
   (if case-sensitive
@@ -255,9 +256,9 @@ and permission notice:
              (return trie))
            (if unique
                ;; See if we're actually removing the intended object
-               (when (funcall test object (trie-node-data end-node))
+               (unless (funcall test object (trie-node-data end-node))
                  (cerror "Remove it anyway" "The object found in trie for ~s is ~s, not ~s"
-                         string (trie-node-data end-node)))
+                         string (trie-node-data end-node) object))
                ;; Not unique, deal with a list of entries
                (let* ((old-data (trie-node-data end-node))
                       (new-data (delete object old-data :test test)))
@@ -274,9 +275,9 @@ and permission notice:
              ((rest (trie-node-subnodes node))
               (rplacd node (delete end-node (trie-node-subnodes node) :test #'eq)))
              ((and last-branch last-branching-node)
-              ;; TODO - this sets last-branching-node just before returning, but it's just a local variable
-              ;;  note also that SBCL whines if you're discarding the return value of DELETE.
-              (setf last-branching-node (delete last-branch last-branching-node :test #'eq)))
+              ;; The Java had a bug here: it assigned DELETE's result to a local variable.
+              ;; Fixed to use RPLACD to modify the actual trie node's subnodes in-place.
+              (rplacd last-branching-node (delete last-branch (trie-node-subnodes last-branching-node) :test #'eq)))
              (t (missing-larkc 12480)))
            (finish-trie-ancestor-tracking)
            (return trie)))
@@ -302,7 +303,7 @@ and permission notice:
         (trie-ancestor-tracking-descend node)))))
 
 (defun trie-exact (trie string &optional case-sensitive? (start 0) end)
-  "[Cyc] Return the unique object indexed by STRING in TRIE. If CASe-SENSITIVE? is non-NIL, STRING is compared case-insensitively. START and END determine the relevant portion of STRING"
+  "[Cyc] Return the unique object indexed by STRING in TRIE. If CASE-SENSITIVE? is non-NIL, STRING is compared case-insensitively. START and END determine the relevant portion of STRING"
   (must (trie-unique trie) "TRIE ~s does not have unique entries" trie)
   (setf case-sensitive? (and case-sensitive? (trie-case-sensitive trie)))
   (let ((node (trie-top-node trie))
@@ -313,10 +314,10 @@ and permission notice:
     (initialize-trie-ancestor-tracking node)
     (do ((next-node nil nil)
          (i start (1+ i)))
-        ;; TODO - Original relied on java operator precedence here, not paren nesting. Verify behavior
         ((or (= i end)
-             ;; Must have processed at least 1 character and not found the next
-             (and (> i 0)
+             ;; Must have processed at least 1 character past start and not found the next
+             ;; Java bug: used (> i 0) instead of (> i start), wrong for non-zero start
+             (and (> i start)
                   (not node)))
          ;; Exit return forms
          (let ((answer nil))

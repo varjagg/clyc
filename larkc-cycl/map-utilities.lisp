@@ -53,8 +53,11 @@ and permission notice:
 (defun* map-put (map key value) (:inline t)
   (setf (gethash key map) value))
 
-(defun* map-get (map key default) (:inline t)
+(defun* map-get (map key &optional default) (:inline t)
   (gethash key map default))
 
 (defun* map-remove (map key) (:inline t)
   (remhash key map))
+
+(defun new-map-iterator (map)
+  (new-hash-table-iterator map))

@@ -71,11 +71,11 @@ Hmm, there doesn't seem to be any place in the struct or index file to hold the 
   (fvector-p object))
 
 (defun new-file-vector (data-filename index-filename &optional (direction :input))
-  (with-open-file (data-stream data-filename :element-type '(unsigned-byte 8)
-                               :direction direction)
-    (with-open-file (index-stream index-filename :element-type '(unsigned-byte 8)
-                                  :direction direction)
-      (create-file-vector data-stream index-stream))))
+  (let ((data-stream (open data-filename :element-type '(unsigned-byte 8)
+                                         :direction direction))
+        (index-stream (open index-filename :element-type '(unsigned-byte 8)
+                                           :direction direction)))
+    (create-file-vector data-stream index-stream)))
 
 (defun create-file-vector (data-stream index-stream)
   (new-fvector data-stream index-stream))
@@ -111,7 +111,7 @@ Hmm, there doesn't seem to be any place in the struct or index file to hold the 
   "[Cyc] Fetch a specific entry from the file vector index. move first to the specified INDEX if provided.
 Returns the NON-NEGATIVE-INTEGER-P file position in the data stream."
   (when index
-    (position-file-vector fvector index))
+    (file-position (fvector-index-stream fvector) (* index 4)))
   ;; Read big endian, the opposite order of CFASL-INPUT-INTEGER
   (read-32bit-be (fvector-index-stream fvector)))
 

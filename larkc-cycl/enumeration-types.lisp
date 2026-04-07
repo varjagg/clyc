@@ -87,7 +87,7 @@ and permission notice:
 (defun sense-p (object)
   "[Cyc] Return T iff OBJECT is a valid CycL literal sense
 :neg or :pos."
-  (member-eq object *valid-senses*))
+  (member-eq? object *valid-senses*))
 
 (defun inverse-sense (sense)
   (case sense
@@ -143,3 +143,34 @@ and permission notice:
     (otherwise (error "~s is not a TRUTH-P" truth))))
 
 (defconstant *term-args* '(1 2 0 :neg :pos 3 4 5 :ist :other))
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'direction-p '(object)
+    "Return T iff OBJECT is a valid assertion inference direction
+ :backward :forward or :code."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'el-strength-p '(object)
+    "Return T iff OBJECT is a valid CycL assertion strength 
+ :default or :monotonic."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'truth-p '(object)
+    "Returns T iff OBJECT is a valid CycL truth
+ :true :false or :unknown."
+    'nil
+    'nil)
+
+
+(register-cyc-api-function 'sense-p '(object)
+    "Return T iff OBJECT is a valid CycL literal sense
+ :neg or :pos."
+    'nil
+    '(booleanp))

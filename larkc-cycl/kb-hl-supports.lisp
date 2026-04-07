@@ -49,7 +49,7 @@ and permission notice:
 (defun* find-kb-hl-support-by-id (id) (:inline t)
   (lookup-kb-hl-support-by-id id))
 
-(defun* 9find-kb-hl-supports-mentioning-term (term) (:inline t)
+(defun* find-kb-hl-supports-mentioning-term (term) (:inline t)
   (lookup-kb-hl-supports-mentioning-term term))
 
 (defun* kb-hl-support-count () (:inline t)
@@ -83,6 +83,13 @@ and permission notice:
 (defun* find-or-possibly-create-kb-hl-support (hl-support) (:inline t)
   (or (find-kb-hl-support hl-support)
       (possibly-create-kb-hl-support hl-support)))
+
+(defun possibly-create-kb-hl-support (hl-support)
+  (let ((justification (hl-justify-for-kb-hl-support hl-support))
+        (kb-hl-support nil))
+    (when (non-empty-hl-justification-p justification)
+      (setf kb-hl-support (create-kb-hl-support hl-support justification)))
+    kb-hl-support))
 
 (defstruct (kb-hl-support (:conc-name "KB-HLS-"))
   id)
@@ -227,7 +234,7 @@ and permission notice:
 
 (defglobal *kb-hl-support-index* nil)
 (deflexical *kb-hl-support-index-lock* (bt:make-lock "KB HL support indexing lock"))
-(deflexical *kb-hl-support-idnex-unindexed-terms* (list #$isa
+(deflexical *kb-hl-support-index-unindexed-terms* (list #$isa
                                                         #$DefaultSemanticsForStringFn
                                                         #$evaluate
                                                         #$genlInverse
@@ -244,7 +251,7 @@ and permission notice:
 
 (defun kb-hl-support-index-indexed-term-p (term)
   (and (indexed-term-p term)
-       (not (kb-hl-support-unindexed-term? term))))
+       (not (kb-hl-support-index-unindexed-term? term))))
 
 (defun kb-hl-support-index-indexed-terms (sentence)
   (let ((terms (expression-gather sentence #'indexed-term-p nil #'equal)))
@@ -297,7 +304,7 @@ and permission notice:
     (set-contents-element-list (set-union (list sentence-kb-hl-supports mt-kb-hl-supports)
                                           #'eq))))
 
-(defun lookup-hl-supports-mentioning-term-in-sentence (term)
+(defun lookup-kb-hl-supports-mentioning-term-in-sentence (term)
   (if (kb-hl-support-index-indexed-term-p term)
       (lookup-kb-hl-supports-mentioning-indexed-term-in-sentence term)
       (missing-larkc 11055)))
@@ -434,9 +441,8 @@ and permission notice:
 
 (defparameter *tms-kb-hl-support-queue* nil)
 
-(defun* enqueue-kb-hl-supports-for-tms? () (:inline t)
-  ;; TODO - assuming it's nil or queue-p
-  *tms-kb-hl-support-queue*)
+(defun* enqueueing-kb-hl-supports-for-tms? () (:inline t)
+  (queue-p *tms-kb-hl-support-queue*))
 
 (defun process-tms-kb-hl-support-queue ()
   (until (queue-empty-p *tms-kb-hl-support-queue*)
@@ -471,5 +477,157 @@ and permission notice:
     (register-kb-hl-support-content id content)
     id))
 
+(defun* kb-hl-support-get-id (kb-hl-support) (:inline t)
+  (kb-hls-id kb-hl-support))
+
 (defun load-kb-hl-support-indexing-int (filename)
   (setf *kb-hl-support-index* (cfasl-load filename)))
+
+;; TODO: The file ordering does not follow the Java declare section order.
+;; Functions and stubs need to be interleaved per declare_kb_hl_supports_file().
+
+;; Reconstructed macros (all commented declareMacro)
+
+;; Reconstructed from: $list0 arglist, $sym4$DO_LIST, $sym5$KB_HL_SUPPORT_ARGUMENTS
+(defmacro do-kb-hl-support-arguments ((argument-var kb-hl-support &key done) &body body)
+  `(do-list (,argument-var (kb-hl-support-arguments ,kb-hl-support) :done ,done)
+     ,@body))
+
+;; Reconstructed from: $list6 arglist, $sym7$DO_SET_CONTENTS, $sym8$DO_KB_HL_SUPPORT_DEPENDENTS_HELPER
+(defmacro do-kb-hl-support-dependents ((dependent-var kb-hl-support &key done) &body body)
+  `(do-set-contents (,dependent-var (do-kb-hl-support-dependents-helper ,kb-hl-support) :done ,done)
+     ,@body))
+
+;; Reconstructed from: $list10 arglist, $sym4$DO_LIST, $sym11$KB_HL_SUPPORT_JUSTIFICATION
+(defmacro do-kb-hl-support-supports ((support-var kb-hl-support &key done) &body body)
+  `(do-list (,support-var (kb-hl-support-justification ,kb-hl-support) :done ,done)
+     ,@body))
+
+;; Reconstructed from: $list44 arglist, $sym48$DO_KB_SUID_TABLE, $list49=(DO-KB-HL-SUPPORTS-TABLE)
+(defmacro do-kb-hl-supports ((var &key (progress-message "mapping Cyc KB HL supports") done)
+                             &body body)
+  `(do-kb-suid-table (,var (do-kb-hl-supports-table)
+                      :progress-message ,progress-message :done ,done)
+     ,@body))
+
+;; Reconstructed from: $list50 arglist, $sym51$DO_KB_SUID_TABLE_OLD_OBJECTS
+(defmacro do-old-kb-hl-supports ((var &key progress-message done) &body body)
+  `(do-kb-suid-table-old-objects (,var (do-kb-hl-supports-table)
+                                  :progress-message ,progress-message :done ,done)
+     ,@body))
+
+;; Reconstructed from: $list50 arglist, $sym52$DO_KB_SUID_TABLE_NEW_OBJECTS
+(defmacro do-new-kb-hl-supports ((var &key progress-message done) &body body)
+  `(do-kb-suid-table-new-objects (,var (do-kb-hl-supports-table)
+                                  :progress-message ,progress-message :done ,done)
+     ,@body))
+
+;; Reconstructed from: $sym69$PIF, $list70=(ENQUEUEING-KB-HL-SUPPORTS-FOR-TMS?),
+;; $sym72$CLET, $list73=((*TMS-KB-HL-SUPPORT-QUEUE* (CREATE-QUEUE))),
+;; $list74=((PROCESS-TMS-KB-HL-SUPPORT-QUEUE))
+;; Pattern: if already enqueueing, just run body; else bind new queue, run body, process queue
+(defmacro with-kb-hl-support-rejustification (&body body)
+  `(if (enqueueing-kb-hl-supports-for-tms?)
+       (progn ,@body)
+       (let ((*tms-kb-hl-support-queue* (create-queue)))
+         ,@body
+         (process-tms-kb-hl-support-queue))))
+
+;; Reconstructed from: $list77=((*KB-HL-SUPPORT-DUMP-ID-TABLE* (CREATE-KB-HL-SUPPORT-DUMP-ID-TABLE))
+;;                               (*CFASL-KB-HL-SUPPORT-HANDLE-FUNC* 'KB-HL-SUPPORT-DUMP-ID))
+(defmacro with-kb-hl-support-dump-id-table (&body body)
+  `(let ((*kb-hl-support-dump-id-table* (create-kb-hl-support-dump-id-table))
+         (*cfasl-kb-hl-support-handle-func* 'kb-hl-support-dump-id))
+     ,@body))
+
+;; Missing commented-declareFunction stubs (79 total):
+;; (defun old-kb-hl-support-count () ...) -- no body, commented declareFunction
+;; (defun new-kb-hl-support-count () ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-arguments (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-dependents (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-justification (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-module (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-mt (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-el-sentence (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-ist-sentence (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-el-ist-sentence (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-elmt (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-cons (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun print-kb-hl-support (kb-hl-support stream depth) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-clear-dependents (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-remove-argument (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-reset-argument (kb-hl-support argument) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-reset-justification (kb-hl-support justification) ...) -- no body, commented declareFunction
+;; (defun rejustify-kb-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun valid-kb-hl-support-content? (object &optional robust?) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-content-valid? (kb-hl-support-content &optional robust?) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-useless? (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-unjustified? (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun possibly-destroy-kb-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun optimize-kb-hl-support-id-tables () ...) -- no body, commented declareFunction
+;; (defun lookup-kb-hl-supports-mentioning-unindexed-term-in-sentence (term) ...) -- no body, commented declareFunction
+;; (defun unindex-kb-hl-support-without-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun reindex-all-kb-hl-supports () ...) -- no body, commented declareFunction
+;; (defun find-or-create-kb-hl-support (hl-support justification) ...) -- no body, commented declareFunction
+;; (defun possibly-reify-hl-supports (justification) ...) -- no body, commented declareFunction
+;; (defun possibly-reify-hl-support (hl-support) ...) -- no body, commented declareFunction
+;; (defun unreify-kb-hl-supports (justification) ...) -- no body, commented declareFunction
+;; (defun unreify-kb-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun rejustify-or-remove-kb-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun tms-possibly-rejustify-kb-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun enqueue-kb-hl-support-for-tms (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun possibly-rejustify-kb-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun verify-kb-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun handle-unverifiable-kb-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun partition-create-invalid-kb-hl-support () ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-dump-id (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun create-kb-hl-support-dump-id-table () ...) -- no body, commented declareFunction
+;; (defun dump-kb-hl-support-content (kb-hl-support stream) ...) -- no body, commented declareFunction
+;; (defun dump-kb-hl-support-indexing-int (filename) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-not-findable-by-hl-support? (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-circular? (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-circular?-int (kb-hl-support seen) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-has-invalid-dependent? (kb-hl-support &optional robust?) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-has-invalid-argument? (kb-hl-support &optional robust?) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-has-invalid-hl-support? (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-support-has-missing-backpointer? (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun kb-hl-supports-not-findable-by-hl-support () ...) -- no body, commented declareFunction
+;; (defun circular-kb-hl-supports () ...) -- no body, commented declareFunction
+;; (defun duplicate-kb-hl-supports () ...) -- no body, commented declareFunction
+;; (defun kb-hl-supports-with-invalid-dependents (&optional robust?) ...) -- no body, commented declareFunction
+;; (defun kb-hl-supports-with-invalid-arguments (&optional robust?) ...) -- no body, commented declareFunction
+;; (defun kb-hl-supports-with-invalid-hl-supports () ...) -- no body, commented declareFunction
+;; (defun kb-hl-supports-with-missing-backpointers () ...) -- no body, commented declareFunction
+;; (defun verify-kb-hl-supports (&optional stream detail-level) ...) -- no body, commented declareFunction
+;; (defun verify-kb-hl-support-indexing (&optional stream) ...) -- no body, commented declareFunction
+;; (defun report-kb-hl-support-indexing-failures (failures stream &optional detail-level) ...) -- no body, commented declareFunction
+;; (defun verify-kb-hl-supports-non-circular (&optional stream) ...) -- no body, commented declareFunction
+;; (defun report-circular-kb-hl-supports (circulars stream &optional detail-level) ...) -- no body, commented declareFunction
+;; (defun verify-kb-hl-support-uniqueness (&optional stream) ...) -- no body, commented declareFunction
+;; (defun report-duplicate-kb-hl-supports (duplicates stream &optional detail-level) ...) -- no body, commented declareFunction
+;; (defun verify-kb-hl-support-dependents (&optional stream) ...) -- no body, commented declareFunction
+;; (defun report-kb-hl-supports-with-invalid-dependents (invalids stream &optional detail-level) ...) -- no body, commented declareFunction
+;; (defun verify-kb-hl-support-arguments (&optional stream) ...) -- no body, commented declareFunction
+;; (defun report-kb-hl-supports-with-invalid-arguments (invalids stream &optional detail-level) ...) -- no body, commented declareFunction
+;; (defun verify-kb-hl-support-hl-supports (&optional stream) ...) -- no body, commented declareFunction
+;; (defun report-kb-hl-supports-with-invalid-hl-supports (invalids stream &optional detail-level) ...) -- no body, commented declareFunction
+;; (defun verify-kb-hl-support-backpointers (&optional stream) ...) -- no body, commented declareFunction
+;; (defun report-kb-hl-supports-with-missing-backpointers (invalids stream &optional detail-level) ...) -- no body, commented declareFunction
+;; (defun destroy-duplicate-kb-hl-supports () ...) -- no body, commented declareFunction
+;; (defun destroy-duplicate-kb-hl-support (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun eliminate-kb-hl-supports-invalid-dependents () ...) -- no body, commented declareFunction
+;; (defun eliminate-kb-hl-support-invalid-dependents (kb-hl-support) ...) -- no body, commented declareFunction
+;; (defun destroy-kb-hl-supports-with-invalid-hl-supports () ...) -- no body, commented declareFunction
+;; (defun bootstrap-kb-hl-supports () ...) -- no body, commented declareFunction
+;; (defun bootstrap-kb-hl-supports-for-deduction (deduction) ...) -- no body, commented declareFunction
+
+;;; Setup
+
+(toplevel
+  (register-macro-helper 'do-kb-hl-support-dependents-helper 'do-kb-hl-support-dependents)
+  (register-macro-helper 'do-kb-hl-supports-table 'do-kb-hl-supports)
+  (declare-defglobal '*kb-hl-supports-from-ids*)
+  (declare-defglobal '*kb-hl-support-index*)
+  (declare-defglobal '*kb-hl-supports-being-created*)
+  (register-macro-helper 'process-tms-kb-hl-support-queue 'with-kb-hl-support-rejustification)
+  (register-macro-helper 'create-kb-hl-support-dump-id-table 'with-kb-hl-support-dump-id-table))

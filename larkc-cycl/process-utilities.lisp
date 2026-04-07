@@ -55,7 +55,7 @@ and permission notice:
   name
   status
   progress-message
-  progress-so-far
+  progress-sofar
   progress-total
   start-time
   finish-time
@@ -103,7 +103,8 @@ and permission notice:
   (funcall visitor-fn lock :begin 'bt:make-lock 1)
   ;; TODO - bordeaux-threads doesn't expose accessing the name?
   (funcall visitor-fn lock :slot :name #+sbcl (sb-thread:mutex-name lock))
-  (funcall visitor-fn lock :end 'bt:make-lock 1))
+  (funcall visitor-fn lock :end 'bt:make-lock 1)
+  lock)
 
 (defstruct process-wrapper
   id
@@ -115,3 +116,13 @@ and permission notice:
 ;; TODO DESIGN - never used
 (defglobal *process-wrapper-isg* (new-integer-sequence-generator))
 
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'kill-process-named '(name)
+    "@param NAME; stringp
+   Kills any process having the given process name. Note
+   that kill-process is not yet supported on Win32."
+    '((name stringp))
+    '(nil))

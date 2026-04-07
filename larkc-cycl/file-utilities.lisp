@@ -96,7 +96,7 @@ DIRECTORY-STRING should include the appropriate directory separator character at
         (:dos (and (> path-length 2)
                    (or (and (char= #\: (char path 1))
                             (alpha-char-p (char path 0)))
-                       (char= #\\ (char path 0)))))))))
+                       (starts-with path "\\\\"))))))))
 
 (defun path-separator-char (path-type)
   "[Cyc] Return the appropriate separator char for the given PATH-TYPE."
@@ -113,11 +113,12 @@ return 0: PATH-LIST
 return 1: FILENAME
 return 2: PATH-TYPE"
   (let ((path-type (guess-path-type path)))
-    (when path-type
-      (let ((path-list (string-tokenize path (list (string (path-separator-char path-type))))))
-        (values (butlast path-list)
-                (car (last path-list))
-                path-type)))))
+    (if path-type
+        (let ((path-list (string-tokenize path (list (string (path-separator-char path-type))))))
+          (values (butlast path-list)
+                  (car (last path-list))
+                  path-type))
+        (values nil path nil))))
 
 (defun reconstruct-path (path-list filename &optional (path-type :unix))
   "[Cyc] Reconstruct the deconstructed path. See DECONSTRUCT-PATH."

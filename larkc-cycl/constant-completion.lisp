@@ -49,7 +49,8 @@ and permission notice:
   (when (zerop (constant-count))
     (setf *constant-names-in-code* nil)
     (dolist (invalid-constant-name (invalid-constant-names))
-      (push invalid-constant-name *constant-names-in-code*)))
+      (push invalid-constant-name *constant-names-in-code*))
+    (setf *constant-names-in-code* (sort *constant-names-in-code* #'string<)))
   (length *constant-names-in-code*))
 
 (defun compute-bogus-constant-names-in-code ()

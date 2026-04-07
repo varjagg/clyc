@@ -69,6 +69,7 @@ and permission notice:
 (defun remove-fort (fort)
   "[Cyc] Remove FORT from the KB."
   (if (constant-p fort)
+      (remove-constant fort)
       (missing-larkc 10431)))
 
 (defstruct fort-id-index
@@ -129,3 +130,39 @@ and permission notice:
             (value (cfasl-input-object stream)))
         (fort-id-index-enter fort-id-index fort value)))
     fort-id-index))
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'fort-p '(object)
+    "Return T iff OBJECT is a first order reified term (FORT)."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'fort-el-formula '(fort)
+    "Return the EL formula for any FORT."
+    '((fort fort-p))
+    '((nil-or consp)))
+
+
+
+
+(register-cyc-api-macro 'do-forts '((var &optional (progress-message makeString("mapping Cyc FORTs")) &key done) &body body)
+    "Iterate over all HL FORT datastructures, executing BODY within the scope of VAR.
+   VAR is bound to the FORT.
+   PROGRESS-MESSAGE is a progress message string.
+   Iteration halts as soon as DONE becomes non-nil.")
+
+
+(register-cyc-api-function 'fort-count 'nil
+    "Return the total number of FORTs."
+    'nil
+    '(integerp))
+
+
+(register-cyc-api-function 'remove-fort '(fort)
+    "Remove FORT from the KB."
+    '((fort fort-p))
+    '(null))

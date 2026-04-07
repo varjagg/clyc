@@ -85,6 +85,6 @@ and permission notice:
 (defmacro do-stack-elements ((item-var stack &key done) &body body)
   ;; TODO - assuming that DONE is a early-exit predicate. Could also be a return value form.
   (when done (warn "do-stack-elements DONE keyword used: ~s" done))
-  `(do ((,item-var ,stack (cdr ,item-var)))
-       ((or ,done (null ,item-var)))
+  `(dolist (,item-var (stack-elements ,stack))
+     ,@(when done `((when ,done (return))))
      ,@body))

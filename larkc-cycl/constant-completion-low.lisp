@@ -62,7 +62,7 @@ and permission notice:
 (defun kb-constant-complete-internal (prefix case-sensitive? exact-length? start end)
   (let ((answer (trie-prefix *constant-completion-table* prefix case-sensitive? exact-length? start end)))
     (if *require-valid-constants*
-        (delete-if #'invalid-constant-handle answer)
+        (delete-if #'invalid-constant-handle? answer)
         answer)))
 
 (defun add-constant-to-completions (constant string)

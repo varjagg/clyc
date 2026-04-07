@@ -90,6 +90,12 @@ If NAME is :UNNAMED, returns a constant with no name."
 (defun kb-constant-guid (constant)
   "[Cyc] Return the external ID for CONSTANT."
   (if (hl-access-remote?)
+      (missing-larkc 29547)
+      (constant-guid-internal constant)))
+
+(defun kb-constant-merged-guid (constant)
+  "[Cyc] Return the merged external ID for CONSTANT."
+  (if (hl-access-remote?)
       (missing-larkc 29548)
       (constant-merged-guid-internal constant)))
 
@@ -108,3 +114,57 @@ If NAME is :UNNAMED, returns a constant with no name."
             (kb-rename-constant-internal constant new-name)))
         result)))
 
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'kb-create-constant '(name external-id)
+    "Return a new constant named NAME with EXTERNAL-ID.
+   If NAME is :unnamed, returns a constant with no name."
+    '((name constant-name-spec-p) (external-id constant-external-id-p))
+    '(constant-p))
+
+
+(register-cyc-api-function 'kb-remove-constant '(constant)
+    "Remove CONSTANT from the KB."
+    '((constant constant-p))
+    '(null))
+
+
+(register-cyc-api-function 'kb-lookup-constant-by-name '(name)
+    "Return the constant named NAME, if it exists.
+   Return NIL otherwise."
+    '((name stringp))
+    '((nil-or constant-p)))
+
+
+(register-cyc-api-function 'kb-constant-name '(constant)
+    "Return the name for CONSTANT."
+    '((constant constant-p))
+    '(constant-name-spec-p))
+
+
+(register-cyc-api-function 'kb-lookup-constant-by-guid '(guid)
+    "Return the constant with GUID, if it exists.
+   Return NIL otherwise."
+    '((guid guid-p))
+    '((nil-or constant-p)))
+
+
+(register-cyc-api-function 'kb-constant-guid '(constant)
+    "Return the external ID for CONSTANT."
+    '((constant constant-p))
+    '(constant-external-id-p))
+
+
+(register-cyc-api-function 'kb-constant-merged-guid '(constant)
+    "Return the external merged ID for CONSTANT."
+    '((constant constant-p))
+    '(constant-external-id-p))
+
+
+(register-cyc-api-function 'kb-rename-constant '(constant new-name)
+    "Rename CONSTANT to have NEW-NAME as its name.  The constant is returned."
+    '((constant constant-p) (new-name valid-constant-name-p))
+    '(constant-p))

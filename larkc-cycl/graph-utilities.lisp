@@ -56,7 +56,7 @@ NAKED-GROUPS     -- list of island groups with single nodes and no links."
              (island-group nil))
         (if (singleton? island-groups)
             (setf island-group (car island-groups))
-            (let ((merged-island-group island-groups))
+            (let ((merged-island-group (merge-island-groups island-groups)))
               (setf all-island-groups (set-difference all-island-groups island-groups))
               (push merged-island-group all-island-groups)
               (setf island-group merged-island-group)))
@@ -104,7 +104,7 @@ NAKED-GROUPS     -- list of island groups with single nodes and no links."
 (defun island-group-for-node (node island-groups &optional (test #'eql))
   "[Cyc] Return the associated island-group for NODE from ISLAND-GROUPS."
   (dolist (island-group island-groups)
-    (multiple-value-bind (nodes links) island-group
+    (destructuring-bind (nodes links) island-group
       (declare (ignore links))
       (when (member? node nodes :test test)
         (return island-group)))))

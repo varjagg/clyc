@@ -76,7 +76,7 @@ and permission notice:
   (system-code-hl-initializations)
   (system-code-inference-initializations)
   (system-code-api-initializations)
-  (when (perform-app-specific-initializations?)
+  (when perform-app-specific-initializations?
     (system-code-application-initializations))
   (if (positive-integer-p (kb-loaded))
       (system-kb-initializations)
@@ -153,6 +153,7 @@ To be called only by SYSTEM-CODE-INITIALIZATIONS."
         (initialize-assertion-hl-store-cache)
         (initialize-constant-index-hl-store-cache)
         (initialize-nart-index-hl-store-cache)
+        (initialize-nart-hl-formula-hl-store-cache)
         (initialize-unrepresented-term-index-hl-store-cache)
         (initialize-kb-hl-support-hl-store-cache)
         (initialize-sbhl-graph-caches)
@@ -168,8 +169,7 @@ To be called only by SYSTEM-CODE-INITIALIZATIONS."
       (progn
         (initialize-hl-store-cache-shared-symbols symbols)
         t)
-      (warn "Could not initialize HL store caches from ~a." dirname))
-  nil)
+      (warn "Could not initialize HL store caches from ~a." dirname)))
 
 (defun initialize-hl-store-cache-shared-symbols (symbols)
   (unless symbols
@@ -191,10 +191,11 @@ To be called only by SYSTEM-CODE-INITIALIZATIONS."
   (setf *hl-store-caches-directory* directory))
 
 (defun hl-store-caches-directory ()
-  (or *hl-store-caches-directory*
-      (and (not (force-monolithic-kb-assumption?))
-           (missing-larkc 30777))
-      *hl-store-caches-directory*))
+  (or (and (stringp *hl-store-caches-directory*) *hl-store-caches-directory*)
+      (progn
+        (unless (force-monolithic-kb-assumption?)
+          (set-hl-store-caches-directory (missing-larkc 30777)))
+        *hl-store-caches-directory*)))
 
 (defun other-binary-arg (arg)
   ;; TODO - can be really optimized, but not sure this is used in any inner loops

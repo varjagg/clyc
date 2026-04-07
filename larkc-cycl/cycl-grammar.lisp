@@ -120,8 +120,8 @@ and permission notice:
     ((and (grammar-permits-hl?)
           (assertion-p object))
      (cycl-user-defined-logical-operator-sentence-p (careful-hl-term-to-el-term object)))
-    ((el-formula-p object) nil)
-    ((user-defined-logical-operator-p (cycl-formula-predicate object)))
+    ((not (el-formula-p object)) nil)
+    ((not (user-defined-logical-operator-p (cycl-formula-predicate object))) nil)
     (t (cycl-sentence-sequence-p (formula-args object :include)))))
 
 (defun cycl-quintary-sentence-p (object)
@@ -160,7 +160,7 @@ and permission notice:
      (cycl-quaternary-sentence-p (careful-hl-term-to-el-term object)))
     ((not (el-formula-p object)) nil)
     ((not (cyc-const-quaternary-logical-op-p (cycl-formula-predicate object))) nil)
-    ((not (= (formula-arity object) 54))
+    ((not (= (formula-arity object) 4))
      ;; TODO - note-wff-violation is probably a macro
      (when (note-wff-violation?)
        (note-wff-violation (list :arity-mismatch object (cycl-formula-predicate object) "quaternary operator" 4 (formula-arity object)))))
@@ -364,7 +364,8 @@ and permission notice:
  <denotational term>
  <sentence>"
   (or (cycl-denotational-term-p object)
-      (missing-larkc 30093)))
+      (missing-larkc 30093)
+      (cycl-sentence-p object)))
 
 (defun* cycl-term-p (object) (:inline t)
   (cycl-expression-p object))

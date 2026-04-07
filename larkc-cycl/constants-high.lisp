@@ -140,7 +140,7 @@ and permission notice:
 (defun make-constant-external-id ()
   (make-constant-guid))
 
-(defun make-consatnt-guid ()
+(defun make-constant-guid ()
   (new-guid))
 
 (deflexical *constant-legacy-guid-date* '(7 20 1969))
@@ -154,3 +154,105 @@ and permission notice:
   (find-constant-by-internal-id dump-id))
 
 
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'create-constant '(name &optional external-id)
+    "Return a new constant named NAME with EXTERNAL-ID as the external ID."
+    '((name constant-name-spec-p) (external-id (nil-or constant-external-id-p)))
+    '(constant-p))
+
+
+(register-cyc-api-function 'find-or-create-constant '(name &optional external-id)
+    "Return the constant with NAME if it exists, otherwise create it with EXTERNAL-ID.
+  Also, if it exists but has a null id, install EXTERNAL-ID on the constant."
+    '((name stringp))
+    '(constant-p))
+
+
+(register-cyc-api-function 'gentemp-constant '(start-name &optional (prefix makeString("TMP")))
+    "Create and return a temporary constant whose name is based on START-NAME"
+    '((start-name stringp))
+    '(constant-p))
+
+
+(register-cyc-api-function 'remove-constant '(constant)
+    "Remove CONSTANT from the KB."
+    '((constant constant-p))
+    '(null))
+
+
+(register-cyc-api-function 'find-constant '(name)
+    "Return the constant with NAME, or NIL if not present."
+    '((name stringp))
+    '((nil-or constant-p)))
+
+
+(register-cyc-api-function 'constant-name '(constant)
+    "Return the name of CONSTANT or :unnamed."
+    '((constant constant-p))
+    'nil)
+
+
+(register-cyc-api-function 'rename-constant '(constant new-name)
+    "Rename CONSTANT to have NEW-NAME as its name.  The constant is returned."
+    '((constant constant-p) (new-name stringp))
+    '(constant-p))
+
+
+(register-cyc-api-function 'constant-internal-id '(constant)
+    "Return the internal id of CONSTANT."
+    '((constant constant-p))
+    '((nil-or constant-internal-id-p)))
+
+
+(register-cyc-api-function 'find-constant-by-internal-id '(id)
+    "Return the constant with internal ID, or NIL if not present."
+    '((id constant-internal-id-p))
+    '((nil-or constant-p)))
+
+
+(register-cyc-api-function 'constant-external-id '(constant)
+    "Return the external id of CONSTANT."
+    '((constant constant-p))
+    '((nil-or constant-external-id-p)))
+
+
+(register-cyc-api-function 'find-constant-by-external-id '(external-id)
+    "Return the constant with EXTERNAL-ID, or NIL if not present."
+    '((external-id constant-external-id-p))
+    '((nil-or constant-p)))
+
+
+(register-cyc-api-function 'constant-info-from-guid-strings '(guid-string-list)
+    "Returns a list of constant info-items corresponding to the GUID-LIST.  Each
+info item is a list of guid-string and name."
+    '((guid-string-list listp))
+    '(listp))
+
+
+(register-cyc-api-function 'constant-info-from-name-strings '(name-string-list)
+    "Returns a list of constant info-items corresponding to the NAME-LIST.  Each
+info item is a list of guid-string and name."
+    '((name-string-list listp))
+    '(listp))
+
+
+(register-cyc-api-function 'constant-namespace '(constant)
+    "Return the namespace to which the constant belongs."
+    '((constant constant-p))
+    'nil)
+
+
+(register-cyc-api-function 'constant-name-within-namespace '(constant)
+    "Return the constant name within its namespace."
+    '((constant constant-p))
+    'nil)
+
+
+(register-cyc-api-function 'random-constant '(&optional (test (function true)))
+    "Return a randomly chosen constant that satisfies TEST"
+    'nil
+    '(constant-p))

@@ -54,7 +54,8 @@ and permission notice:
   "[Cyc] Clear QUEUE and return it."
   (setf (q-num queue) 0)
   (setf (q-elements queue) nil)
-  (setf (q-last queue) nil))
+  (setf (q-last queue) nil)
+  queue)
 
 (declaim (inline queue-empty-p))
 (defun queue-empty-p (queue)
@@ -89,12 +90,12 @@ and permission notice:
         (setf (q-last queue) nil))
       item)))
 
-(defun remqueue (item queue &optional (test :eql))
+(defun remqueue (item queue &optional (test #'eql))
   "[Cyc] Remove all occurrences of ITEM from QUEUE.  Returns QUEUE."
   ;; Manually doing this to keep the count updated properly
   (do ((last (q-last queue))
        (back nil)
-       (next nil (rest next)))
+       (next (q-elements queue) (rest next)))
       ((not next))
     (if (funcall test (car next) item)
         (progn

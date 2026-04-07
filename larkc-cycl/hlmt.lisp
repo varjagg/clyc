@@ -118,11 +118,16 @@ NOTE: Returns true iff OBJECT actually is an HLMT."
 (defun possibly-hlmt-naut-p (object)
   (when (possibly-naut-p object)
     (let ((functor (naut-functor object)))
-      (or (missing-larkc 12260)))))
+      (or (missing-larkc 12260)
+          (mt-union-function-p functor)
+          (missing-larkc 12249)))))
 
 (defun hlmt-naut-p (object)
   (and (possibly-hlmt-naut-p object)
-       (or (missing-larkc 12292))))
+       (or (mt-space-naut-p object)
+           (missing-larkc 12292)
+           (mt-union-naut-p object)
+           (anytime-during-psc-fn-naut-p object))))
 
 (defun mt-space-naut-p (object)
   (and (possibly-naut-p object)
@@ -174,15 +179,52 @@ NOTE: Returns true iff OBJECT actually is an HLMT."
   "[Cyc] Returns the dimension of HLMT specified by DIM."
   (let ((mt nil)
         (found? nil))
-    ;; TODO - this probably was a large macro expansion but the branches ended up missing-larkc
-    (if (monad-mt-p hlmt)
-        (unless found?
-          (let ((dim-var :monad)
-                (mt-var hlmt))
-            (when (eq dim dim-var)
-              (setf mt mt-var)
-              (setf found? t))))
-        (missing-larkc 12293))
+    (cond
+      ((monad-mt-p hlmt)
+       (unless found?
+         (let ((dim-var :monad)
+               (mt-var hlmt))
+           (when (eq dim dim-var)
+             (setf mt mt-var)
+             (setf found? t)))))
+      ((missing-larkc 12293)
+       (unless found?
+         (let ((dim-var (missing-larkc 12289))
+               (mt-var hlmt))
+           (when (eq dim dim-var)
+             (setf mt mt-var)
+             (setf found? t)))))
+      ((mt-space-naut-p hlmt)
+       (let ((args (missing-larkc 29822)))
+         (unless found?
+           (dolist (arg args)
+             (when found? (return))
+             (let ((dim-var (missing-larkc 12297))
+                   (mt-var arg))
+               (when (eq dim dim-var)
+                 (setf mt mt-var)
+                 (setf found? t)))))))
+      ((or (anytime-psc-p hlmt) (anytime-during-psc-fn-naut-p hlmt))
+       (unless found?
+         (let ((dim-var :time)
+               (mt-var hlmt))
+           (when (eq dim dim-var)
+             (setf mt mt-var)
+             (setf found? t)))))
+      ((missing-larkc 12255)
+       (unless found?
+         (let ((dim-var :monad)
+               (mt-var hlmt))
+           (when (eq dim dim-var)
+             (setf mt mt-var)
+             (setf found? t)))))
+      (t
+       (unless found?
+         (let ((dim-var :unknown)
+               (mt-var hlmt))
+           (when (eq dim dim-var)
+             (setf mt mt-var)
+             (setf found? t))))))
     mt))
 
 (defun reduce-hlmt (hlmt &optional (minimize-mt-union-mts? t))
@@ -197,8 +239,43 @@ NOTE: Result is destructible."
         (return hlmt)))
     (let ((substantial-dimensions nil))
       (cond
-        ((monad-mt-p hlmt) (missing-larkc 12270))
-        ((missing-larkc 12294))))))
+        ((monad-mt-p hlmt)
+         (let ((dim :monad) (val hlmt))
+           (declare (ignore dim))
+           (unless (missing-larkc 12270)
+             (push (missing-larkc 12332) substantial-dimensions))))
+        ((missing-larkc 12294)
+         (let ((dim (missing-larkc 12290)) (val hlmt))
+           (declare (ignore dim))
+           (unless (missing-larkc 12271)
+             (push (missing-larkc 12333) substantial-dimensions))))
+        ((mt-space-naut-p hlmt)
+         (let ((args (missing-larkc 29823)))
+           (dolist (arg args)
+             (let ((dim (missing-larkc 12298)) (val arg))
+               (declare (ignore dim))
+               (unless (missing-larkc 12272)
+                 (push (missing-larkc 12334) substantial-dimensions))))))
+        ((or (anytime-psc-p hlmt) (anytime-during-psc-fn-naut-p hlmt))
+         (let ((dim :time) (val hlmt))
+           (declare (ignore dim))
+           (unless (missing-larkc 12273)
+             (push (missing-larkc 12335) substantial-dimensions))))
+        ((missing-larkc 12258)
+         (let ((dim :monad) (val hlmt))
+           (declare (ignore dim))
+           (unless (missing-larkc 12274)
+             (push (missing-larkc 12336) substantial-dimensions))))
+        (t
+         (let ((dim :unknown) (val hlmt))
+           (declare (ignore dim))
+           (unless (missing-larkc 12275)
+             (push (missing-larkc 12337) substantial-dimensions)))))
+      (if (singleton-p substantial-dimensions)
+          (first substantial-dimensions)
+          (if substantial-dimensions
+              (missing-larkc 12323)
+              (hlmt-monad-mt hlmt))))))
 
 (defun transform-mt-union-nauts (hlmt minimize-mt-union-mts?)
   (cond
@@ -207,12 +284,44 @@ NOTE: Result is destructible."
                         (transform-mt-union-nauts (cdr hlmt) minimize-mt-union-mts?)))
     (t hlmt)))
 
+;; (defun reduce-mt-union-hlmt (hlmt minimize-mt-union-mts?) ...) -- commented declaration, no body
+;; (defun reduce-mt-union-hlmt-int (hlmt) ...) -- commented declaration, no body, memoized
+;; (defun new-reduced-hlmt (hlmt) ...) -- commented declaration, no body
+;; (defun combine-hlmts (hlmt1 hlmt2) ...) -- commented declaration, no body
+
 (defun valid-hlmt-p (hlmt &optional robust)
   (when (hlmt-p hlmt)
     (if robust
-        (cond
-          ((monad-mt-p hlmt) (missing-larkc 12345))
-          ((missing-larkc 12295)))
+        (let ((invalid? nil))
+          (cond
+            ((monad-mt-p hlmt)
+             (unless invalid?
+               (unless (missing-larkc 12345)
+                 (setf invalid? t))))
+            ((missing-larkc 12295)
+             (unless invalid?
+               (unless (missing-larkc 12346)
+                 (setf invalid? t))))
+            ((mt-space-naut-p hlmt)
+             (let ((args (missing-larkc 29824)))
+               (unless invalid?
+                 (dolist (arg args)
+                   (when invalid? (return))
+                   (unless (missing-larkc 12347)
+                     (setf invalid? t))))))
+            ((or (anytime-psc-p hlmt) (anytime-during-psc-fn-naut-p hlmt))
+             (unless invalid?
+               (unless (missing-larkc 12348)
+                 (setf invalid? t))))
+            ((missing-larkc 12259)
+             (unless invalid?
+               (unless (missing-larkc 12349)
+                 (setf invalid? t))))
+            (t
+             (unless invalid?
+               (unless (missing-larkc 12350)
+                 (setf invalid? t)))))
+          (not invalid?))
         (valid-monad-mt-p (hlmt-monad-mt hlmt)))))
 
 (defun monad-mt-p (object)
@@ -247,6 +356,15 @@ NOTE: Result is destructible."
 
 (defun* anytime-psc-p (object) (:inline t)
   (eq object *anytime-psc*))
+
+(defun anytime-during-psc-fn-naut-p (object)
+  (and (possibly-naut-p object)
+       (missing-larkc 12250)))
+
+(defun hlmt-with-anytime-psc-p (hlmt)
+  (let ((time-mt (hlmt-temporal-mt hlmt)))
+    (or (anytime-psc-p time-mt)
+        (anytime-during-psc-fn-naut-p time-mt))))
 
 (defun* hlmt-temporal-mt (hlmt) (:inline t)
   (get-hlmt-dimension :time hlmt))

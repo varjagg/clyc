@@ -51,7 +51,7 @@ and permission notice:
 
 (defun hash-test-to-symbol (test)
   "[Cyc] Return the symbol form of TEST, which is a valid hash-test function."
-  (check-type test 'valid-hash-test-p)
+  (declare (type (satisfies valid-hash-test-p) test))
   (if (symbolp test)
       test
       (find test *valid-hash-test-symbols* :key #'symbol-function)))

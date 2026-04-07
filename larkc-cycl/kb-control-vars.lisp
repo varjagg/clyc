@@ -41,9 +41,11 @@ and permission notice:
 (in-package :clyc)
 
 
-;; TODO - this file should probably go up pretty early in the load order
-
-(defglobal *backchain-forbidden-unless-arg-chosen* #$backchainForbiddenWhenUnboundInArg)
+;; TODO: should be #$backchainForbiddenWhenUnboundInArg, but the #$ reader
+;; macro isn't loaded yet at this point in the file order, so we call
+;; reader-make-constant-shell directly.
+(defglobal *backchain-forbidden-unless-arg-chosen*
+  (reader-make-constant-shell "backchainForbiddenWhenUnboundInArg"))
 (deflexical *kb-features* nil
   "[Cyc] The list of KB feature symbols")
 (defglobal *reformulator-kb-loaded?* nil)
@@ -71,10 +73,10 @@ and permission notice:
   (setf *kct-kb-loaded?* nil))
 
 (defparameter *forward-inference-enabled?* t)
-(defparameter *forward-propagate-from-negation* nil
+(defparameter *forward-propagate-from-negations* nil
   "[Cyc] Do we allow forward propagation from negated gafs.")
 (defparameter *forward-propagate-to-negations* nil
-  "[Cyc] Do we allow conclusion of negated fags in forward propagation.")
+  "[Cyc] Do we allow conclusion of negated gafs in forward propagation.")
 (defparameter *within-forward-inference?* nil)
 
 (defun* within-forward-inference? () (:inline t)
@@ -105,7 +107,7 @@ and permission notice:
                   *lexicon-kb-loaded?*
                   *rtp-kb-loaded?*
                   *rkf-kb-loaded?*
-                  *thesauraus-kb-loaded?*
+                  *thesaurus-kb-loaded?*
                   *quant-kb-loaded?*
                   *time-kb-loaded?*
                   *date-kb-loaded?*
@@ -113,6 +115,6 @@ and permission notice:
                   *wordnet-kb-loaded?*
                   *cyc-secure-kb-loaded?*
                   *planner-kb-loaded?*
-                  *kct-kb-loaded?*
-                  *forward-inference-environment*))
-    (pushnew item *kb-features*)))
+                  *kct-kb-loaded?*))
+    (pushnew item *kb-features*))
+  (pushnew '*forward-inference-environment* *fi-state-variables*))

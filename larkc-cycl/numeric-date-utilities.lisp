@@ -115,7 +115,7 @@ and permission notice:
        (encode-date-from-template day month year template1))
       ((and (= length 1)
             (time-template-p template1))
-       (encode-time-from-template millisecond second minute hour template2))
+       (encode-time-from-template millisecond second minute hour template1))
       (t (error "Template ~s is not a valid datetime-string template." template)))))
 
 (defun valid-date-template-char (char)
@@ -141,12 +141,13 @@ and permission notice:
 
 (defun n-digit-template-element-p (template n token-checker separator-checker)
   (when (>= (length template) n)
-    (dotimes (index n)
-      (unless (funcall token-checker (char template index))
-        (return nil)))
-    (unless (and (> (length template) n)
-                 (not (funcall separator-checker (char template n))))
-      t)))
+    (block check
+      (dotimes (index n)
+        (unless (funcall token-checker (char template index))
+          (return-from check nil)))
+      (unless (and (> (length template) n)
+                   (not (funcall separator-checker (char template n))))
+        t))))
 
 (defun encode-date-from-template (day month year template)
   (cond
@@ -171,7 +172,7 @@ and permission notice:
 (defun encode-time-from-template (millisecond second minute hour template)
   (cond
     ((not hour) "")
-    ((equalp template "hh:mm:ss") (format nil "~2,'0d:~2,'0d:~s,'0d" hour minute second))
+    ((equalp template "hh:mm:ss") (format nil "~2,'0d:~2,'0d:~2,'0d" hour minute second))
     ((equalp template "hh:mm") (format nil "~2,'0d:~2,'0d" hour minute))
     ((equalp template "hh:mm:ss.mmm") (format nil "~2,'0d:~2,'0d:~2,'0d.~3,'0d" hour minute second millisecond))
     ((equalp template "hh:mm:ss.mm") (format nil "~2,'0d:~2,'0d:~2,'0d.~2,'0d" hour minute second millisecond))
@@ -192,7 +193,7 @@ and permission notice:
   "[Cyc] Return T iff OBJECT is a valid universal date."
   (when (integerp object)
     (when (minusp object)
-      (universal-date-p (- object)))
+      (return-from universal-date-p (universal-date-p (- object))))
     (let* ((temp object)
            (day (rem temp 100)))
       (when (<= day 31)

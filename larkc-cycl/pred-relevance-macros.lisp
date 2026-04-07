@@ -53,7 +53,7 @@ and permission notice:
 
 (defun* relevant-pred? (pred) (:inline t)
   "[Cyc] Return T iff PRED is a relevant predicate at this point."
-  (or (pred-relevant-undefined-p)
+  (or (pred-relevance-undefined-p)
       ;; TODO - skipped the large case test to directly call various function names. This skips over various missing-larkc reports, and would end up in a 'Function X is undefined' style error instead.
       (funcall *relevant-pred-function* pred)))
 
@@ -61,7 +61,7 @@ and permission notice:
   (null *relevant-pred-function*))
 
 (defun* all-preds-are-relevant? () (:inline t)
-  (or (pred-relevant-undefined-p)
+  (or (pred-relevance-undefined-p)
       (eq #'relevant-pred-is-everything *relevant-pred-function*)))
 
 (defun inference-genl-predicate-of? (pred)
@@ -71,7 +71,7 @@ and permission notice:
          (cached-spec-pred? inference-pred pred))))
 
 (defun inference-genl-inverse-of? (pred)
-  (let ((inference-pred (literal-prediate *inference-literal*)))
+  (let ((inference-pred (literal-predicate *inference-literal*)))
     (and inference-pred
          (not (eq pred inference-pred))
          (cached-spec-inverse? inference-pred pred))))
@@ -83,8 +83,8 @@ and permission notice:
 
 (defun determine-inference-genl-or-spec-inverse-relevance (sense)
   (if (eq :pos sense)
-      #'inference-genl-inverse-of
-      #'inference-genl-inverse))
+      #'inference-genl-inverse-of?
+      #'inference-genl-inverse?))
 
 (defstruct (pred-info-object (:conc-name "PRED-INFO-"))
   pred

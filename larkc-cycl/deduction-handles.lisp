@@ -77,9 +77,10 @@ and permission notice:
     next-id))
 
 (defun register-deduction-id (deduction id)
-  "[Cyc] Note that ID will eb used as the id for DEDUCTION."
+  "[Cyc] Note that ID will be used as the id for DEDUCTION."
   (reset-deduction-id deduction id)
-  (id-index-enter *deduction-from-id* id deduction))
+  (id-index-enter *deduction-from-id* id deduction)
+  deduction)
 
 (defun deregister-deduction-id (id)
   "[Cyc] Note that ID is not in use as a deduction id."
@@ -94,7 +95,7 @@ and permission notice:
 
 (defmethod sxhash ((object deduction))
   (let ((id (d-id object)))
-    (or id 786)))
+    (if (integerp id) id 786)))
 
 (defun* get-deduction () (:inline t)
   "[Cyc] Make a new deduction shell, potentially in static space."
@@ -102,7 +103,8 @@ and permission notice:
 
 (defun free-deduction (deduction)
   "[Cyc] Invalidate DEDUCTION."
-  (setf (d-id deduction) nil))
+  (setf (d-id deduction) nil)
+  deduction)
 
 (defun valid-deduction-handle? (object)
   (and (deduction-p object)
@@ -142,7 +144,8 @@ and permission notice:
 
 (defun reset-deduction-id (deduction new-id)
   "[Cyc] Primitively change the id of DEDUCTION to NEW-ID."
-  (setf (d-id deduction) new-id))
+  (setf (d-id deduction) new-id)
+  deduction)
 
 (defun* deduction-valid-handle? (deduction) (:inline t)
   ;; TODO - original checked for integerp
@@ -151,3 +154,37 @@ and permission notice:
 (defun* find-deduction-by-id (id) (:inline t)
   (lookup-deduction id))
 
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-macro 'do-deductions '((var &optional (progress-message makeString("mapping Cyc deductions")) &key done) &body body)
+    "Iterate over all HL deduction datastructures, executing BODY within the scope of VAR.
+   VAR is a deduction.
+   PROGRESS-MESSAGE is a progress message string.
+   Iteration halts early as soon as DONE becomes non-nil.")
+
+
+(register-cyc-api-function 'deduction-count 'nil
+    "Return the total number of deductions."
+    'nil
+    '(integerp))
+
+
+(register-cyc-api-function 'deduction-p '(object)
+    "Return T iff OBJECT is a CycL deduction."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'deduction-id '(deduction)
+    "Return the id of DEDUCTION."
+    '((deduction deduction-p))
+    '(integerp))
+
+
+(register-cyc-api-function 'find-deduction-by-id '(id)
+    "Return the deduction with ID, or NIL if not present."
+    '((id integerp))
+    '((nil-or deduction-p)))

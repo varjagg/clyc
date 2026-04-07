@@ -61,8 +61,8 @@ and permission notice:
 
 (defun file-vector-reference-present-mutated? (ref)
   "[Cyc] The file vector reference stands in for an object that is not the one that was swapped in."
-  (or (fvector-ref-has-mutated-index-p ref)
-      (fvector-ref-payload-in-memory-p ref)))
+  (and (fvector-ref-has-mutated-index-p ref)
+       (fvector-ref-payload-in-memory-p ref)))
 
 (defun fvector-ref-has-mutated-index-p (ref)
   (fvector-ref-mutated-index-p (fvector-ref-index ref)))
@@ -79,7 +79,7 @@ and permission notice:
   (and (fvector-ref-has-valid-index-p ref)
        (fvector-ref-payload-in-memory-p ref)))
 
-(defun fvactor-ref-has-valid-index-p (ref)
+(defun fvector-ref-has-valid-index-p (ref)
   (fvector-ref-valid-index-p (fvector-ref-index ref)))
 
 (defun file-vector-backed-map-w/-cache-get (map file-vector cache-strategy key &optional not-found)
@@ -87,31 +87,34 @@ and permission notice:
 CACHE-STRATEGY can be SYMBOLP if no cache strategy is needed.
 Returns the value retrieved under the KEY or NOT-FOUDN if not present."
   (let ((datum (map-get-without-values map key not-found)))
-    (when (file-vector-reference-p datum)
-      (cond
-        ((file-vector-reference-present? datum)
-         (let ((value (file-vector-reference-referenced-object datum)))
-           (when (and (cache-strategy-p cache-strategy)
-                      (file-vector-reference-present-pristine? datum))
-             (bt:with-lock-held (*file-vector-backed-map-read-lock*)
-               (cache-strategy-note-cache-hit cache-strategy)
-               (cache-strategy-note-reference cache-strategy key)))
-           value))
+    (if (file-vector-reference-p datum)
+        (cond
+          ((file-vector-reference-present? datum)
+           (let ((value (file-vector-reference-referenced-object datum)))
+             (when (and (cache-strategy-p cache-strategy)
+                        (file-vector-reference-present-pristine? datum))
+               (bt:with-lock-held (*file-vector-backed-map-read-lock*)
+                 (cache-strategy-note-cache-hit cache-strategy)
+                 (cache-strategy-note-reference cache-strategy key)))
+             value))
 
-        ((file-vector-reference-deleted? datum) not-found)
+          ((file-vector-reference-deleted? datum) not-found)
 
-        ((file-vector-reference-swapped-out? datum)
-         (let ((index (file-vector-reference-index datum))
-               (data-stream (get-file-vector-data-stream file-vector)))
-           (prog1 (bt:with-lock-held (*file-vector-backed-map-read-lock*)
-                    (position-file-vector file-vector index)
-                    (file-vector-backed-map-read-value data-stream))
+          ((file-vector-reference-swapped-out? datum)
+           (let* ((index (file-vector-reference-index datum))
+                  (data-stream (get-file-vector-data-stream file-vector))
+                  (payload (bt:with-lock-held (*file-vector-backed-map-read-lock*)
+                             (position-file-vector file-vector index)
+                             (file-vector-backed-map-read-value data-stream))))
+             (set-file-vector-reference-referenced-object datum payload)
              (let ((potential-loser (cache-strategy-track cache-strategy key)))
                (unless (eq potential-loser key)
                  (missing-larkc 6234)))
-             (cache-strategy-note-cache-miss cache-strategy))))
+             (cache-strategy-note-cache-miss cache-strategy)
+             payload))
 
-        (t (error "Invalid state transition: ~A is neither present, nor deleted nor swapped out." datum))))))
+          (t (error "Invalid state transition: ~A is neither present, nor deleted nor swapped out." datum)))
+        datum)))
 
 (defun file-vector-reference-referenced-object (ref)
   (fvector-ref-payload ref))
@@ -132,7 +135,7 @@ Returns the value retrieved under the KEY or NOT-FOUDN if not present."
   (and (fvector-ref-has-mutated-index-p ref)
        (not (fvector-ref-payload-in-memory-p ref))))
 
-(defun file-vector-backed-map-m/-cache-put (map cache-strategy key value)
+(defun file-vector-backed-map-w/-cache-put (map cache-strategy key value)
   "[Cyc] Put the value into the file-vector backed map. if the entry denoted by the key has a file vector backed reference, then mark the file vector reference as mutated and replace the payload with the value. If the CACHE-STRATEGY is valid, then untrack the key.
 Otherwise, simply store the passed-in new value.
 CACHE-STRATEGY can be SYMBOLP if no cache strategy is needed.
@@ -150,7 +153,7 @@ Returns :MUTATED if the entry was a file-vector reference, NIL otherwise."
   (let* ((current-value (map-get-without-values map key :not-found))
         (is-file-vector-reference (file-vector-reference-p current-value))
         (deleted-p nil))
-    (if support-undo-p
+    (if (and support-undo-p is-file-vector-reference)
         (missing-larkc 6214)
         (map-remove map key))
     (if (and is-file-vector-reference
@@ -188,7 +191,7 @@ Returns :MUTATED if the entry was a file-vector reference, NIL otherwise."
     (set-file-vector-reference-referenced-object ref payload)
     ref))
 
-(defun file-vector-backed-map-w/cache-touch (map cache-strategy key &optional fvector)
+(defun file-vector-backed-map-w/-cache-touch (map cache-strategy key &optional fvector)
   "[Cyc] If the entry denoted by key has a file-vector backed reference, then mark the reference as mutated. This allows to percolate change information properly in situations where the value of a map is a container.
 Touched items have to be untracked in the cache strategy if caching is active.
 CACHE-STRATEGY can be SYMBOLP if no cache strategy is needed.

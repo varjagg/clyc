@@ -58,9 +58,46 @@ and permission notice:
   (set-assertion-asserted-why assertion nil)
   (set-assertion-asserted-second assertion nil)
   (remove-assertion-argument assertion asserted-argument)
-  (kb-remove-asserted-argument-internal asserted-argument))
+  (kb-remove-asserted-argument-internal asserted-argument)
+  assertion)
+
+(missing-function-implementation possibly-replace-assertion-asserted-argument-with-tv)
+(missing-function-implementation replace-assertion-asserted-argument-with-tv)
+(missing-function-implementation replace-assertion-asserted-argument)
 
 (define-hl-modifier hl-assert-bookkeeping-binary-gaf (pred arg1 arg2 mt)
     "[Cyc] Assert (PRED ARG1 ARG2) in MT to the bookkeeping store."
     nil
   (assert-bookkeeping-binary-gaf pred arg1 arg2 mt))
+
+(define-hl-modifier hl-unassert-bookkeeping-binary-gaf (pred arg1 arg2 mt)
+    "[Cyc] Unassert (PRED ARG1 ARG2) in MT from the bookkeeping store."
+    nil
+  (unassert-bookkeeping-binary-gaf pred arg1 arg2 mt))
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'kb-create-asserted-argument '(assertion truth strength)
+    "Create an asserted argument for ASSERTION from TRUTH and STRENGTH,
+and hook up all the indexing between them."
+    '((assertion assertion-p) (truth truth-p) (strength el-strength-p))
+    '(asserted-argument-p))
+
+
+(register-cyc-api-function 'kb-remove-asserted-argument '(assertion asserted-argument)
+    "Remove ASSERTED-ARGUMENT for ASSERTION."
+    '((assertion assertion-p) (asserted-argument asserted-argument-p))
+    '(null))
+
+
+(register-cyc-api-function 'hl-assert-bookkeeping-binary-gaf '(pred arg1 arg2 mt)
+    "Assert (PRED ARG1 ARG2) in MT to the bookkeeping store."
+    '((pred fort-p) (mt hlmt-p))
+    '(boolean))
+
+
+(register-cyc-api-function 'hl-unassert-bookkeeping-binary-gaf '(pred arg1 arg2 mt)
+    "Unassert (PRED ARG1 ARG2) in MT from the bookkeeping store."
+    '((pred fort-p) (mt hlmt-p))
+    '(boolean))

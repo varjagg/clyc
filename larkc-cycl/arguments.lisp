@@ -178,7 +178,7 @@ Hardcodes the type hierarchy:
 (defun valid-support? (support &optional robust)
   "[Cyc] Return T if SUPPORT is a valid KB deduction support. ROBUST requests more thorough checking."
   (cond
-    ((assertion-p support) (valid-assertion-p support))
+    ((assertion-p support) (valid-assertion? support))
     ((kb-hl-support-p support) (valid-kb-hl-support? support robust))
     ;; TODO - valid-hl-support-p or valid-hl-support?
     ((hl-support-p support) (missing-larkc 31885))))
@@ -245,6 +245,13 @@ Hardcodes the type hierarchy:
     ((kb-hl-support-p support) (missing-larkc 11039))
     (t (hl-support-mt support))))
 
+(defun support-justification (support)
+  "[Cyc] Return the justification of SUPPORT."
+  (cond
+    ((assertion-p support) (list support))
+    ((kb-hl-support-p support) (missing-larkc 11036))
+    (t (hl-support-justify support))))
+
 (defun* support-strength (support) (:inline t)
   "[Cyc] Return the strength of SUPPORT."
   (tv-strength (support-tv support)))
@@ -308,3 +315,91 @@ Hardcodes the type hierarchy:
 
 (defun* canonicalize-hl-justification (hl-justification) (:inline t)
   (sort (copy-list hl-justification) #'support-<))
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'argument-p '(object)
+    "Return T iff OBJECT is an HL argument structure."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'argument-equal '(argument1 argument2)
+    "Return T iff ARGUMENT1 and ARGUMENT2 are equivalent arguments."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'argument-truth '(argument)
+    "Return the truth of ARGUMENT."
+    '((argument argument-p))
+    '(truth-p))
+
+
+(register-cyc-api-function 'argument-strength '(argument)
+    "Return the strength of ARGUMENT."
+    '((argument argument-p))
+    '(el-strength-p))
+
+
+(register-cyc-api-function 'asserted-argument-p '(object)
+    "Return T iff OBJECT is an HL asserted argument structure."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'kb-lookup-asserted-argument '(assertion truth strength)
+    "Return the asserted argument with ASSERTION, TRUTH, and STRENGTH, if it exists.
+   Return NIL otherwise."
+    '((assertion assertion-p) (truth truth-p) (strength el-strength-p))
+    '((nil-or asserted-argument-p)))
+
+
+(register-cyc-api-function 'support-p '(object)
+    "Return T iff OBJECT can be a support in an argument."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'support-module '(support)
+    "Return the module of SUPPORT."
+    '((support support-p))
+    '(hl-support-module-p))
+
+
+(register-cyc-api-function 'support-sentence '(support)
+    "Return the sentence of SUPPORT."
+    '((support support-p))
+    '(consp))
+
+
+(register-cyc-api-function 'support-mt '(support)
+    "Return the microtheory of SUPPORT."
+    '((support support-p))
+    '(hlmt-p))
+
+
+(register-cyc-api-function 'support-truth '(support)
+    "Return the truth of SUPPORT."
+    '((support support-p))
+    '(truth-p))
+
+
+(register-cyc-api-function 'support-strength '(support)
+    "Return the strength of SUPPORT."
+    '((support support-p))
+    '(el-strength-p))
+
+
+(register-cyc-api-function 'hl-support-p '(object)
+    "Does OBJECT represent an HL support?"
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'make-hl-support '(hl-module sentence &optional (mt *mt*) (tv :true-def))
+    "Construct a new HL support."
+    '((hl-module hl-support-module-p) (sentence possibly-cycl-sentence-p) (mt hlmt-p) (tv tv-p))
+    '(hl-support-p))

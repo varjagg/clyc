@@ -51,7 +51,7 @@ and permission notice:
       (missing-larkc 10828)
       (eval-in-api-subl-eval api-request)))
 
-(defun possibly-cyc-eval (api-request)
+(defun possibly-cyc-api-eval (api-request)
   "[Cyc] Call EVAL on API-REQUEST.
 Functions defined via the Cyc API are also supported."
   (if *eval-in-api?*
@@ -73,16 +73,16 @@ Functions defined via the Cyc API are also supported."
       (apply func args)
       (cyc-api-eval (cons func (mapcar #'quotify args)))))
 
-(defglobal *eval-in-api-mutable-global* nil)
+(defglobal *eval-in-api-mutable-globals* nil)
 
 (defun register-api-mutable-global (var)
-  (push var *eval-in-api-mutable-global*)
+  (push var *eval-in-api-mutable-globals*)
   var)
 
-(defglobal *eval-in-api-immutable-global* nil)
+(defglobal *eval-in-api-immutable-globals* nil)
 
 (defun register-api-immutable-global (var)
-  (push var *eval-in-api-immutable-global*)
+  (push var *eval-in-api-immutable-globals*)
   var)
 
 (defparameter *eval-in-api-env* nil
@@ -130,3 +130,47 @@ Functions defined via the Cyc API are also supported."
   "[Cyc] The stack of macros that we're currently verifying in the context of.")
 (deflexical *api-user-variables* nil
   "[Cyc] The dictionary of persistent api user variables and values.")
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'valid-api-operator-p '(operator)
+    "@return boolean T if APPLY or FUNCALL of that OPERATOR or use
+as a MACRO would success in the most restricted version of the API"
+    '((operator symbolp))
+    '(booleanp))
+
+
+(register-cyc-api-function 'valid-api-function-p '(operator)
+    "@return boolean T if APPLY or FUNCALL of that OPERATOR
+would succeed in the most restricted version of the API. 
+@note does NOT check API-SPECIAL-P"
+    '((operator symbolp))
+    '(booleanp))
+
+
+(register-cyc-api-function 'valid-api-macro-p '(operator)
+    "@return boolean T iff macro expansion of that OPERATOR
+would succeed in the most restricted version of the API. 
+@note does NOT check API-SPECIAL-P"
+    '((operator symbolp))
+    '(booleanp))
+
+
+(register-cyc-api-function 'clear-api-user-variables 'nil
+    "Removes all user variables."
+    'nil
+    '(nil))
+
+
+(register-cyc-api-function 'put-api-user-variable '(var value)
+    "Sets the value of a the user variable VAR to the given VALUE."
+    'nil
+    '(nil))
+
+
+(register-cyc-api-function 'get-api-user-variable '(var)
+    "Gets the value of a the user variable VAR."
+    'nil
+    'nil)

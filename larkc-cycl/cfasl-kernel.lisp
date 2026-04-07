@@ -50,9 +50,9 @@ and permission notice:
 (defparameter *cfasl-kernel-standard-output* nil
     "[Cyc] The standard output stream for debugging within a task-processor-request.")
 
-(defun cfasl-server-toplevel (in-stream out-stream)
+(defun cfasl-server-top-level (in-stream out-stream)
   (let ((*cfasl-common-symbols* nil))
-    (cfasl-set-common-symbolscommon-symbols nil)
+    (cfasl-set-common-symbols nil)
     (let ((*perform-cfasl-externalization* nil)
           (*generate-readable-fi-results* nil)
           (*default-api-input-protocol* 'read-cfasl-request)
@@ -78,8 +78,9 @@ and permission notice:
   (unless (proper-list-p api-request)
     (error "Invalid API Request: ~s is not a proper list" api-request))
   (unless (or *eval-in-api?*
-              (valid-api-function-symbol (car (api-request))))
-    (error "Invalid API Request: ~s is not a valid API function symbol" (car api-request))))
+              (valid-api-function-symbol (car api-request)))
+    (error "Invalid API Request: ~s is not a valid API function symbol" (car api-request)))
+  t)
 
 (defun send-cfasl-result (out-stream cfasl-result &optional error)
   (when error
@@ -120,4 +121,21 @@ Submits the REQUEST form to the task request queue with ID, PRIORITY, REQUESTOR,
                                   (*package* (find-package :cyc))))))
     (api-task-processor-request request id priority requestor
                                 (append server-bindings client-bindings)
-                                uuid-string)))
+                                uuid-string)
+    nil))
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'task-processor-request '(request id priority requestor client-bindings &optional uuid-string)
+    "@param REQUEST; consp for evaluation
+   @param ID; integerp
+   @param PRIORITY; intergerp
+   @param REQUESTOR; stringp
+   @param CLIENT-BINDINGS; consp of (var value) pairs
+   @param UUID-STRING; identifies the client to which the response will be sent
+   Submits the REQUEST form to the task request queue with ID, PRIORITY,
+   REQUESTOR, BINDINGS and OUT-STREAM."
+    '((request consp) (id integerp) (priority integerp) (requestor stringp) (client-bindings listp))
+    '(nil))

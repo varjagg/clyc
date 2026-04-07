@@ -63,7 +63,7 @@ and permission notice:
 
 (defun assertion-indexing-store-initialize (&optional estimated-assertion-count)
   (let ((initial-size (assertion-indexing-store-initial-size estimated-assertion-count)))
-    (assertion-indexing-store-reset (make-hash-table initial-size #'eq)))
+    (assertion-indexing-store-reset (make-hash-table :size initial-size :test #'eq)))
   ;; TODO - meaningful return value?
   *assertion-indexing-store*)
 
@@ -104,7 +104,7 @@ and permission notice:
 (defun fully-indexed-term-p (object)
   "[Cyc] Return T iff OBJECT is the type which will be indexed in the other index, if necessary."
   (and (indexed-term-p object)
-       (unindexed-syntax-constant-p object)))
+       (not (unindexed-syntax-constant-p object))))
 
 (defun valid-fully-indexed-term-p (object)
   "[Cyc] Return T iff OBJECT is the type which will be indexed in the other index, if necessary, and is valid."
@@ -300,7 +300,8 @@ Note: result is NOT destructible!"
 
 (defun* intermediate-index-delete-key (intermediate-index key) (:inline t)
   "[Cyc] Delete any mapping from KEY to a subindex in INTERMEDIATE-INDEX."
-  (intermediate-index-dictionary-delete-key intermediate-index key))
+  (intermediate-index-dictionary-delete-key intermediate-index key)
+  intermediate-index)
 
 (defun* initialize-term-intermediate-index (term) (:inline t)
   "[Cyc] Initializes a top-level intermediate index for TERM. Clobbers any existing indexing for TERM."
@@ -364,3 +365,11 @@ If not found, create a new intermediate index for KEY, with an equality test det
 (defun* final-index-set (final-index) (:inline t)
   "[Cyc] Returns the set datastructure in FINAL-INDEX. Currently a final index _is_ a set, so this is the identity function."
   final-index)
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'indexed-term-p '(object)
+    "Returns T iff OBJECT is an indexed CycL term, e.g. a fort or assertion."
+    'nil
+    '(booleanp))

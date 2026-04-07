@@ -84,9 +84,34 @@ Return NIL if not present."
 
 (defun deduction-strength (deduction)
   (and (deduction-handle-valid? deduction)
+       (kb-deduction-strength deduction)))
+
+(defun deduction-supports (deduction)
+  (and (deduction-handle-valid? deduction)
        (possibly-unreify-kb-hl-supports (kb-deduction-supports deduction))))
 
 (defparameter *deduction-dump-id-table* nil)
 
 (defun* find-deduction-by-dump-id (dump-id) (:inline t)
   (find-deduction-by-id dump-id))
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'deduction-assertion '(deduction)
+    "Return the support for which DEDUCTION is a deduction."
+    '((deduction deduction-p))
+    '(support-p))
+
+
+(register-cyc-api-function 'deduction-truth '(deduction)
+    "Return the truth of DEDUCTION -- either :true :false or :unknown."
+    '((deduction deduction-p))
+    '(truth-p))
+
+
+(register-cyc-api-function 'deduction-strength '(deduction)
+    "Return the current argumentation strength of DEDUCTION -- either :monotonic, :default, or :unknown."
+    '((deduction deduction-p))
+    '(el-strength-p))

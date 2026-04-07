@@ -221,7 +221,8 @@ TL assertion -> HL assertion.")
     (kb-set-assertion-asserted-by assertion who)
     (kb-set-assertion-asserted-when assertion when)
     (kb-set-assertion-asserted-why assertion why)
-    (kb-set-assertion-asserted-second assertion second)))
+    (kb-set-assertion-asserted-second assertion second))
+  assertion)
 
 (defun invalid-assertion? (assertion &optional robust?)
   (declare (ignore robust?))
@@ -253,7 +254,7 @@ TL assertion -> HL assertion.")
   "[Cyc] Remove ASSERTION."
   (kb-remove-assertion assertion))
 
-(defun only-argment-of-assertion-p (assertion argument)
+(defun only-argument-of-assertion-p (assertion argument)
   "[Cyc] Returns T if ARGUMENT is the sole argument for ASSERTION; NIL if there are other, different arguments."
   (not (member? argument (assertion-arguments assertion) :test #'not-eq)))
 
@@ -274,3 +275,179 @@ TL assertion -> HL assertion.")
 (defun* find-assertion-by-dump-id (dump-id) (:inline t)
   "[Cyc] Return the assertion with DUMP-ID during a KB load."
   (find-assertion-by-id dump-id))
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'assertion-cnf '(assertion)
+    "Return the cnf of ASSERTION.
+   @note If you know the assertion is a gaf,
+   consider using gaf-formula instead,
+   if you do not explicitly need a CNF."
+    '((assertion assertion-p))
+    '(cnf-p))
+
+
+(register-cyc-api-function 'assertion-mt '(assertion)
+    "Return the mt of ASSERTION."
+    '((assertion assertion-p))
+    '(hlmt-p))
+
+
+(register-cyc-api-function 'assertion-direction '(assertion)
+    "Return the direction of ASSERTION (either :backward, :forward or :code)."
+    '((assertion assertion-p))
+    '(direction-p))
+
+
+(register-cyc-api-function 'assertion-truth '(assertion)
+    "Return the current truth of ASSERTION -- either :true :false or :unknown."
+    '((assertion assertion-p))
+    '(truth-p))
+
+
+(register-cyc-api-function 'assertion-strength '(assertion)
+    "Return the current argumentation strength of ASSERTION -- either :monotonic, :default, or :unknown."
+    '((assertion assertion-p))
+    '(el-strength-p))
+
+
+(register-cyc-api-function 'assertion-variable-names '(assertion)
+    "Return the variable names for ASSERTION."
+    '((assertion assertion-p))
+    '(listp))
+
+
+(register-cyc-api-function 'asserted-by '(assertion)
+    "Returns the cyclist who asserted ASSERTION."
+    '((assertion assertion-p))
+    'nil)
+
+
+(register-cyc-api-function 'asserted-when '(assertion)
+    "Returns the day when ASSERTION was asserted."
+    '((assertion assertion-p))
+    '(integerp))
+
+
+(register-cyc-api-function 'assertion-formula '(assertion)
+    "Return a formula for ASSERTION."
+    '((assertion assertion-p))
+    '(el-formula-p))
+
+
+(register-cyc-api-function 'assertion-ist-formula '(assertion)
+    "Return a formula in #$ist format for ASSERTION."
+    '((assertion assertion-p))
+    '(el-formula-p))
+
+
+(register-cyc-api-function 'assertion-mentions-term? '(assertion term)
+    "Return T iff ASSERTION's formula or mt contains TERM.
+   If assertion is a meta-assertion, recurse down sub-assertions.
+   By convention, negated gafs do not necessarily mention the term #$not."
+    '((assertion assertion-p) (term hl-term-p))
+    '(booleanp))
+
+
+(register-obsolete-cyc-api-function 'assertion-mentions-term 'nil '(assertion term)
+    "@see assertion-mentions-term?"
+    '((assertion assertion-p) (term hl-term-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'gaf-predicate '(assertion)
+    "Return the predicate of gaf ASSERTION."
+    '((assertion assertion-p))
+    'nil)
+
+
+(register-cyc-api-function 'gaf-arg0 '(assertion)
+    "Return arg 0 (the predicate) of the gaf ASSERTION."
+    '((assertion assertion-p))
+    'nil)
+
+
+(register-cyc-api-function 'gaf-arg1 '(assertion)
+    "Return arg 1 of the gaf ASSERTION."
+    '((assertion assertion-p))
+    'nil)
+
+
+(register-cyc-api-function 'gaf-arg2 '(assertion)
+    "Return arg 2 of the gaf ASSERTION."
+    '((assertion assertion-p))
+    'nil)
+
+
+(register-cyc-api-function 'gaf-arg3 '(assertion)
+    "Return arg 3 of the gaf ASSERTION."
+    '((assertion assertion-p))
+    'nil)
+
+
+(register-cyc-api-function 'gaf-arg4 '(assertion)
+    "Return arg 4 of the gaf ASSERTION."
+    '((assertion assertion-p))
+    'nil)
+
+
+(register-cyc-api-function 'gaf-arg5 '(assertion)
+    "Return arg 5 of the gaf ASSERTION."
+    '((assertion assertion-p))
+    'nil)
+
+
+(register-cyc-api-function 'forward-assertion? '(assertion)
+    "Predicate returns T iff ASSERTION's direction is :FORWARD."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'backward-assertion? '(assertion)
+    "Predicate returns T iff ASSERTION's direction is :BACKWARD."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'code-assertion? '(assertion)
+    "Predicate returns T iff ASSERTION's direction is :CODE."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'assertion-has-truth? '(assertion truth)
+    "Return T iff ASSERTION's current truth is TRUTH."
+    '((assertion assertion-p) (truth truth-p))
+    '(booleanp))
+
+
+(register-obsolete-cyc-api-function 'assertion-has-truth 'nil '(assertion truth)
+    "@see assertion-has-truth?"
+    '((assertion assertion-p) (truth truth-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'asserted-assertion? '(assertion)
+    "Return non-nil IFF assertion has an asserted argument."
+    '((assertion assertion-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'deduced-assertion? '(assertion)
+    "Return non-nil IFF assertion has some deduced argument"
+    '((assertion assertion-p))
+    '(booleanp))
+
+
+(register-cyc-api-function 'get-asserted-argument '(assertion)
+    "Return the asserted argument for ASSERTION, or nil if none present."
+    '((assertion assertion-p))
+    '((nil-or asserted-argument-p)))
+
+
+(register-cyc-api-function 'assertion-has-dependents-p '(assertion)
+    "Return non-nil IFF assertion has dependents."
+    '((assertion assertion-p))
+    '(booleanp))

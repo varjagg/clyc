@@ -94,7 +94,8 @@ and permission notice:
 
 (defun system-store (system)
   (bt:with-lock-held (*system-lock*)
-    (pushnew system *system-index*)))
+    (pushnew system *system-index*))
+  nil)
 
 (defun system-lookup (system-name)
   (declare (string system-name))
@@ -103,7 +104,7 @@ and permission notice:
 (defun system-new (system-name &optional provisional-p default-pathname)
   (declare (string system-name)
            (ignore provisional-p default-pathname))
-  (let ((new (make-system :name system-name)))
+  (let ((new (make-system :name (string-downcase system-name))))
     (system-store new)
     new))
 

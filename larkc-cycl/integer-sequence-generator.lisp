@@ -59,7 +59,8 @@ and permission notice:
 (defun integer-sequence-generator-reset (isg)
   "[Cyc] Reset an Integer Sequence Generator to its original state."
   (bt:with-lock-held ((isg-lock isg))
-    (setf (isg-current isg) (isg-start isg))))
+    (setf (isg-current isg) (isg-start isg)))
+  isg)
 
 (defconstant *cfasl-wide-opcode-isg* 130)
 

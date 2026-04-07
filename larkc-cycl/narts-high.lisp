@@ -62,7 +62,7 @@ Subsitutions for existing sub-NARTs are performed."
 (defun nart-expand (object)
   "[Cyc] Recursively expand all NARTs in OBJECT into their EL forms (NAUTs)."
   (if (tree-find-if #'nart-p object)
-      (transform object #'nart-p)
+      (transform object #'nart-p #'nart-el-formula)
       object))
 
 (defun nart-substitute (object)
@@ -79,7 +79,7 @@ Returns OBJECT itself if no substitutions can be made."
       (let ((result tree))
         (if (contains-nat-formula-as-element? tree)
             (let ((new-tree (copy-list tree)))
-              (do ((list new-tree))
+              (do ((list new-tree (cdr list)))
                   ((atom list)
                    (setf result new-tree))
                 (let ((arg (car list)))
@@ -96,7 +96,7 @@ Returns OBJECT itself if no substitutions can be made."
 (defun contains-nat-formula-as-element? (list)
   "[Cyc] Return T iff LIST contains at least one element that could be reified as a nart. It does not consider whether LIST itself could be reified as a nart, and it does not look deeper than one level of nesting."
   (do ((rest list (cdr rest)))
-      ((atom list))
+      ((atom rest))
     (when (nat-formula-p (car rest))
       (return t))))
 
@@ -115,3 +115,36 @@ No substitutions for sub-NARTs are performed."
   "[Cyc] Return the NART with DUMP-ID during a KB load."
   (find-nart-by-id dump-id))
 
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'nart-hl-formula '(nart)
+    "Return the hl formula of this NART."
+    '((nart nart-p))
+    '((nil-or consp)))
+
+
+(register-cyc-api-function 'naut-p '(object)
+    "Return T iff OBJECT is a datastructure implementing a non-atomic unreified term (NAUT).
+   By definition, this satisies @xref CYCL-NAT-P but not @xref NART-P."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'nart-el-formula '(nart)
+    "Return the el formula of this NART."
+    '((nart nart-p))
+    '((nil-or consp)))
+
+
+(register-cyc-api-function 'random-nart '(&optional (test (function true)))
+    "Return a randomly chosen NART that satisfies TEST"
+    'nil
+    '(nart-p))
+
+
+(register-cyc-api-function 'remove-nart '(nart)
+    "Remove NART from the KB."
+    '((nart nart-p))
+    '(null))

@@ -72,7 +72,7 @@ and permission notice:
                   "[Cyc] The microtheory where #$definintMt assertions go.  Should be the same as the *MT-MT*")
 (defglobal-mt-var *decontextualized-predicate-mt* #$BaseKB #$decontextualizedPredicate
                   "[Cyc] The microtheory where #$decontextualizedPredicate assertions go.")
-(defglobal-mt-var *decontextualized-collection-mt* #$BaseKB #$decontextualizedPredicate
+(defglobal-mt-var *decontextualized-collection-mt* #$BaseKB #$decontextualizedCollection
                   "[Cyc] The microtheory where #$decontextualizedCollection assertions go.")
 (defglobal-mt-var *ephemeral-term-mt* #$BaseKB #$ephemeralTerm
                   "[Cyc] The microtheory where #$ephemeralTerm gafs go.")

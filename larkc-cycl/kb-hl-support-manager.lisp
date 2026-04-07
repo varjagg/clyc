@@ -61,7 +61,7 @@ and permission notice:
 (defun* lookup-kb-hl-support-content (id) (:inline t)
   (lookup-kb-object-content *kb-hl-support-content-manager* id))
 
-(defun* register-kb-hl-supoprt-content (id kb-hl-support-content) (:inline t)
+(defun* register-kb-hl-support-content (id kb-hl-support-content) (:inline t)
   "[Cyc] Note that ID will be used as the id for KB-HL-SUPPORT-CONTENT."
   (register-kb-object-content *kb-hl-support-content-manager* id kb-hl-support-content))
 

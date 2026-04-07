@@ -44,7 +44,8 @@ and permission notice:
 (defun function-symbol-p (obj)
   "[Cyc] Return T iff OBJECT is a symbol with a function definition."
   (and (symbolp obj)
-       (fboundp obj)))
+       (fboundp obj)
+       (functionp (symbol-function obj))))
 
 (defun function-symbol-arglist (function-symbol)
   "[Cyc] Return the arglist of FUNCTION-SYMBOL"
@@ -73,10 +74,8 @@ and permission notice:
   "[Cyc] Convert PATHNAME to a physical pathname (performing any logical pathname translations)"
   (truename pathname))
 
-(defmacro member? (item list &optional (test '#'eql) (key '#'identity))
-  `(member ,item ,list
-           ,@(and test `(:test ,test))
-           ,@(and key `(:key ,key))))
+(defun* member? (item list &optional (test #'eql) (key #'identity)) (:inline t)
+  (member item list :test test :key key))
 
 ;; PERFORMANCE - do we assume fixnum for subl-level code?
 (defun* positive-integer-p (obj)

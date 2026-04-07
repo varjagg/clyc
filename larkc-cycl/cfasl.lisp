@@ -71,9 +71,9 @@ and permission notice:
 
 (defun cfasl-output (object stream)
   "[Cyc] Output OBJECT to STREAM in the CFASL protocol. The encoding is relevant to this image only."
-  (when (cfasl-compress-object? object)
-    (missing-larkc 12988))
-  (cfasl-output-object object stream))
+  (if (cfasl-compress-object? object)
+      (missing-larkc 12988)
+      (cfasl-output-object object stream)))
 
 (defun cfasl-output-externalized (object stream)
   "[Cyc] Output OBJECT to STREAM in the CFASL protocol. The encoding is relevant to any image, not just this one."
@@ -147,7 +147,7 @@ and permission notice:
 (defun cfasl-raw-read-byte (stream)
   (when (cfasl-decoding-stream-p stream)
     (missing-larkc 30961))
-  (read-byte stream))
+  (read-byte stream nil nil))
 
 (defparameter *within-cfasl-externalization* nil)
 
@@ -414,7 +414,7 @@ and permission notice:
   (let* ((encoding (cfasl-input-object stream))
          (symbol (cfasl-decode-common-symbol encoding)))
     (unless symbol
-      (cerror "Use NIL." "Common symbol at index ~d was not found in ~s." '*cfasl-common-symbols*))
+      (cerror "Use NIL." "Common symbol at index ~d was not found in ~s." encoding '*cfasl-common-symbols*))
     symbol))
 
 (defmethod cfasl-output-object ((object cons) stream)
@@ -490,6 +490,7 @@ and permission notice:
 
 (defun cfasl-output-string (string stream)
   (cfasl-raw-write-byte *cfasl-opcode-string* stream)
+  (cfasl-output-integer (length string) stream)
   (map nil (lambda (char)
              (cfasl-raw-write-byte (char-code char) stream))
        string))

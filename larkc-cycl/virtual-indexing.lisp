@@ -75,3 +75,11 @@ BEST-COUNT: The smallest count of assertions indexed via the best other index."
            (when (good-term-for-overlap-index-p arg)
              (incf num-indexed-args)))
          (<= num-indexed-args 1)))))
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'assertions-mentioning-terms '(term-list &optional include-meta-assertions?)
+    "Return a list of assertions that mention every term in TERM-LIST."
+    'nil
+    '((list assertion-p)))

@@ -40,7 +40,7 @@ and permission notice:
 (deflexical *kb-arity-table-equality-test* #'eq
   "[Cyc] The equality test used for the KB arity tables.")
 
-(defglobal *kb-arity-table* nil)
+(deflexical *kb-arity-table* nil)
 
 (defun* arity-lookup (relation) (:inline t)
   (gethash relation *kb-arity-table*))
@@ -49,7 +49,8 @@ and permission notice:
   (setf (gethash relation *kb-arity-table*) arity))
 
 (defun* rem-arity (relation) (:inline t)
-  (remhash relation *kb-arity-table*))
+  (remhash relation *kb-arity-table*)
+  relation)
 
 (defun arity (relation)
   (cond
@@ -67,7 +68,8 @@ and permission notice:
     (when (and arity-in-table
                (not (eql arity-in-table arity)))
       (error "Trying to overload arity for ~a from ~a to ~a" relation arity-in-table arity))
-    (set-arity relation arity)))
+    (set-arity relation arity)
+    arity))
 
 (defun maybe-remove-arity-for-relation (relation arity)
   (let ((dont-remove nil)
@@ -82,9 +84,10 @@ and permission notice:
     (unless dont-remove
       (rem-arity relation))
     (when other-arity
-      (set-arity relation other-arity))))
+      (set-arity relation other-arity))
+    relation))
 
-(defglobal *kb-arity-min-table* nil)
+(deflexical *kb-arity-min-table* nil)
 
 (defun* arity-min-lookup (relation) (:inline t)
   (gethash relation *kb-arity-min-table*))
@@ -103,7 +106,7 @@ and permission notice:
     ((reifiable-nat? relation #'cyc-var? *anect-mt*)
      (missing-larkc 10321))))
 
-(defglobal *kb-arity-max-table* nil)
+(deflexical *kb-arity-max-table* nil)
 
 (defun* arity-max-lookup (relation) (:inline t)
   (gethash relation *kb-arity-max-table*))
@@ -141,4 +144,14 @@ and permission notice:
   (setf *kb-arity-table* (cfasl-input stream))
   (setf *kb-arity-min-table* (cfasl-input stream))
   (setf *kb-arity-max-table* (cfasl-input stream))
-  (cfasl-input stream))
+  (cfasl-input stream)
+  nil)
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'arity '(relation)
+    "Return the arity for relation constant RELATION."
+    'nil
+    'nil)

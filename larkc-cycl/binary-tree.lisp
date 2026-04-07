@@ -143,7 +143,7 @@ and permission notice:
 
 (defun btree-insert-aux (new old comp-func)
   "[Cyc] Insert NEW off of OLD in direction idnicated by COMP-FUNC comparison of tags."
-  (if (funcall comp-func old new)
+  (if (funcall comp-func (bt-tag old) (bt-tag new))
       (progn
         (must-not (bt-higher old)
                   "~s info will be lost inserting ~s into ~s" (bt-higher old) new old)
@@ -184,7 +184,7 @@ and permission notice:
 (defconstant *cfasl-opcode-legacy-btree-high* 21)
 (defconstant *cfasl-opcode-legacy-btree-leaf* 22)
 (defparameter *btree-balance-vector-index* 0)
-(defparameter *btree-valance-vector* nil)
+(defparameter *btree-balance-vector* nil)
 
 (defstruct avl-tree
   root

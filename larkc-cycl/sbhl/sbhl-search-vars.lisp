@@ -454,6 +454,50 @@ and permission notice:
   "[Cyc] The false truth value with same strength as *SBHL-TV*."
   (sbhl-false-tv *sbhl-tv*))
 
+;; Reconstructed from inline expansions in sbhl_link_methods.java, sbhl_search_methods.java, etc.
+;; Evidence: commented declareMacro in sbhl_search_vars.java; orphan constants
+;; $sym59$WITH_SBHL_MODULE, $sym14$POSSIBLY_WITH_SBHL_MT_RELEVANCE in multiple SBHL files.
+
+(defmacro with-sbhl-module ((module) &body body)
+  "[Cyc] Binds *sbhl-module* to MODULE for the duration of BODY."
+  `(let ((*sbhl-module* ,module))
+     ,@body))
+
+(defmacro possibly-with-sbhl-mt-relevance ((mt) &body body)
+  "[Cyc] If MT is non-nil, binds mt-relevance variables for inference in MT.
+If MT is nil, keeps existing bindings."
+  (once-only (mt)
+    `(let ((*mt* (update-inference-mt-relevance-mt ,mt))
+           (*relevant-mt-function* (update-inference-mt-relevance-function ,mt))
+           (*relevant-mts* (update-inference-mt-relevance-mt-list ,mt)))
+       ,@body)))
+
+(defmacro possibly-with-sbhl-tv ((tv) &body body)
+  "[Cyc] If TV is non-nil, binds *sbhl-tv* and *relevant-sbhl-tv-function* for TV.
+If TV is nil, keeps existing bindings. Type-checks TV when non-nil."
+  (once-only (tv)
+    `(let ((*sbhl-tv* (or ,tv *sbhl-tv*))
+           (*relevant-sbhl-tv-function* (if ,tv
+                                            #'relevant-sbhl-tv-is-general-tv
+                                            *relevant-sbhl-tv-function*)))
+       (when ,tv
+         (sbhl-check-type ,tv sbhl-search-truth-value-p))
+       ,@body)))
+
+(defmacro possibly-with-sbhl-true-tv ((tv) &body body)
+  "[Cyc] If TV is non-nil, binds *sbhl-tv* to TV (validating it's a true tv).
+If TV is nil, binds *sbhl-tv* to #$True-JustificationTruth.
+Reconstructed from sbhl_search_vars.java commented declareMacro + expansion
+evidence in sbhl_link_methods.java sbhl_forward_true_link_nodes."
+  (once-only (tv)
+    `(let ((*sbhl-tv* (or ,tv #$True-JustificationTruth))
+           (*relevant-sbhl-tv-function* (if ,tv
+                                            #'relevant-sbhl-tv-is-general-tv
+                                            *relevant-sbhl-tv-function*)))
+       (when ,tv
+         (sbhl-check-type ,tv sbhl-search-truth-value-p))
+       ,@body)))
+
 (defun sbhl-translate-to-old-tv (tv)
   "[Cyc] The keyword associated with TV, either :TRUE or :FALSE."
   (cond

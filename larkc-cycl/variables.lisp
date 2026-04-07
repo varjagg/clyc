@@ -81,10 +81,15 @@ and permission notice:
   (< (variable-id var1)
      (variable-id var2)))
 
-(defun-memoized default-el-var-for-hl-var (variable)
+(defun-cached default-el-var-for-hl-var (variable)
     (:test eq
+     :declare ((type variable variable))
      :doc "[Cyc] Return a readable EL var from HL var VARIABLE.")
   (make-el-var (prin1-to-string variable)))
+
+;; (defun get-default-el-var (el-var) ...) -- active declaration, no body
+
+;; (defun hl-var-for-default-el-var (el-var) ...) -- active declaration, no body, memoized
 
 (defun* sort-hl-variable-list (hl-variable-list) (:inline t)
   (sort hl-variable-list #'variable-<))
@@ -102,8 +107,54 @@ and permission notice:
             (next (car rest) (car rest)))
            ((atom (cdr rest))
             (or (not-fully-bound-p next)
-                (variable-p (cdr rest)))))))
+                (variable-p (cdr rest))))
+        (when (not-fully-bound-p next)
+          (return t)))))
 
 (defun* cycl-ground-expression-p (expression) (:inline t)
   (not (expression-find-if #'cyc-var? expression)))
 
+
+
+;;; Cyc API registrations
+
+(register-cyc-api-function 'variable-p '(object)
+    "Return T iff OBJECT is an HL variable."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'variable-count 'nil
+    "Return the total number of HL variables."
+    'nil
+    '(integerp))
+
+
+(register-cyc-api-function 'variable-id '(variable)
+    "Return id of HL variable VARIABLE."
+    '((variable variable-p))
+    '(integerp))
+
+
+(register-cyc-api-function 'find-variable-by-id '(id)
+    "Return the HL variable with ID, or NIL if not present."
+    '((id integerp))
+    '((nil-or variable-p)))
+
+
+(register-cyc-api-function 'default-el-var-for-hl-var '(variable)
+    "Return a readable EL var from HL var VARIABLE."
+    '((variable variable-p))
+    'nil)
+
+
+(register-cyc-api-function 'fully-bound-p '(object)
+    "Return T iff OBJECT contains no HL variables, and therefore is fully bound."
+    'nil
+    '(booleanp))
+
+
+(register-cyc-api-function 'not-fully-bound-p '(object)
+    "Return T iff OBJECT contains some HL variable, and therefore is not fully bound."
+    'nil
+    '(booleanp))

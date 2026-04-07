@@ -47,7 +47,7 @@ Hook up the indexing for the new deduction."
       (kb-create-deduction-local assertion supports truth)))
 
 (defun kb-create-deduction-local (assertion supports truth)
-  (let ((internal-id (create-deduction-kb-store assertion supports truth)))
+  (let ((internal-id (kb-create-deduction-kb-store assertion supports truth)))
     (find-deduction-by-id internal-id)))
 
 (define-hl-modifier kb-remove-deduction (deduction)
@@ -89,3 +89,57 @@ Hook up the indexing for the new deduction."
   (kb-set-deduction-strength-internal deduction new-strength))
 
 
+
+
+;;; Cyc API registrations
+
+
+(register-cyc-api-function 'kb-create-deduction '(assertion supports truth)
+    "Create a new deduction consisting of SUPPORTS for ASSERTION.
+   TRUTH is the truth value of the deduction.
+   Hook up the indexing for the new deduction."
+    '((assertion support-p) (supports hl-justification-p) (truth truth-p))
+    '(deduction-p))
+
+
+(register-cyc-api-function 'kb-remove-deduction '(deduction)
+    "Remove DEDUCTION from the KB, and unhook its indexing."
+    '((deduction deduction-p))
+    '(null))
+
+
+(register-cyc-api-function 'kb-lookup-deduction '(assertion supports truth)
+    "Return the deduction with ASSERTION, SUPPORTS, and TRUTH, if it exists.
+   Return NIL otherwise."
+    '((assertion support-p) (supports hl-justification-p) (truth truth-p))
+    '((nil-or deduction-p)))
+
+
+(register-cyc-api-function 'kb-deduction-assertion '(deduction)
+    "Return the assertion for DEDUCTION."
+    '((deduction deduction-p))
+    '(support-p))
+
+
+(register-cyc-api-function 'kb-deduction-supports '(deduction)
+    "Return the supports for DEDUCTION."
+    '((deduction deduction-p))
+    '(hl-justification-p))
+
+
+(register-cyc-api-function 'kb-deduction-truth '(deduction)
+    "Return the truth for DEDUCTION."
+    '((deduction deduction-p))
+    '(truth-p))
+
+
+(register-cyc-api-function 'kb-deduction-strength '(deduction)
+    "Return the strength for DEDUCTION."
+    '((deduction deduction-p))
+    '(el-strength-p))
+
+
+(register-cyc-api-function 'kb-set-deduction-strength '(deduction new-strength)
+    "Change the strength of DEDUCTION to NEW-STRENGTH."
+    '((deduction deduction-p) (new-strength el-strength-p))
+    '(deduction-p))

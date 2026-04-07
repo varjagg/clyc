@@ -82,10 +82,12 @@ and permission notice:
         (values nil t)
         (let* (;; Copy from adjustable vector to a plain one
                (name (subseq buffer 0)))
-          (values (or (reader-make-constant-shell name
-                                                  (not (stream-forbids-constant-creation stream)))
-                      (error "~s is not an existing constant" name))
-                  t)))))
+          (let ((constant (find-constant-by-name name)))
+            (if constant
+                (values constant t)
+                (if (stream-forbids-constant-creation stream)
+                    (simple-reader-error "~S is not the name of a constant." name)
+                    (values (reader-make-constant-shell name t) t))))))))
 
 (defun find-constant-by-name (name)
   (let ((constant (let ((*require-valid-constants* nil))

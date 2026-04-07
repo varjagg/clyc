@@ -112,7 +112,7 @@ METHOD must be suitable for (funcall method <pattern> <tree>).")
           (:not (destructuring-bind (sub-pattern) pattern-args
                   (not (pattern-matches-tree-recursive sub-pattern tree))))
           ;; TODO - this presumably calls fixed-arity funcall functions in the original code, from 1-4 pattern-args. If there's more, there's no case to handle that and it silently contnues, which seems odd.  However, maybe the intent is that covers all cases?  Using the general case here.
-          (:test (apply (first pattern-args) (rest pattern-args)))
+          (:test (apply (first pattern-args) tree (rest pattern-args)))
           (:tree-find (destructuring-bind (sub-pattern) pattern-args
                         (pattern-matches-tree-tree-find sub-pattern tree)))
           (:quote (destructuring-bind (quoted-object) pattern-args
@@ -219,12 +219,12 @@ Return transformation result and updated BINDINGS."
              (ignore operator))
     ;; The original fast-pathed 0-4 args with a bunch of tests.
     ;; Not sure that helps in modern processors.  TODO - profile
-    (apply method (mapcar (lambda (arg) (pattern-transform-tree arg tree)) method-args))))
+    (apply method (mapcar (lambda (arg) (pattern-transform-tree-recursive arg tree)) method-args))))
 
 (defun pattern-transform-cons (pattern tree)
   (let ((answer (copy-list pattern)))
     ;; Transform the CARs and final CDR of the copied list.
-    (do ((rest-answer answer (cdr answer)))
+    (do ((rest-answer answer (cdr rest-answer)))
         ((atom (cdr rest-answer))
          (rplaca rest-answer (pattern-transform-tree-recursive (car rest-answer) tree))
          (when (cdr rest-answer)
