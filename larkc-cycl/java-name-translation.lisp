@@ -474,7 +474,8 @@ and permission notice:
 
 (defun java-backend-predefined-function-p (function)
   "[Cyc] Return T iff FUNCTION is a predefined function in the Java backend."
-  (sublisp-boolean (gethash-without-values function *java-backend-function-name-table* nil)))
+  ;; [Clyc] gethash-without-values replaced with gethash — same behavior, single return value
+  (sublisp-boolean (gethash function *java-backend-function-name-table* nil)))
 
 ;; (defun java-backend-function-class-lookup (function) ...) -- active declareFunction, no body
 ;; (defun java-backend-function-name-lookup (function) ...) -- active declareFunction, no body

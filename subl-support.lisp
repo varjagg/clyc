@@ -277,6 +277,15 @@
 (defmacro until (expr &body body)
   `(loop until ,expr do (progn ,@body)))
 
+(declaim (inline gethash-without-values))
+(defun gethash-without-values (key hash-table &optional default)
+  (gethash key hash-table default))
+
+(declaim (inline sublisp-boolean))
+(defun sublisp-boolean (object)
+  "[Cyc] Convert OBJECT to T or NIL."
+  (not (null object)))
+
 (declaim (inline fixnump))
 (defun fixnump (expr)
   (typep expr 'fixnum))
@@ -489,4 +498,9 @@ Same condition-variable wakeup mechanism as process-wait."
           (bt:condition-wait *process-wait-cv* *process-wait-lock*
                              :timeout (min remaining 1)))))))
 
-
+(defun seed-random (&optional seed)
+  (setf *random-state* (if seed
+                           ;; Only SBCL provides a repeatable numeric random seeding
+                           (sb-ext:seed-random-state seed)
+                           (make-random-state t))))
+                           

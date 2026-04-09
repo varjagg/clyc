@@ -43,7 +43,7 @@ and permission notice:
 (defglobal *agenda-should-quit* nil)
 (defglobal *restart-agenda-flag* nil)
 (defparameter *within-agenda* nil)
-(deflexical *default-agenda-package* (find-package "CYC"))
+(deflexical *default-agenda-package* (find-package "CLYC"))
 (defparameter *agenda-resourcing-spaces* 10
   "[Cyc] The number of SBHL spaces to resource within an agenda process")
 (defglobal *agenda-process* nil)

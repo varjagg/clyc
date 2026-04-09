@@ -808,14 +808,9 @@ generic removal modules, then register this property."
     (destructuring-bind (hl-module &rest predicates) generic-info
       (dolist (predicate predicates)
         (inference-removal-module-note-specific predicate hl-module))))
-  (let ((set-contents-var (do-set-internal (removal-modules))))
-    (let* ((basis-object (do-set-contents-basis-object set-contents-var))
-           (state (do-set-contents-initial-state basis-object set-contents-var)))
-      (loop until (do-set-contents-done? basis-object state)
-            do (let ((hl-module (do-set-contents-next basis-object state)))
-                 (when (do-set-contents-element-valid? state hl-module)
-                   (classify-removal-module hl-module)))
-               (setf state (do-set-contents-update-state state)))))
+  ;; [Clyc] Reconstituted do-set macro from Java compiler expansion
+  (do-set (hl-module (removal-modules))
+    (classify-removal-module hl-module))
   (reclassify-preference-modules)
   nil)
 

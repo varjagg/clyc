@@ -47,6 +47,8 @@ and permission notice:
 (defglobal *system-parameters* nil
     "[Cyc] The list of system parameters defined by DEFINE-SYSTEM-PARAMETER.")
 
+;; (defun all-system-parameters () ...) -- active declareFunction, no body
+
 (defun register-system-parameter (name default type description)
   (unless (member type *valid-system-parameter-types*)
     (warn "~s ~s has an unknown type ~s." 'define-system-parameter name type))
@@ -54,19 +56,24 @@ and permission notice:
   (push (list name default type description) *system-parameters*)
   name)
 
+;; Reconstructed from Internal Constants:
+;; $list7 = (NAME DEFAULT TYPE DESCRIPTION), $sym8$PROGN, $sym9$REGISTER_SYSTEM_PARAMETER,
+;; $sym10$QUOTE, $sym11$DEFVAR. defvar init is :unset ($kw12$UNSET).
 (defmacro define-system-parameter (name default type &body description)
-  "Assuming behavior from context, was referenced in the .java, but without implementation. &body is used purely for indentation."
   `(progn
      (defvar ,name :unset ,@description)
      (register-system-parameter ',name ,default ,type ,@description)))
 
 (defun remove-system-parameter (name)
   "[Cyc] Remove NAME from the system parameters."
-  (declare (symbol name))
+  (declare (type symbol name))
   (setf *system-parameters* (delete name *system-parameters* :test #'eq :key #'car)))
 
 (defun system-parameter-value-unset-p (val)
   (eq val :unset))
+
+;; (defun alphanumericize-string (string) ...) -- active declareFunction, no body
+;; (defun setup-system-parameters (directory &optional config-filename) ...) -- active declareFunction, no body
 
 (defun check-system-parameters ()
   (dolist (entry *system-parameters*)
@@ -85,11 +92,12 @@ and permission notice:
                        (integer (integerp val))
                        (symbol (symbolp val))
                        (none t))
-               (warn "The system parameter ~s has the value ~s, but it is supposed to be of type ~s."
+               (warn "The system paramater ~S has the value ~S, but it is supposed to be ~S."
                      symbol val type))))))))
 
 (defun load-system-parameters ()
   "[Cyc] Load the system-parameters file."
+  ;; [Clyc] Java calls cyc-home-filename; adapted for CL pathnames
   (let ((filename (merge-pathnames #P"src/main/resources/parameters.lisp"
                                    *cyc-home-directory*)))
     (if (probe-file filename)
@@ -99,7 +107,6 @@ and permission notice:
              do (evaluate-parameter-form form)))
         (warn "System parameters file ~a not loaded." filename))))
 
-;; TODO - does this need to be a separate function?  inline it in the above?
 (defun read-parameter-form (stream)
   (let ((*read-eval* nil))
     (read stream nil :eof)))
@@ -107,8 +114,8 @@ and permission notice:
 (defun evaluate-parameter-form (form)
   (destructuring-bind (operator &rest args) form
     (case operator
-      ;; TODO - which package in clyc?
-      (in-package (eval '(in-package "CYC")))
+      (in-package (eval '(in-package "CLYC")))
+      ;; [Clyc] Java only handles CSETQ; setq/setf added for CL compatibility
       ((setq csetq setf) (destructuring-bind (symbol value) args
                            (when (member symbol *system-parameters* :key #'first)
                              (set symbol (evaluate-parameter-value value)))))
@@ -119,7 +126,6 @@ and permission notice:
     ((atom value) value)
     ((eq 'quote (first value)) (second value))))
 
-;; TODO - this doesn't quite properly envelope toplevel forms for the macroexpansion
 (define-system-parameter *auto-continue-transcript-problems* t 't-or-nil
   "[Cyc] Possible values: NIL, T. If NIL, transcript problems will cause error breaks that make the system stop. If T, such problems will not cause breakage.")
 (define-system-parameter *continue-agenda-on-error* t 't-or-nil
@@ -140,14 +146,16 @@ and permission notice:
   "[Cyc] Possible values: A number. This parameter specifies the offset of the Cyc API (application programming interface) service from *BASE-TCP-PORT*.")
 (define-system-parameter *cfasl-port-offset* 14 'integer
   "[Cyc] Possible values: A number. This parameter specifies the offset of the Cyc CFASL-server service from *BASE-TCP-PORT*.")
+(define-system-parameter *tcp-localhost-only?* nil 't-or-nil
+  "[Cyc] Possible values: T, NIL. IF NIL, then remote TCP clients can connect to Cyc, otherwise no remote connections are allowed. The most secure configuration leaves this parameter T, and uses a separate Web server to redirect HTTP requests to Cyc.")
 (define-system-parameter *permit-api-host-access* t 't-or-nil
   "[Cyc] Possible values: T, NIL. If T, then API functions can access host services including the file system and outbound tcp connections. The most secure configuration leaves this parameter NIL.")
 (define-system-parameter *use-transcript-server* nil 't-or-nil
   "[Cyc] Possible values: T, NIL. If T, then writing to the master transcsript will be controlled by the Cyc Transcript Server, which will need to be installed at your site. You only need to set this to T if you are running multiple instances of Cyc. If NIL, then Cyc will read and write to the master transcript without regard to other processes doing the same.")
 (define-system-parameter *master-transcript-lock-host* nil 'nil-or-string
   "[Cyc] Possible values: NIL or a string. This parameter is only used if *USE-TRANSCRIPT-SERVER* is T. If so, then this parameter should be set to the name of the host offering the cyc-serializer serivce.")
-(define-system-parameter *master-transcript-service-port* 3608 'integer
-  "[Cyc] Possible values: A number. This parameter is only used if *USE-TRANSCRIPT-SERVER* is T. If so, then this parameter should be set to the port number fo the cyc-serializer read service.")
+(define-system-parameter *master-transcript-server-port* 3608 'integer
+  "[Cyc] Possible values: A number. This parameter is only used if *USE-TRANSCRIPT-SERVER* is T. If so, then this parameter should be set to the port number of the cyc-serializer read service.")
 (define-system-parameter *allow-guest-to-edit?* nil 't-or-nil
   "[Cyc] Possible values: T, NIL. If NIL, require authentication before allowing modifications to the knowledge base. If T, any user is allowed to modify the knowledge base.")
 (define-system-parameter *default-cyclist-name* "Guest" 'string
@@ -160,3 +168,8 @@ and permission notice:
     "[Cyc] The directory under which CSS files used by the browser are stored")
 (define-system-parameter *cyc-execution-context* :unknown 'symbol
   "[Cyc] Possible values: One of the symbols :CYCORP or :UNKNOWN. If the execution context is set to :CYCORP, then the CYC image can assume that it is running in Cycorp's development environment and make strong assumptions about setup and infrastructure.")
+
+;;; Setup phase
+
+(toplevel
+  (declare-defglobal '*system-parameters*))

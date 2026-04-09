@@ -666,7 +666,7 @@ and permission notice:
                                      (:file "java-name-translation")
                                      ;; MISSING-LARKC (:file "java-backend")
                                      ;; MISSING-LARKC (:file "translator-utilities")
-                                     ;;(:file "eu.larkc.core.LarkcInit")
+                                     ;;(:file "eu.larkc.core.LarkcInit") ;; integrated into toplevel clyc.lisp
                                      ;; MISSING-LARKC (:file "eu.larkc.core.endpoint.sparql.LarKCHttpServer")
                                      ))
                (:file "clyc")))

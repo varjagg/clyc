@@ -34,9 +34,63 @@ and permission notice:
   limitations under the License.
 |#
 
-;; For now, contains toplevel utilities that aren't direct ports from LarkC
 
 (in-package :clyc)
+
+
+;;;; ================================
+;;;; STARTUP
+
+(setf *silent-progress?* t) ;this removes some printouts
+(setf *dump-verbose* NIL) ;this removes some printouts
+
+
+(defun clyc-init ()
+  (system-code-initializations)
+
+  (print (load-kb "src/main/resources/cyc-tiny/"))
+  ;;(print (load-kb "ext/rtiny/")) ;; commented out in LarKC's startup, but can't find anything in LarKC named this
+  
+  ;; System parameters
+  (load-system-parameters)
+
+  ;; CycL code initializations, includes KB-dependent initializations
+  (system-code-initializations)
+
+  ;; this should be the very last step
+  (setf *init-file-loaded?* t)
+
+  (initialize-larkc)
+  ;;(start-sparql-server)
+  (start-management-interface))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;THE FOLLOWING ENABLES OPENCYC API;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;(define robust-enable-tcp-server (type port handler)
+;  (pif (fboundp 'enable-tcp-server)
+;       ;; new way
+;       (ret (enable-tcp-server type port))
+;       ;; old way
+;       (ret (sl::start-tcp-server port handler nil))))
+;
+;(csetq *base-tcp-port* 3600)
+;(progn
+;  (print "Enabling base TCP services to port 3600")
+;  (finish-output))
+;
+;(robust-enable-tcp-server
+; :cyc-api (api-port) 'api-server-top-level)
+;;; CFASL server
+;(robust-enable-tcp-server
+; :cfasl (cfasl-port) 'cfasl-server-top-level)
+
+
+
+
+;;;; ================================
+;;;; TOPLEVEL UTILITIES
+
 
 (defun cyc-api-functions ()
   "Return a list of all registered Cyc API functions with their full signatures.

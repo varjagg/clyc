@@ -25,6 +25,8 @@ Many of the macro sites remain expanded as they were in Java, and need to be rec
 
 The original LarKC distribution has most of its Cyc source code in a flat directory, which is reflected here in `larkc-cycl` (named after the `com/cyc/cycjava/cycl/` originating directory). This will be reorganized after things are up & running.
 
+The `cyc-testing` directory contains test harness & registration, but no actual test function bodies.
+
 ### AI Slop
 
 AI assistance has gotten this project past the automation complexity humps, and all AI ported files are meticulously (at least the earlier ones) human-reviewed. AI is commonly munging some Cyc-originated comments, which will be mechanically fixed later, but also commenting ideas for some of the redacted function calls, and successfully reconstructing `defmacro`s from leftover internal constant literals and corresponding expanded instances. While it's catching some macroexpansions and reverting them back to their original forms, I'm leaving most of the missed ones to be scanned individually after everything has had its initial port. It simply can't keep all of them "in mind" as it ports each file, and the more visible Lisp examples the better.
@@ -99,16 +101,26 @@ Compilation warnings can be made visible by evaluating the following before quic
 
 `fraction-utilities` - Elided, since CL already natively supports rational numbers.
 
-### File Exists But the Implementation is missing-larkc
+### Files Exist But the Implementation is missing-larkc
 
 `bijection` - A key/value mapping that also supports reversed value→key lookups.  A-list for small maps, pair of hashtables for large maps.  No given implementation, but can be easily recreated.  
 `shelfs` - Some data container that supports "finalize", "rearrange", "bsearch", etc.  
 `glob` - Some dual-indexed data container.  
 `bag` - A multi-set. Possible to recreate.  
 `accumulation` - A data accumulation interface that can append its values to various different concrete datastructures.  Probably reconstructable.  
-`red-`* - Some form of generic on-disk data repository, maybe similar to the Windows registry?  
+`red-*` - Some form of generic on-disk data repository, maybe similar to the Windows registry?  
 `file-hash-table` - On-disk key/value store. Huge function list.  
 `sparse-matrix` `sparse-vector` `heap` - Self explanatory.  
+
+## General Mechanism Notes
+
+`Transcripts` - no actual output or evaluation code, just skeleton.
+`cyc-testing/` - Test harness & registration, but no actual test function bodies.
+`Hash functions` - CFASL doesn't store hash values, so we can defer to SBCL `sxhash` and still load saved worlds
+`Worlds` - There doesn't seem to be any notion of a single-file world export, just a directory of fine-grained cfasl files.
+`SKSI` - Not included, a very minimal set of hooks remains.
+`CFASL compression` - Not included. Definitions for compression tags remain.
+`Janus` - Not included. A framework for recording & playing back inference for testing?
 
 ## Utilities
 
@@ -121,6 +133,7 @@ Compilation warnings can be made visible by evaluating the following before quic
 `special-variable-state.lisp` - Snapshots a list of CL special variables.
 
 `misc-utilities.lisp` - Startup code.
+
 
 ## Glossary
 
@@ -138,6 +151,11 @@ Compilation warnings can be made visible by evaluating the following before quic
 `Sequence term` = a term holding the remainder of a sequence, as in a dotted list. Also `sequence variable` if the term is a variable.  
 `Shell` = an empty structure, possibly for filling in structure resourcing pools.
 `Cyc API` = a subset of SubL which is intended to be the public API. It is not a separate language. The actual validation of the Cyc API subset is missing-larkc, but all the API declarations are present.
+
+**Inference:**
+`Removal` = directly answer a query literal with bindings, removing that literal from the query.
+`Transformation` = substitute a query literal with an antecedent expansion or alternative, to explore finding other query strategies.
+`Productivity` = an estimate for the number of results an inference module will produce.
 
 **Clyc:**  
 `missing-larkc` = specific term for things in Cyc that were not provided to the LarKC project, distinguished from unimplemented or unfinished things in Clyc.  

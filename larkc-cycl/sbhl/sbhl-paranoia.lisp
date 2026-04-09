@@ -105,7 +105,7 @@ This should be set to NIL during for types initialization.")
 ;; Disablable error handling doesn't need to be fast anyway, as long as the inline portion of the check is small.
 (defmacro sbhl-check-type (object type-test &optional (level 1))
   `(when (and (sbhl-object-type-checking-p)
-              (,type-test ,object))
+              (not (,type-test ,object)))
      (sbhl-handle-type-check-failure ,object ',type-test ,level)))
 
 (defun sbhl-handle-type-check-failure (object type-test level)

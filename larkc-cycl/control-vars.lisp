@@ -41,19 +41,16 @@ and permission notice:
 (in-package :clyc)
 
 
-;; TODO DESIGN - Nothing in the code ever sets this to NIL, so the #$ can't be used in bootstrap?
-;; HACK - setting it to NIL for now
-(defparameter *read-require-constant-exists* nil ;;t
+;; [Clyc] Java default is T; set to NIL for bootstrap since nothing sets it back
+(defparameter *read-require-constant-exists* nil
   "[Cyc] Does the #$ reader error if the referenced constant does not exist?")
 (defglobal *table-area* nil)
-(defvar *rkf-mt* nil
-  "[Cyc] The mt within which RKF interactions are assumed.")
 (defglobal *hl-lock* (bt:make-lock "HL Store Lock")
   "[Cyc] Controls modification of the HL store")
 (defparameter *bootstrapping-kb?* nil)
 (deflexical *keyword-package* (find-package "KEYWORD"))
 (deflexical *sublisp-package* (find-package "SUBLISP")) ;; TODO - clyc? subl?
-(deflexical *cyc-package* (find-package "CYC")) ;; TODO - clyc?
+(deflexical *cyc-package* (find-package "CLYC"))
 (defparameter *cnf-matching-predicate* 'equal
   "[Cyc] predicate used to compare two cnfs when searching for an assertion (or axiom) in the kb")
 (defparameter *gaf-matching-predicate* 'equal
@@ -205,6 +202,9 @@ and permission notice:
   "[Cyc] Controls whether the unifier treats the-terms as variables. Should always be globally NIL and bound to T by the-term inference methods.")
 (defparameter *inference-the-term-bindings* nil)
 (defparameter *the-term-qua-constant* nil)
+
+;; (defun the-term-qua-constant? (object) ...) -- active declareFunction, no body
+
 (defparameter *external-inference-enabled* nil
   "[Cyc] Determines whether or not External HL module inferencing is enabled.")
 (defparameter *suppress-conflict-notices?* nil)
@@ -222,18 +222,35 @@ and permission notice:
   "[Cyc] Do we ignore remote errors or handle them the same way as local errors?")
 (defglobal *auto-increment-kb* nil
   "[Cyc] This determines whether or not the image will change to the next KB when teh close-kb transcript operation is reached.")
+
+;; (defun auto-increment-kb () ...) -- active declareFunction, no body
+;; (defun set-auto-increment-kb (value) ...) -- active declareFunction, no body
 (deflexical *load-submitted-transcripts?* nil
   "[Cyc] Controls whether the running image will load submitted transcripts via MAYBE-LOAD-SUBMITTED-TRANSCRIPT.")
 (deflexical *send-submitted-transcript-loading-notices?* nil
   "[Cyc] Controls whether, when a submitted transcript is loaded, the image should notify the submitter that it is being loaded as part of a build.")
+
+;; (defun load-submitted-transcripts? () ...) -- active declareFunction, no body
+;; (defun set-load-submitted-transcripts (value) ...) -- active declareFunction, no body
+;; (defun send-submitted-transcript-loading-notices? () ...) -- active declareFunction, no body
+;; (defun set-send-submitted-transcript-loading-notices (value) ...) -- active declareFunction, no body
+
 (defvar *cyc-image-id* nil
   "[Cyc] A string consisting of '<machine-name>-<universal-time>-<process-id>'.")
 
-;; TODO - referenced from kb-accessors
-(missing-function-implementation mapping-funcall-arg)
+;; Reconstructed from Internal Constants:
+;; $sym3$WITH_LOCK_HELD, $list4 = (*HL-LOCK*)
+(defmacro within-hl-modification (&body body)
+  `(with-lock-held (*hl-lock*) ,@body))
+
+;; (defun mapping-funcall-arg (arg &optional fn-arg) ...) -- active declareFunction, no body
+;; (defun mapping-funcall-int () ...) -- active declareFunction, no body
+;; (defun inference-warn (format-string &optional arg1 arg2) ...) -- active declareFunction, no body
 
 (defun make-cyc-image-id ()
-  "[Cyc] Make a unique identifier for a cyc image: '<machine-name>-<universal-time>-<process-id>"
+  "[Cyc] Make a unique identifier for a Cyc image: `<machine-name>-<universal-time>-<process-id>'."
+  ;; [Clyc] Java calls string-upto(get-machine-name("UNKNOWN"), #\.) and get-process-id;
+  ;; adapted for CL runtime with machine-instance and sb-posix:getpid
   (let ((machine-name (string-downcase (machine-instance)))
         (process-id #+sbcl (write-to-string (sb-posix:getpid)) #-sbcl "unknownpid")
         (cyc-universal-time (universal-timestring)))
@@ -248,9 +265,11 @@ and permission notice:
 
 (defglobal *build-kb-loaded* nil)
 
+;; (defun build-kb-loaded () ...) -- active declareFunction, no body
+
 (defun set-build-kb-loaded (kb)
-  (when kb
-    (check-type kb 'integerp))
+  "[Cyc] Set the build KB version."
+  (declare (type (or null integer) kb))
   (setf *build-kb-loaded* kb)
   (set-kb-loaded kb))
 
@@ -261,30 +280,42 @@ and permission notice:
   *kb-loaded*)
 
 (defun set-kb-loaded (kb)
-  (when kb
-    (check-type kb 'integerp))
+  "[Cyc] Set the current KB version."
+  (declare (type (or null integer) kb))
   (setf *kb-loaded* kb))
+
+;; (defun core-kb-loaded? () ...) -- active declareFunction, no body
 
 (defun non-tiny-kb-loaded? ()
   "[Cyc] Does the KB contain a nontrivial amount that is not the core (tiny) KB?"
-  ;; TODO - distant forward references from SubL into CycL. These should be moved into a CycL library
-  (and (> (funcall 'constant-count) 10000)
-       (< 8 (truncate (funcall 'assertion-count) (funcall 'fort-count)))))
+  (and (> (constant-count) 10000)
+       (< 8 (truncate (assertion-count) (fort-count)))))
+
+;; (defun kb-tiny-or-full () ...) -- active declareFunction, no body
 
 (defglobal *kb-pedigree* :unknown)
+
+;; (defun kb-pedigree () ...) -- active declareFunction, no body
+
 (defparameter *use-transcript?* t)
 (defglobal *run-own-operations?* t)
 (defglobal *caught-up-on-master-transcript* nil
   "[Cyc] Boolean: This is used by the agenda to decide whether or not to wait before doing another read.")
+
+;; (defun caught-up-on-master-transcript () ...) -- active declareFunction, no body
+;; (defun set-caught-up-on-master-transcript (value) ...) -- active declareFunction, no body
+
 (defglobal *communication-mode* :unknown)
 (defparameter *unencapsulating-within-agenda* nil)
 (defvar *save-asked-queries?* nil
   "[Cyc] Whether to save queries asked into a query transcript.")
 
 (defun save-asked-queries? ()
+  "[Cyc] Whether to save queries asked into a query transcript."
+  ;; [Clyc] Java uses positive-integer-p(kb-loaded()); CL equivalent is (typep ... '(integer 1))
   (and *save-asked-queries?*
        (non-tiny-kb-loaded?)
-       (typep (kb-loaded) '(integer 0))))
+       (typep (kb-loaded) '(integer 1))))
 
 (defglobal *init-file-loaded?* nil)
 (defparameter *within-assert* nil)
@@ -301,6 +332,9 @@ and permission notice:
 
 (defun within-assert? ()
   *within-assert*)
+
+;; (defun within-unassert? () ...) -- active declareFunction, no body
+;; (defun lexicon-initialized-p () ...) -- active declareFunction, no body
 
 (defparameter *compute-inference-results* t)
 (defparameter *cache-inference-results* nil
@@ -330,6 +364,9 @@ and permission notice:
   "[Cyc] Has the db meta query init file successfully loaded, or not?")
 (defparameter *dbm-cache-loading-started?* nil)
 (defparameter *dbm-cache-loading-finished?* nil)
+;; TODO - what exactly is RKF or ACIP?
+(defvar *rkf-mt* nil
+  "[Cyc] The mt within which RKF interactions are assumed.")
 (defglobal *acip-subkernel-extraction* nil
   "[Cyc] When non-NIL, the ACIP subkernel we are currently extracting.")
 (defglobal *acip-subkernel-output-stream* nil
@@ -350,3 +387,45 @@ and permission notice:
   "[Cyc] When non-NIL, the inferences and problem-stores generated by KBQ-RUN-QUERY are auto-destroyed.")
 (defparameter *kbq-run-query-non-continuable-enabled?* t
   "[Cyc] When non-NIL, the inferences generated by KBQ-RUN-QUERY are always run with :CONTINUABLE? NIL since they won't ever be continued.")
+
+;;; Setup phase
+
+(toplevel
+  (declare-defglobal '*table-area*)
+  (declare-defglobal '*hl-lock*)
+  (register-global-lock '*hl-lock* "HL Store Lock")
+  (declare-control-parameter-internal '*hl-failure-backchaining*
+    "Enable HL predicate backchaining"
+    "This controls whether or not we allow backchaining on those predicates
+which have dedicated HL module support, such as #$isa, #$genls and #$equals."
+    '((:value nil "No") (:value t "Yes (expensive)")))
+  (declare-control-parameter-internal '*negation-by-failure*
+    "Enable negation by failure"
+    "This controls whether or not we allow the inability to prove a proposition to be an
+argument for that proposition not being true."
+    '((:value nil "No") (:value t "Yes")))
+  (declare-control-parameter-internal '*complete-extent-minimization*
+    "Enable complete extent minimization"
+    "This controls whether or not we allow the use of completeness meta-knowledge
+to provide arguments for negated propositions."
+    '((:value nil "No") (:value t "Yes")))
+  (declare-control-parameter-internal '*unbound-rule-backchain-enabled*
+    "Enable unbound predicate rule backchaining"
+    "This controls whether or not we allow backchaining with rules
+that conclude literals whose predicate position is unbound.
+Many type-level predicates have defining axioms of this form."
+    '((:value nil "No") (:value t "Yes (expensive)")))
+  (declare-defglobal '*auto-increment-kb*)
+  (declare-defglobal '*build-kb-loaded*)
+  (declare-defglobal '*kb-loaded*)
+  (declare-defglobal '*kb-pedigree*)
+  (declare-defglobal '*run-own-operations?*)
+  (declare-defglobal '*caught-up-on-master-transcript*)
+  (declare-defglobal '*communication-mode*)
+  (declare-defglobal '*init-file-loaded?*)
+  (declare-control-parameter-internal '*cache-inference-results*
+    "Cache backward query results"
+    "This controls whether the results of successful backward queries are cached in the KB."
+    '((:value nil "No") (:value t "Yes")))
+  (declare-defglobal '*acip-subkernel-extraction*)
+  (declare-defglobal '*acip-subkernel-output-stream*))
