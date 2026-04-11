@@ -138,11 +138,14 @@ and permission notice:
   (setf (aref *cfasl-input-method-table* cfasl-opcode) function))
 
 (defun cfasl-raw-peek-byte (stream)
-  ;; Rewritten since CL doesn't have unread-byte
-  ;; Pulled error detection from cfasl-raw-read-byte
+  ;; [Clyc] Java does read_byte + unread_byte. CL has no unread-byte,
+  ;; so we read a byte and back up the file position by 1.
   (when (cfasl-decoding-stream-p stream)
     (missing-larkc 30961))
-  (flexi-streams:peek-byte stream))
+  (let ((byte (read-byte stream nil nil)))
+    (when byte
+      (file-position stream (1- (file-position stream))))
+    byte))
 
 (defun cfasl-raw-read-byte (stream)
   (when (cfasl-decoding-stream-p stream)
@@ -302,13 +305,14 @@ and permission notice:
   (logior fixnum0 (ash fixnum1 8) (ash fixnum2 16) (ash fixnum3 24)))
 
 (defun cfasl-input-integer (bytes stream)
-  ;; bytes seems to be a byte count again
+  ;; [Clyc] Java had a read-byte-sequence-to-positive-integer bulk-read fast path
+  ;; for non-decoding streams. The assembly logic is identical to the per-byte path
+  ;; (little-endian: byte 0 at bit offset 0, byte 1 at bit offset 8, etc.), so we
+  ;; use the per-byte path unconditionally. Supports >4 bytes via recursive split.
   (cond
-    ((not (cfasl-decoding-stream-p stream)) (read-byte-sequence-to-positive-integer bytes stream))
-    ;; TODO BUG - this breaks past 8 bytes!
-    ((> bytes 4) (let ((high-recursive (cfasl-input-integer (- bytes 4) stream))
-                       (low-4 (cfasl-input-integer 4 stream)))
-                   (logior (ash high-recursive 32) low-4)))
+    ((> bytes 4) (let ((low-4 (cfasl-input-integer 4 stream))
+                       (high-recursive (cfasl-input-integer (- bytes 4) stream)))
+                   (logior low-4 (ash high-recursive 32))))
     (t (case bytes
          (4 (assemble-4-fixnums-to-non-negative-integer (cfasl-raw-read-byte stream)
                                                         (cfasl-raw-read-byte stream)
@@ -380,6 +384,8 @@ and permission notice:
 (defun cfasl-input-nil (stream)
   (declare (ignore stream))
   nil)
+
+(declare-cfasl-opcode *cfasl-opcode-common-symbol* 50 'cfasl-input-common-symbol)
 
 (defparameter *cfasl-common-symbols* nil
   "[Cyc] A list of commonly used symbols for which it is cost-effective to output in a terser representation.")
@@ -505,10 +511,11 @@ and permission notice:
                             (= length (length old)))
                        old
                        (make-string length)))))
-    (if (not (cfasl-decoding-stream-p stream))
-        (read-sequence string stream)
-        (dotimes (i length)
-          (setf (char string i) (code-char (cfasl-raw-read-byte stream)))))
+    ;; [Clyc] Java read bytes directly into a char array. CL read-sequence
+    ;; from a (unsigned-byte 8) stream into a character string is not portable,
+    ;; so we always read byte-by-byte and convert via code-char.
+    (dotimes (i length)
+      (setf (char string i) (code-char (cfasl-raw-read-byte stream))))
     string))
 
   ;; TODO
@@ -531,6 +538,23 @@ and permission notice:
         (setf (gethash key hashtable) value)))
     hashtable))
 
+;; [Clyc] keyhash.lisp is elided (replaced by standard hashtables), but its
+;; CFASL opcode (68) appears in KB dumps. Keyhash is a set: type size [key]*.
+;; We read it as a key→t hashtable.
+(declare-cfasl-opcode *cfasl-opcode-keyhash* 68 'cfasl-input-keyhash)
+
+(defun cfasl-input-keyhash (stream)
+  "[Cyc] Read a keyhash from STREAM. Keyhash is a set (key-only hash table)."
+  (let* ((type (cfasl-input-object stream))
+         (size (cfasl-input-object stream))
+         (test (if (member type '(eq eql equal equalp))
+                   type
+                   'eql))
+         (ht (make-hash-table :test test :size size)))
+    (dotimes (i size)
+      (setf (gethash (cfasl-input-object stream) ht) t))
+    ht))
+
 (defconstant *cfasl-opcode-guid* 43)
 
 ;; TODO - the class GUID is not defined yet, it's a native type in Java SubL
@@ -550,7 +574,7 @@ and permission notice:
   ;; TODO - cfasl-input-guid is missing?
 
 
-(defconstant *cfasl-opcode-legacy-guid* 25)
+(declare-cfasl-opcode *cfasl-opcode-legacy-guid* 25 'cfasl-input-legacy-guid)
 
 (defun cfasl-output-legacy-guid (guid stream)
   (cfasl-raw-write-byte *cfasl-opcode-legacy-guid* stream)

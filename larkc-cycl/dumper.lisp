@@ -327,7 +327,7 @@ and permission notice:
 
 (defun load-copyright (stream)
   (let ((copyright (cfasl-input stream)))
-    (declare (type string copyright))
+    (check-type copyright string)
     copyright))
 
 (defun load-unit-file (dump-directory filename load-func progress-message)

@@ -128,7 +128,7 @@ and permission notice:
                                      (:file "tries")
                                      ;; ELIDED (:file "shelfs") - basically missing-larkc
                                      (:file "id-index")
-                                     ;; ELIDED (:file "dictionary") - use hashtables; see dictionary.lisp (not in this system)
+                                     (:file "dictionary") ;; [Clyc] elided struct, uses hashtables; retains CFASL opcode registration
                                      (:file "cfasl-compression")
                                      (:file "cfasl-utilities")
                                      (:file "bijection") ;; partial port - missing-larkc

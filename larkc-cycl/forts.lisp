@@ -120,7 +120,7 @@ and permission notice:
 (defun new-fort-id-index-narts ()
   (new-id-index (new-nart-id-threshold)))
 
-(defconstant *cfasl-opcode-fort-id-index* 99)
+(declare-cfasl-opcode *cfasl-opcode-fort-id-index* 99 'cfasl-input-fort-id-index)
 
 (defun cfasl-input-fort-id-index (stream)
   (let ((fort-id-index (new-fort-id-index))

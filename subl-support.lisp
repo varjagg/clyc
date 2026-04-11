@@ -498,6 +498,12 @@ Same condition-variable wakeup mechanism as process-wait."
           (bt:condition-wait *process-wait-cv* *process-wait-lock*
                              :timeout (min remaining 1)))))))
 
+(defun construct-filename (dir-list filename &optional ext rel?)
+  (princ-to-string (make-pathname :directory (cons (if rel? :relative :absolute) dir-list)
+                                  :name (if ext
+                                            (concatenate 'string filename "." ext)
+                                            filename))))
+
 (defun seed-random (&optional seed)
   (setf *random-state* (if seed
                            ;; Only SBCL provides a repeatable numeric random seeding

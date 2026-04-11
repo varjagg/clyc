@@ -41,6 +41,7 @@ and permission notice:
 ;; DEPRECATED: The SubL dictionary type is elided in preference to standard CL
 ;; hash tables. Only non-obvious functionality is retained here.
 
+#|
 (defun* dictionary-p (object) (:inline t)
   "[Cyc] Return T iff OBJECT is a dictionary."
   (hash-table-p object))
@@ -74,11 +75,13 @@ and permission notice:
            ,@body
            (incf ,so-far)
            (note-percent-progress ,so-far ,total))))))
+|#
 
 ;;; CFASL deserialization
 
-(defconstant *cfasl-opcode-dictionary* 61)
+(declare-cfasl-opcode *cfasl-opcode-dictionary* 61 'cfasl-input-dictionary)
 (defconstant *cfasl-opcode-legacy-dictionary* 64)
+;; (defun cfasl-input-legacy-dictionary (stream) ...) -- active declareFunction, no body
 
 (defun cfasl-input-dictionary (stream)
   "[Cyc] Read a dictionary from STREAM using the CFASL protocol."
@@ -91,4 +94,3 @@ and permission notice:
         (setf (gethash key dictionary) value)))
     dictionary))
 
-(register-cfasl-input-function *cfasl-opcode-dictionary* #'cfasl-input-dictionary)

@@ -36,9 +36,12 @@ and permission notice:
 
 (in-package :clyc)
 
-;; [Clyc] Java uses Filesys.construct_filename(NIL,NIL,NIL,T); adapted for CL pathnames
-(deflexical *cyc-home-directory* #P"./"
+;; TODO - cyc home seems to be for the cyc project source code, but are worlds supposed to be all held under here?
+(deflexical *cyc-home-directory* (asdf:system-source-directory :clyc)
   "[Cyc] The pathname for the cyc home directory (suitable for use with RELATIVE-FILENAME)")
+
+(deflexical *kbs-directory* (merge-pathnames #P"clyc-kbs/" (user-homedir-pathname))
+  "[Cyc] The pathname for the kbs directory (suitable for use with RELATIVE-FILENAME)")
 
 (defglobal *available-cyc-features* nil)
 
@@ -73,12 +76,10 @@ and permission notice:
 ;; (defun cyc-hpkb-feature () ...) -- active declareFunction, no body
 ;; (defun cyc-qa-feature () ...) -- active declareFunction, no body
 ;; (defun cyc-kbi-feature () ...) -- active declareFunction, no body
-
-(defun cyc-opencyc-feature ()
-  nil)
-
+(defun cyc-opencyc-feature () nil)
 ;; (defun cyc-researchcyc-feature () ...) -- active declareFunction, no body
 ;; (defun cyc-sksi-feature () ...) -- active declareFunction, no body
+
 ;; (defun matches-execution-context-p (context) ...) -- active declareFunction, no body
 ;; (defun cycorp-execution-context-p () ...) -- active declareFunction, no body
 

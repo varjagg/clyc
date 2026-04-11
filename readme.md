@@ -67,39 +67,38 @@ Compilation warnings can be made visible by evaluating the following before quic
 
 [The modern Common Lisp + Quicklisp modus operandi is to add a symlink in `~/quicklisp/local-projects/` to projects like Clyc, and run `(ql:quickload "clyc")` from the REPL to load a project.]
 
+## General Mechanism Notes
+
+`Disk persistence` - KB CFASL files can be read, but writing is missing-larkc. A `cyc-tiny` bootstrap KB is included in LarKC, but that will never expand on-disk. Everything ends up RAM-resident only.  
+`Transcripts` - no actual output or evaluation code, just skeleton.  
+`cyc-testing/` - Test harness & registration, but no actual test function bodies.  
+`Hash functions` - CFASL doesn't store hash values, so we can defer to SBCL `sxhash` and still load abitrary saved KBs.  
+`Worlds` - There doesn't seem to be any notion of a single-file world export, just a directory of fine-grained cfasl files.  
+`SKSI` - Not included, a very minimal set of hooks remains.  
+`CFASL compression` - Not included. Definitions for compression tags remain.  
+`Janus` - Not included. A framework for recording & playing back inference for testing?  
+
 ## Data Structures
 
 *These are listed by their* `.java`/`.lisp` *filenames.*
 
-`tries` - Character-based trie used to intern and prefix-complete Constant names from strings.
-
-`id-index` - Key/value storage with incrementally allocated integer keys.  Backed by a vector, which can be grown, with a hashtable storing entries whose keys are out of range.
-
-`set` - Wrapped set-contents for some reason, maybe for its cfasl interface? Replaced with a key->key hashtable implementation.
-
-`cache` - A hashtable with LRU discarding to keep a fixed size. (LRU discarding might be missing-larkc)
-
-`queue` - A FIFO queue (cons-backed), and a priority FIFO queue (b-tree backed).
-
-`binary-tree` - A standard binary tree, and an AVL tree which is missing-larkc.
-
-`stacks` - A LIFO stack which also maintains a count of elements.
-
-`deck` - A push/pop interface manually dispatched to either a queue or stack.
-
-`fvector` - file-vector, an indexed on-disk array of arbitrary-length elements. However, writing seems to be missing-larkc.
-
-`kb-object-manager` - In-memory cache for a fixed percentage of a `fvector`. Forms the basis of most high-level storage.
+`tries` - Character-based trie used to intern and prefix-complete Constant names from strings.  
+`id-index` - Key/value storage with incrementally allocated integer keys.  Backed by a vector, which can be grown, with a hashtable storing entries whose keys are out of range.  
+`set` - Wrapped set-contents for some reason, maybe for its cfasl interface? Replaced with a key->key hashtable implementation.  
+`cache` - A hashtable with LRU discarding to keep a fixed size. (LRU discarding might be missing-larkc)  
+`queue` - A FIFO queue (cons-backed), and a priority FIFO queue (b-tree backed).  
+`binary-tree` - A standard binary tree, and an AVL tree which is missing-larkc.  
+`stacks` - A LIFO stack which also maintains a count of elements.  
+`deck` - A push/pop interface manually dispatched to either a queue or stack.  
+`fvector` - file-vector, an indexed on-disk array of arbitrary-length elements. However, writing seems to be missing-larkc.  
+`kb-object-manager` - In-memory cache for a fixed percentage of a `fvector`. Forms the basis of most high-level storage.  
 
 ### Deprecated
 
-`dictionary` - Key/value storage backed by an a-list when small, and a hashtable when large. Elided in preference to standard hashtables.
-
-`keyhash` - A set, stored in a manually-implemented hash table so as not to store a value. Elided in preference to standard hashtables.
-
-`set-contents` - A set, stored in a list when small, keyhash when large.  Converted to use only a hashtable backend, though should be deprecated in favor of `set`.
-
-`fraction-utilities` - Elided, since CL already natively supports rational numbers.
+`dictionary` - Key/value storage backed by an a-list when small, and a hashtable when large. Elided in preference to standard hashtables.  
+`keyhash` - A set, stored in a manually-implemented hash table so as not to store a value. Elided in preference to standard hashtables.  
+`set-contents` - A set, stored in a list when small, keyhash when large.  Converted to use only a hashtable backend, though should be deprecated in favor of `set`.  
+`fraction-utilities` - Elided, since CL already natively supports rational numbers.  
 
 ### Files Exist But the Implementation is missing-larkc
 
@@ -112,27 +111,13 @@ Compilation warnings can be made visible by evaluating the following before quic
 `file-hash-table` - On-disk key/value store. Huge function list.  
 `sparse-matrix` `sparse-vector` `heap` - Self explanatory.  
 
-## General Mechanism Notes
-
-`Transcripts` - no actual output or evaluation code, just skeleton.
-`cyc-testing/` - Test harness & registration, but no actual test function bodies.
-`Hash functions` - CFASL doesn't store hash values, so we can defer to SBCL `sxhash` and still load saved worlds
-`Worlds` - There doesn't seem to be any notion of a single-file world export, just a directory of fine-grained cfasl files.
-`SKSI` - Not included, a very minimal set of hooks remains.
-`CFASL compression` - Not included. Definitions for compression tags remain.
-`Janus` - Not included. A framework for recording & playing back inference for testing?
-
 ## Utilities
 
-`structure resourcing` - Object pooling for reusing structure instances. Generally missing-larkc, but took a while to figure out what the term meant.
-
-`cfasl` - Serialization & deserialization tools.
-
-`memoization-state.lisp` - Memoizes function calls.
-
-`special-variable-state.lisp` - Snapshots a list of CL special variables.
-
-`misc-utilities.lisp` - Startup code.
+`structure resourcing` - Object pooling for reusing structure instances. Generally missing-larkc, but took a while to figure out what the term meant.  
+`cfasl` - Serialization & deserialization tools.  
+`memoization-state.lisp` - Memoizes function calls.  
+`special-variable-state.lisp` - Snapshots a list of CL special variables.  
+`misc-utilities.lisp` - Startup code.  
 
 
 ## Glossary
@@ -149,13 +134,14 @@ Compilation warnings can be made visible by evaluating the following before quic
 `Arity` = the number of terms in a predicate not including the first (the operator).  
 `Sequence` = a cons list.  
 `Sequence term` = a term holding the remainder of a sequence, as in a dotted list. Also `sequence variable` if the term is a variable.  
-`Shell` = an empty structure, possibly for filling in structure resourcing pools.
-`Cyc API` = a subset of SubL which is intended to be the public API. It is not a separate language. The actual validation of the Cyc API subset is missing-larkc, but all the API declarations are present.
+`Shell` = an empty structure for KB content, lazily filled and LRU cached from CFASLs.  
+`Def` = a filled structure with KB content, referenced by a shell.  
+`Cyc API` = a subset of SubL which is intended to be the public API. It is not a separate language. The actual validation of the Cyc API subset is missing-larkc, but all the API declarations are present.  
 
 **Inference:**
-`Removal` = directly answer a query literal with bindings, removing that literal from the query.
-`Transformation` = substitute a query literal with an antecedent expansion or alternative, to explore finding other query strategies.
-`Productivity` = an estimate for the number of results an inference module will produce.
+`Removal` = directly answer a query literal with bindings, removing that literal from the query.  
+`Transformation` = substitute a query literal with an antecedent expansion or alternative, to explore finding other query strategies.  
+`Productivity` = an estimate for the number of results an inference module will produce.  
 
 **Clyc:**  
 `missing-larkc` = specific term for things in Cyc that were not provided to the LarKC project, distinguished from unimplemented or unfinished things in Clyc.  
@@ -170,21 +156,21 @@ Compilation warnings can be made visible by evaluating the following before quic
 `NART` = Non-Atomic Reified Term. Internal identifier that a NAUT resolved to.  
 `TOU` = Term Of Unit, predicate that maps a NART to a NAUT.  
 `FORT` = First-Order Reified Term, which is a constant or a NART.  
-`WFF` = Well-Formed Formula.  Arity, argument types, connectives, MT it's in, semantics are all checked, valid, and coherent.
+`WFF` = Well-Formed Formula.  Arity, argument types, connectives, MT it's in, semantics are all checked, valid, and coherent.  
 `EL` = Epistemological Level, expressive human-editable form.  
 `HL` = Heuristic Level, efficient low-level form.  
-`TL` = Transcript Level, a serializable transform of HL for transcripts.
+`TL` = Transcript Level, a serializable transform of HL for transcripts.  
 `SBHL` = Subsumption Based HL, meta predicates like `#$isa`, `#$genls`, `#$genlAttributes`.  
 `FOL` = First-Order Logic, the full sentence style of EL.  
 `CNF` = Conjunctive Normal Form, the style of HL. `(#$and (#$or ?term+)+)`, where terms may also be negated.  
 `GUID` = Globally Unique ID, external identifier.  
 `SUID` = (System?) Unique ID, internal identifier.  
 `TV` = Truth value. Default or monotonically true or false, unknown truth, etc.  
-`CZER` = Canonicalizer.
-`AT` = the `arg-type` mechanisms.
-`GT` = General Transitivity, the transitive predicate reasoning dispatch layer.
-`GHL` = Graph Hierarchy Link, the abstract general graph search infrastructure underlying GT.
-`ASENT` = Atomic Sentence, a sentence that contains no variables or logical connectives.
-`KE` = Knowledge Editor, high-level API for KB modifications.
-`FI` = Functional Interface, older interface for KB operations, superseded by KE and Cyc API.
+`CZER` = Canonicalizer.  
+`AT` = the `arg-type` mechanisms.  
+`GT` = General Transitivity, the transitive predicate reasoning dispatch layer.  
+`GHL` = Graph Hierarchy Link, the abstract general graph search infrastructure underlying GT.  
+`ASENT` = Atomic Sentence, a sentence that contains no variables or logical connectives.  
+`KE` = Knowledge Editor, high-level API for KB modifications.  
+`FI` = Functional Interface, older interface for KB operations, superseded by KE and Cyc API.  
 

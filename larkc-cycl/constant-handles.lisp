@@ -53,6 +53,24 @@ and permission notice:
   ;; TODO - String, but a lot of code tests for stringp of this in terms of registering it in tables. Why?
   name)
 
+(defun print-constant (object stream depth)
+  "[Cyc] Print CONSTANT to STREAM."
+  (declare (ignore depth))
+  (let ((name (c-name object))
+        (suid (c-suid object)))
+    (cond
+      ((stringp name)
+       (format stream "#$~a" name))
+      ((eq object (cfasl-invalid-constant))
+       (write-string "<The CFASL invalid constant>" stream))
+      ((integerp suid)
+       (format stream "<Constant ~a>" suid))
+      (t
+       (format stream "<Constant ??>")))))
+
+(defmethod print-object ((obj constant) stream)
+  (print-constant obj stream 0))
+
 (declaim (inline constant-handle-valid?))
 (defun constant-handle-valid? (constant)
   (integerp (c-suid constant)))

@@ -87,7 +87,7 @@ Returns SET."
 (defun* new-set-iterator (set) (:inline t)
   (new-hash-table-iterator set))
 
-(defconstant *cfasl-opcode-set* 60)
+(declare-cfasl-opcode *cfasl-opcode-set* 60 'cfasl-input-set)
 
 (defun cfasl-input-set (stream)
   (let* ((test (cfasl-input stream))
@@ -96,6 +96,7 @@ Returns SET."
     (cfasl-input-set-contents stream set size)))
 
 (defconstant *cfasl-opcode-legacy-set* 67)
+;; (defun cfasl-input-legacy-set (stream) ...) -- active declareFunction, no body
 
 (defun* set-element-list (set) (:inline t)
   "[Cyc] Returns a list of the elements of SET."
