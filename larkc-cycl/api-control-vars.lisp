@@ -42,8 +42,8 @@ and permission notice:
 
 
 (defparameter *cfasl-constant-handle-func* nil
-  "[Cyc] Fucntion used to determine constant handles during CFASL output.
-If nIL, the default used is CONSTANT-INTERNAL-ID")
+  "[Cyc] Function used to determine constant handles during CFASL output.
+If NIL, the default used is CONSTANT-INTERNAL-ID")
 (defparameter *cfasl-constant-handle-lookup-func* nil
   "[Cyc] Function used to look up constants from their handles during CFASL input.
 If NIL, the default used is FIND-CONSTANT-BY-INTERNAL-ID")
@@ -82,6 +82,6 @@ If NIL, the default used is FIND-CLAUSE-STRUC-BY-ID")
 (defparameter *default-ke-purpose* nil
   "[Cyc] The purpose to use for KE by default.  NIL = General Cyc KE.")
 (defparameter *ke-purpose* *default-ke-purpose*
-  "[Cyc] This variable constains current KE purpose for asserting formulas to the system.
+  "[Cyc] This variable contains current KE purpose for asserting formulas to the system.
 NIL means that the KB purpose is generic extension of Cyc's knowledge.")
 (defparameter *generate-readable-fi-results* t)

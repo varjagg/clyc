@@ -55,15 +55,7 @@ and permission notice:
 
 (defconstant *dtp-removal-module-cost-test* 'removal-module-cost-test)
 
-(defmethod print-object ((object removal-module-cost-test) stream)
-  (removal-module-cost-test-print-function-trampoline object stream))
-
 ;; Declare phase (following declare_removal_module_cost_tests_file order)
-
-;; Active declareFunction with body — delegates to the default struct print function.
-(defun removal-module-cost-test-print-function-trampoline (object stream)
-  (default-struct-print-function object stream 0)
-  nil)
 
 ;; removal-module-cost-test-p — provided by defstruct
 ;; (Java's $removal_module_cost_test_p$UnaryFunction was a handleMissingMethodError

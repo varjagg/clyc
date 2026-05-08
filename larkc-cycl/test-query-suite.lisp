@@ -38,6 +38,7 @@ and permission notice:
 
 ;; Struct definition — generates accessors, predicate, constructor, and setf accessors.
 ;; Covers: test-query-suite-p, test-ste-*, _csetf-test-ste-*, make-test-query-suite
+;; print-object is missing-larkc 23172 — CL's default print-object handles this.
 
 (defstruct (test-query-suite (:conc-name "TEST-STE-"))
   cycl-id
@@ -48,12 +49,6 @@ and permission notice:
 (defconstant *dtp-test-query-suite* 'test-query-suite)
 
 ;; Declare phase (following declare_test_query_suite_file order)
-
-;; Active declareFunction with body (missing-larkc 23172)
-(defun test-query-suite-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for print method."
-  (declare (ignore object stream))
-  (missing-larkc 23172))
 
 ;; test-query-suite-p — provided by defstruct
 ;; test-ste-cycl-id — provided by defstruct

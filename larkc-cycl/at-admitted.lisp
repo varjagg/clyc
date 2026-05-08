@@ -46,20 +46,20 @@ and permission notice:
 (defparameter *at-cr-argnum* nil)
 
 (deflexical *at-candidate-relations-max* 512
-  "[Cyc] Estimated max number of candidate relations.")
+  "[Cyc] estimated max number of candidate relations")
 
 (defparameter *ira-table* nil
-  "[Cyc] Hashtable mapping relations -> boolean.")
+  "[Cyc] hashtable mapping relations -> boolean")
 (defparameter *ira-argnum* nil
-  "[Cyc] An integer.")
+  "[Cyc] an integer")
 (defparameter *ira-relations-estimate* 512
-  "[Cyc] Estimated number of applicable relations.")
+  "[Cyc] estimated number of applicable relations")
 (defparameter *ira-isa-sbhl-space* nil)
 (defparameter *ira-arg-isa-pred* nil
-  "[Cyc] One of #$arg1Isa, #$arg2Isa, etc.")
+  "[Cyc] one of #$arg1Isa, #$arg2Isa, etc.")
 (defparameter *ira-genl-sbhl-space* nil)
 (defparameter *ira-arg-genl-pred* nil
-  "[Cyc] One of #$arg1Genl, #$arg2Genl, etc.")
+  "[Cyc] one of #$arg1Genl, #$arg2Genl, etc.")
 (defparameter *ira-mapping-result* nil)
 
 ;; Functions (declare section ordering)

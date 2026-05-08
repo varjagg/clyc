@@ -37,6 +37,7 @@ and permission notice:
 
 (in-package :clyc)
 
+;; print-object is missing-larkc 29372 — CL's default print-object handles this.
 (defstruct (simple-lru-cache-strategy
             (:conc-name "SLRU-CACHESTRAT-")
             (:predicate simple-lru-cache-strategy-p)
@@ -51,10 +52,6 @@ and permission notice:
   metrics)
 
 (defconstant *dtp-simple-lru-cache-strategy* 'simple-lru-cache-strategy)
-
-(defun simple-lru-cache-strategy-print-function-trampoline (object stream)
-  ;; Delegates to print-simple-lru-cache-strategy, which is missing-larkc.
-  (missing-larkc 29372))
 
 ;; (defun print-simple-lru-cache-strategy (object stream depth) ...) -- active declareFunction, no body
 ;; (defun new-simple-lru-cache-strategy (capacity &optional metrics) ...) -- active declareFunction, no body
@@ -179,4 +176,7 @@ and permission notice:
 ;; (defun test-slru-cache-strategy-compare-directions (capacity) ...) -- active declareFunction, no body
 ;; (defun test-slru-cache-strategy-peek-operators (capacity) ...) -- active declareFunction, no body
 
-;;; Setup phase — define-test-case-table-int calls are elided (macro-helper to nonexistent macro)
+;;; Setup phase — [Clyc] Java setup invokes (define_test_case_table_int ...) calls,
+;;; but new-generic-test-case-table's check-types call missing-larkc stubs
+;;; test-case-name-p and cyc-test-kb-p, so the calls cannot run at load time.
+;;; Restore once those predicates have bodies.

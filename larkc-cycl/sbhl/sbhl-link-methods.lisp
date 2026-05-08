@@ -42,9 +42,9 @@ returns mt-links dictionary from DIRECTION field of direction-link."
   (let ((link (get-sbhl-graph-link node (get-sbhl-module))))
     (get-sbhl-mt-links link direction (get-sbhl-module))))
 
-;; (defun sbhl-predicate-links (node)) -- commented declareFunction, no body
-;; (defun sbhl-inverse-links (node)) -- commented declareFunction, no body
-;; (defun sbhl-undirected-links (node)) -- commented declareFunction, no body
+;; (defun sbhl-predicate-links (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-inverse-links (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-undirected-links (node) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-graph-link-nodes (node direction mt tv)
   "[Cyc] Accessor: takes NODE, DIRECTION, MT, and TV. Returns list of nodes for
@@ -65,12 +65,12 @@ tv-link specified by MT, in forward direction. Requires *sbhl-module* to be defi
 tv-link specified by MT, in backward direction. Requires *sbhl-module* to be defined."
   (get-sbhl-graph-link-nodes node (get-sbhl-module-backward-direction (get-sbhl-module)) mt tv))
 
-;; (defun member-of-sbhl-link-nodes? (arg1 arg2 arg3 arg4 arg5)) -- commented declareFunction, no body
-;; (defun no-accessible-sbhl-nodes-p (node)) -- commented declareFunction, no body
-;; (defun sbhl-link-mts (arg1 arg2)) -- commented declareFunction, no body
-;; (defun sbhl-forward-mts (arg1 arg2)) -- commented declareFunction, no body
-;; (defun sbhl-backward-mts (arg1 arg2)) -- commented declareFunction, no body
-;; (defun sbhl-link-nodes-by-iteration (arg1 arg2)) -- commented declareFunction, no body
+;; (defun member-of-sbhl-link-nodes? (arg1 arg2 arg3 arg4 arg5) ...) -- commented declareFunction, no body
+;; (defun no-accessible-sbhl-nodes-p (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-link-mts (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-forward-mts (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-backward-mts (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-link-nodes-by-iteration (arg1 arg2) ...) -- commented declareFunction, no body
 
 (defun sbhl-link-nodes (module node direction &optional mt tv with-cutoff-support?)
   "[Cyc] The asserted link nodes accessible by NODE via one sbhl-link-pred link,
@@ -87,7 +87,7 @@ as specified by MODULE, with relevant truth value."
                 (setf result (nconc (copy-list link-nodes) result)))))))
     (fast-delete-duplicates result)))
 
-;; (defun sbhl-link-nodes-p (arg1 arg2 arg3 &optional arg4 arg5)) -- commented declareFunction, no body
+;; (defun sbhl-link-nodes-p (arg1 arg2 arg3 &optional arg4 arg5) ...) -- commented declareFunction, no body
 
 (defun sbhl-forward-true-link-nodes (module node &optional mt tv with-cutoff-support?)
   (declare (type (satisfies sbhl-module-p) module))
@@ -102,7 +102,7 @@ as specified by MODULE, with relevant truth value."
        (sbhl-error 1 "sbhl-link-nodes never called.")
        nil))))
 
-;; (defun sbhl-forward-false-link-nodes (module node &optional mt tv with-cutoff-support?)) -- commented declareFunction, no body
+;; (defun sbhl-forward-false-link-nodes (module node &optional mt tv with-cutoff-support?) ...) -- commented declareFunction, no body
 
 (defun sbhl-backward-true-link-nodes (module node &optional mt tv with-cutoff-support?)
   (declare (type (satisfies sbhl-module-p) module))
@@ -117,8 +117,8 @@ as specified by MODULE, with relevant truth value."
        (sbhl-error 1 "sbhl-link-nodes never called.")
        nil))))
 
-;; (defun sbhl-backward-true-link-nodes-p (module node &optional mt tv)) -- commented declareFunction, no body
-;; (defun sbhl-backward-false-link-nodes (module node &optional mt tv with-cutoff-support?)) -- commented declareFunction, no body
+;; (defun sbhl-backward-true-link-nodes-p (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-backward-false-link-nodes (module node &optional mt tv with-cutoff-support?) ...) -- commented declareFunction, no body
 
 (defun sbhl-mt-matching-link-nodes (module node mt)
   "[Cyc] Assumes TRUE tv, and forward direction, and returns the link-nodes of NODE
@@ -134,8 +134,8 @@ in MODULE which match MT"
                 (push link-node result)))))))
     (fast-delete-duplicates result)))
 
-;; (defun sbhl-siblings-forward (arg1 arg2 &optional arg3 arg4)) -- commented declareFunction, no body
-;; (defun sbhl-siblings-backward (arg1 arg2 &optional arg3 arg4)) -- commented declareFunction, no body
+;; (defun sbhl-siblings-forward (arg1 arg2 &optional arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun sbhl-siblings-backward (arg1 arg2 &optional arg3 arg4) ...) -- commented declareFunction, no body
 
 (defun create-new-sbhl-link (direction mt tv node &optional module)
   "[Cyc] Returns a new sbhl direction link created from scratch from args."
@@ -200,18 +200,18 @@ create-and-store-sbhl-link. Will not add redundant links."
        (missing-larkc 1914))))
   nil)
 
-;; (defun make-all-sbhl-links ()) -- commented declareFunction, no body
+;; (defun make-all-sbhl-links () ...) -- commented declareFunction, no body
 
 (defun assertion-sbhl-tv (assertion)
   (let ((truth (assertion-truth assertion))
         (strength (assertion-strength assertion)))
     (truth-strength-to-sbhl-tv truth strength)))
 
-;; (defun sbhl-recompute-links (arg1 &optional arg2 arg3)) -- commented declareFunction, no body
-;; (defun sbhl-recompute-graph-links (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-recompute-links-of-node (node)) -- commented declareFunction, no body
-;; (defun sbhl-recompute-links-of-nodes (nodes)) -- commented declareFunction, no body
-;; (defun reset-sbhl-links (arg1)) -- commented declareFunction, no body
+;; (defun sbhl-recompute-links (arg1 &optional arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun sbhl-recompute-graph-links (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-recompute-links-of-node (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-recompute-links-of-nodes (nodes) ...) -- commented declareFunction, no body
+;; (defun reset-sbhl-links (arg1) ...) -- commented declareFunction, no body
 
 (defun add-sbhl-link (arg1 arg2 mt tv)
   "[Cyc] After adding support. Adds necessary link structure and data to store
@@ -249,9 +249,9 @@ corresponding to MODULE."
         (add-sbhl-link arg1 arg2 mt tv))))
   nil)
 
-;; (defun set-sbhl-links (arg1 arg2 &optional arg3)) -- commented declareFunction, no body
-;; (defun remove-sbhl-link-node (arg1 arg2 arg3 arg4 arg5 &optional arg6)) -- commented declareFunction, no body
-;; (defun remove-sbhl-forward-and-backward-link-node (arg1 arg2 arg3 arg4 &optional arg5)) -- commented declareFunction, no body
+;; (defun set-sbhl-links (arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
+;; (defun remove-sbhl-link-node (arg1 arg2 arg3 arg4 arg5 &optional arg6) ...) -- commented declareFunction, no body
+;; (defun remove-sbhl-forward-and-backward-link-node (arg1 arg2 arg3 arg4 &optional arg5) ...) -- commented declareFunction, no body
 
 (defun remove-sbhl-link (arg1 arg2 mt tv)
   (let* ((module (get-sbhl-module))
@@ -336,15 +336,15 @@ corresponding to MODULE."
   (setf *isa-arg2-naut-table* (make-hash-table :size 200))
   nil)
 
-;; (defun clear-isa-arg2-naut-table ()) -- commented declareFunction, no body
+;; (defun clear-isa-arg2-naut-table () ...) -- commented declareFunction, no body
 
 (defun isa-stored-naut-arg2-p (v-term)
   "[Cyc] Whether TERM has any direct isas which are NAUTs."
   (and (hash-table-p *isa-arg2-naut-table*)
        (and (gethash v-term *isa-arg2-naut-table*) t)))
 
-;; (defun store-isa-arg2-naut (arg1 arg2 arg3 arg4)) -- commented declareFunction, no body
-;; (defun remove-isa-arg2-naut (arg1 arg2 arg3 arg4)) -- commented declareFunction, no body
+;; (defun store-isa-arg2-naut (arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun remove-isa-arg2-naut (arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
 
 (defun isa-to-naut-conditions? (arg1 arg2)
   "[Cyc] Whether looking for (isa ARG1 ARG2) in the NAUT table is applicable."
@@ -352,8 +352,8 @@ corresponding to MODULE."
        (sbhl-node-object-p arg1)
        (possibly-naut-p arg2)))
 
-;; (defun isas-from-naut-arg2 (arg1 &optional arg2 arg3)) -- commented declareFunction, no body
-;; (defun union-isas-from-naut-arg2 (arg1 &optional arg2 arg3)) -- commented declareFunction, no body
+;; (defun isas-from-naut-arg2 (arg1 &optional arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun union-isas-from-naut-arg2 (arg1 &optional arg2 arg3) ...) -- commented declareFunction, no body
 
 ;; TODO - reconstruct do-isas-from-naut-arg2 macro. No expansion sites visible to verify against.
 ;; Internal Constants evidence from sbhl_link_methods.java:
@@ -375,18 +375,18 @@ corresponding to MODULE."
   (setf *quoted-isa-arg2-naut-table* (make-hash-table :size 200))
   nil)
 
-;; (defun clear-quoted-isa-arg2-naut-table ()) -- commented declareFunction, no body
+;; (defun clear-quoted-isa-arg2-naut-table () ...) -- commented declareFunction, no body
 
 (defun quoted-isa-stored-naut-arg2-p (v-term)
   "[Cyc] Whether TERM has any direct quoted-isas which are NAUTs."
   (and (hash-table-p *quoted-isa-arg2-naut-table*)
        (and (gethash v-term *quoted-isa-arg2-naut-table*) t)))
 
-;; (defun store-quoted-isa-arg2-naut (arg1 arg2 arg3 arg4)) -- commented declareFunction, no body
-;; (defun remove-quoted-isa-arg2-naut (arg1 arg2 arg3 arg4)) -- commented declareFunction, no body
-;; (defun quoted-isa-to-naut-conditions? (arg1 arg2)) -- commented declareFunction, no body
-;; (defun quoted-isas-from-naut-arg2 (arg1 &optional arg2 arg3)) -- commented declareFunction, no body
-;; (defun union-quoted-isas-from-naut-arg2 (arg1 &optional arg2 arg3)) -- commented declareFunction, no body
+;; (defun store-quoted-isa-arg2-naut (arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun remove-quoted-isa-arg2-naut (arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun quoted-isa-to-naut-conditions? (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun quoted-isas-from-naut-arg2 (arg1 &optional arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun union-quoted-isas-from-naut-arg2 (arg1 &optional arg2 arg3) ...) -- commented declareFunction, no body
 ;; TODO - reconstruct do-quoted-isas-from-naut-arg2 macro. No expansion sites visible to verify against.
 ;; Internal Constants evidence from sbhl_link_methods.java:
 ;; Arglist: $list60 = ((QUOTED-ISA-VAR TERM &OPTIONAL MT TV) &BODY BODY)
@@ -439,14 +439,14 @@ from the *non-fort-isa-table*, with mt and tv relevance filtering."
   "[Cyc] For use by ONLY the dumper."
   *non-fort-isa-table*)
 
-;; (defun non-fort-instance-table ()) -- commented declareFunction, no body
+;; (defun non-fort-instance-table () ...) -- commented declareFunction, no body
 
 (defun non-fort-isa-tables-unbuilt? ()
   (or (uninitialized-p *non-fort-isa-table*)
       (uninitialized-p *non-fort-instance-table*)))
 
-;; (defun initialize-non-fort-isa-tables ()) -- commented declareFunction, no body
-;; (defun rebuild-non-fort-isa-tables ()) -- commented declareFunction, no body
+;; (defun initialize-non-fort-isa-tables () ...) -- commented declareFunction, no body
+;; (defun rebuild-non-fort-isa-tables () ...) -- commented declareFunction, no body
 
 (defun non-fort-isa? (ins col &optional mt tv)
   (declare (type (satisfies non-fort-p) ins))
@@ -463,10 +463,10 @@ from the *non-fort-isa-table*, with mt and tv relevance filtering."
                   (setf result? t))))))))
     result?))
 
-;; (defun non-fort-isa-any? (ins col &optional mt tv)) -- commented declareFunction, no body
-;; (defun non-fort-isa-all? (ins col &optional mt tv)) -- commented declareFunction, no body
-;; (defun non-fort-isas (ins &optional mt tv)) -- commented declareFunction, no body
-;; (defun non-fort-all-isa (ins &optional mt tv)) -- commented declareFunction, no body
+;; (defun non-fort-isa-any? (ins col &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun non-fort-isa-all? (ins col &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun non-fort-isas (ins &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun non-fort-all-isa (ins &optional mt tv) ...) -- commented declareFunction, no body
 
 (defun non-fort-instance-table-lookup (col)
   (gethash col *non-fort-instance-table*))
@@ -491,16 +491,16 @@ from the *non-fort-isa-table*, with mt and tv relevance filtering."
         (return-from possibly-remove-non-fort-isa t))))
   nil)
 
-;; (defun add-non-fort-isa (gaf)) -- commented declareFunction, no body
-;; (defun remove-non-fort-isa (gaf)) -- commented declareFunction, no body
-;; (defun clear-sbhl-links-within-mt (arg1 arg2 &optional arg3)) -- commented declareFunction, no body
-;; (defun clear-sbhl-links (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun clear-all-sbhl-links (arg1)) -- commented declareFunction, no body
-;; (defun clear-all-sbhl-links-within-mt (arg1 arg2)) -- commented declareFunction, no body
-;; (defun remove-node-from-sbhl-graphs (node)) -- commented declareFunction, no body
-;; (defun clear-sbhl-module-graph (module)) -- commented declareFunction, no body
-;; (defun clear-all-sbhl-data ()) -- commented declareFunction, no body
-;; (defun clear-all-sbhl-non-time-data ()) -- commented declareFunction, no body
+;; (defun add-non-fort-isa (gaf) ...) -- commented declareFunction, no body
+;; (defun remove-non-fort-isa (gaf) ...) -- commented declareFunction, no body
+;; (defun clear-sbhl-links-within-mt (arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
+;; (defun clear-sbhl-links (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun clear-all-sbhl-links (arg1) ...) -- commented declareFunction, no body
+;; (defun clear-all-sbhl-links-within-mt (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun remove-node-from-sbhl-graphs (node) ...) -- commented declareFunction, no body
+;; (defun clear-sbhl-module-graph (module) ...) -- commented declareFunction, no body
+;; (defun clear-all-sbhl-data () ...) -- commented declareFunction, no body
+;; (defun clear-all-sbhl-non-time-data () ...) -- commented declareFunction, no body
 
 (defun sbhl-any-asserted-true-links (module node &optional (mt *mt*))
   "[Cyc] The first term found that appears in the arg 2 position of a gaf with
@@ -517,10 +517,10 @@ is MODULE's link predicate."
       (nconc (pred-values-in-relevant-mts node (sbhl-mod-link-pred module) mt 1 2 :true)
              (pred-values-in-relevant-mts node (sbhl-mod-link-pred module) mt 2 1 :true))))
 
-;; (defun sbhl-asserted-false-links (module node &optional mt)) -- commented declareFunction, no body
-;; (defun sbhl-asserted-true-inverse-links (module node &optional mt)) -- commented declareFunction, no body
-;; (defun sbhl-asserted-false-inverse-links (module node &optional mt)) -- commented declareFunction, no body
-;; (defun sbhl-supported-true-links (module node &optional mt)) -- commented declareFunction, no body
-;; (defun sbhl-supported-false-links (module node &optional mt)) -- commented declareFunction, no body
-;; (defun sbhl-supported-true-inverse-links (module node &optional mt)) -- commented declareFunction, no body
-;; (defun sbhl-supported-false-inverse-links (module node &optional mt)) -- commented declareFunction, no body
+;; (defun sbhl-asserted-false-links (module node &optional mt) ...) -- commented declareFunction, no body
+;; (defun sbhl-asserted-true-inverse-links (module node &optional mt) ...) -- commented declareFunction, no body
+;; (defun sbhl-asserted-false-inverse-links (module node &optional mt) ...) -- commented declareFunction, no body
+;; (defun sbhl-supported-true-links (module node &optional mt) ...) -- commented declareFunction, no body
+;; (defun sbhl-supported-false-links (module node &optional mt) ...) -- commented declareFunction, no body
+;; (defun sbhl-supported-true-inverse-links (module node &optional mt) ...) -- commented declareFunction, no body
+;; (defun sbhl-supported-false-inverse-links (module node &optional mt) ...) -- commented declareFunction, no body

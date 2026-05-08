@@ -43,8 +43,6 @@ and permission notice:
 
 (defconstant *dtp-new-root-strategy-data* 'new-root-strategy-data)
 
-;; (defun new-root-strategy-data-print-function-trampoline (object stream) ...) -- active declareFunction, no body
-
 (defun new-root-strategy-data-p (object)
   (typep object 'new-root-strategy-data))
 

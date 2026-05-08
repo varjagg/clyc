@@ -39,6 +39,7 @@ and permission notice:
 (deflexical *default-hierarchical-visitor-noop-callback* #'false
   "[Cyc] The default value to use for a hierarchical visitor when the callback is not supposed to do anything.")
 
+;; print-object is missing-larkc 30458 — CL's default print-object handles this.
 (defstruct (hierarchical-visitor (:conc-name "HIER-VISIT-"))
   begin-path-fn
   end-path-fn
@@ -48,10 +49,6 @@ and permission notice:
   param)
 
 (defconstant *dtp-hierarchical-visitor* 'hierarchical-visitor)
-
-(defun hierarchical-visitor-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for hierarchical-visitor."
-  (missing-larkc 30458))
 
 ;; hierarchical-visitor-p - active declareFunction, provided by defstruct (1 0)
 ;; hier-visit-begin-path-fn - active declareFunction, provided by defstruct (1 0)

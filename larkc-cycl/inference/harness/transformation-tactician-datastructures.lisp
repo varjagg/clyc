@@ -50,8 +50,6 @@ and permission notice:
 
 (defconstant *dtp-transformation-strategy-data* 'transformation-strategy-data)
 
-;; (defun transformation-strategy-data-print-function-trampoline (object stream) ...) -- active declareFunction, no body
-
 (defun transformation-strategy-data-p (object)
   (typep object 'transformation-strategy-data))
 

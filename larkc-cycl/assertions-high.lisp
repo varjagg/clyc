@@ -37,11 +37,55 @@ and permission notice:
 (in-package :clyc)
 
 
+;; Reconstructed from Internal Constants: $list0 arglist, $sym4$ DO-LIST,
+;; $sym5$ ASSERTION-ARGUMENTS.
+(defmacro do-assertion-arguments ((argument-var assertion &key done) &body body)
+  `(do-list (,argument-var (assertion-arguments ,assertion) :done ,done)
+     ,@body))
+
+;; Reconstructed from Internal Constants: $list6 arglist, $sym4$ DO-LIST,
+;; $sym7$ ASSERTION-DEPENDENTS.
+(defmacro do-assertion-dependents ((deduction-var assertion &key done) &body body)
+  `(do-list (,deduction-var (assertion-dependents ,assertion) :done ,done)
+     ,@body))
+
+;; Reconstructed from Internal Constants: $list8 arglist ((LIT-VAR ASSERTION &KEY SENSE PREDICATE DONE)),
+;; $sym12$ PREDICATE-VAR (gensym), $sym13$ CLET, $sym14$ DO-ASSERTION-LITERALS,
+;; $sym15$ PWHEN, $sym16$ ATOMIC-SENTENCE-PREDICATE, $sym17$ CNF-VAR (gensym),
+;; $sym18$ ASSERTION-VAR (gensym), $sym19$ ASSERTION-CNF, $sym20$ DO-ALL-LITS-AS-ASENTS.
+;; TODO - shape of the :predicate filter is inferred; verify against any future runtime test.
+(defmacro do-assertion-literals ((lit-var assertion &key sense predicate done) &body body)
+  (let ((assertion-var (gensym "ASSERTION-VAR"))
+        (cnf-var (gensym "CNF-VAR"))
+        (predicate-var (gensym "PREDICATE-VAR")))
+    `(let* ((,assertion-var ,assertion)
+            (,cnf-var (assertion-cnf ,assertion-var))
+            (,predicate-var ,predicate))
+       (do-all-lits-as-asents (,lit-var ,cnf-var :sense ,sense :done ,done)
+         (pwhen (or (null ,predicate-var)
+                    (eq ,predicate-var (atomic-sentence-predicate ,lit-var)))
+           ,@body)))))
+
+;; Reconstructed from Internal Constants: $list139 = ((*ASSERTION-DUMP-ID-TABLE*
+;; (CREATE-ASSERTION-DUMP-ID-TABLE)) (*CFASL-ASSERTION-HANDLE-FUNC* 'ASSERTION-DUMP-ID)).
+(defmacro with-assertion-dump-id-table (&body body)
+  `(let ((*assertion-dump-id-table* (create-assertion-dump-id-table))
+         (*cfasl-assertion-handle-func* 'assertion-dump-id))
+     ,@body))
+
+
+;; [Clyc] Java defines each of these accessors as a standalone defun that does
+;; checkType(assertion, ASSERTION-P) + assertion-handle-valid? guard + delegates to the
+;; corresponding kb-<name> function. Replaced here with a macro that synthesises all of
+;; those defuns from a name + docstring. The Java checkType becomes (declare (type ...)).
 (defmacro define-valid-assertion-func (name &body (docstring &optional (internal-func (symbolicate "KB-" name))))
   `(defun ,name (assertion)
-     ,docstring
-     (and (assertion-valid? assertion)
+     ,@(when (stringp docstring) (list docstring))
+     (declare (type assertion-p assertion))
+     (and (assertion-handle-valid? assertion)
           (,internal-func assertion))))
+
+;; (defun intuitive-assertion-cnf (assertion) ...) -- active declaration, no body
 
 (define-valid-assertion-func assertion-cnf
   "[Cyc] Return the cnf of ASSERTION.
@@ -81,7 +125,7 @@ Note: Result is not destructible.")
   kb-assertion-asserted-by)
 
 (define-valid-assertion-func asserted-when
-  "[Cyc] Returns teh day when ASSERTION was asserted."
+  "[Cyc] Returns the day when ASSERTION was asserted."
   kb-assertion-asserted-when)
 
 (define-valid-assertion-func asserted-why
@@ -107,30 +151,57 @@ Note: Result is not destructible.")
 
 (defun assertion-formula (assertion)
   "[Cyc] Return a formula for ASSERTION."
+  (declare (type assertion-p assertion))
   (if (gaf-assertion? assertion)
       (gaf-el-formula assertion)
       (when-let ((cnf (assertion-cnf assertion)))
         (and (cnf-p cnf)
              (cnf-formula cnf (assertion-truth assertion))))))
 
+;; (defun assertion-ist-formula (assertion) ...) -- active declaration, no body, Cyc API
+;; (defun assertion-to-hl-assertion-spec (assertion) ...) -- active declaration, no body
+;; (defun assertion-to-hl-assertibles (assertion) ...) -- active declaration, no body
+;; (defun assertion-mentions-term? (assertion term) ...) -- active declaration, no body, Cyc API
+;; (defun assertion-mentions-term (assertion term) ...) -- active declaration, no body, obsolete Cyc API
+;; (defun assertion-cnf-or-gaf-hl-formula (assertion) ...) -- active declaration, no body
+
 (defun rule-assertion? (assertion)
   "[Cyc] Return T iff ASSERTION is a rule, i.e. not a ground atomic formula (gaf)."
   (and (assertion-p assertion)
        (not (gaf-assertion? assertion))))
 
+;; (defun backward-rule? (assertion) ...) -- active declaration, no body
+
 (defun forward-rule? (assertion)
   (and (rule-assertion? assertion)
        (forward-assertion? assertion)))
 
+;; (defun single-literal-rule? (assertion) ...) -- active declaration, no body
+;; (defun backward-gaf? (assertion) ...) -- active declaration, no body
+;; (defun forward-gaf? (assertion) ...) -- active declaration, no body
+
 (defun* assertion-type (assertion) (:inline t)
   "[Cyc] Return the current type of ASSERTION -- either :GAF or :RULE."
+  (declare (type assertion-p assertion))
   (if (gaf-assertion? assertion)
       :gaf
       :rule))
 
+;; (defun assertion-has-mt? (assertion mt) ...) -- active declaration, no body
+
 (defun* assertion-has-type? (assertion type) (:inline t)
   "[Cyc] Return T iff ASSERTION's current type is TYPE."
+  (declare (type assertion-p assertion)
+           (type assertion-type-p type))
   (eq type (assertion-type assertion)))
+
+;; (defun assertion-has-type (assertion type) ...) -- active declaration, no body, obsolete
+;; (defun ground-assertion? (assertion) ...) -- active declaration, no body
+;; (defun atomic-assertion? (assertion) ...) -- active declaration, no body
+;; (defun meta-assertion? (assertion) ...) -- active declaration, no body
+;; (defun lifting-assertion-p (assertion) ...) -- active declaration, no body
+;; (defun assertion-forts (assertion &optional a b c d) ...) -- active declaration, no body
+;; (defun assertion-constants (assertion) ...) -- active declaration, no body
 
 (defun* gaf-formula (assertion) (:inline t)
   "[Cyc] Return the formula for ASSERTION, which must be a gaf.
@@ -166,22 +237,33 @@ This will return (#$not <blah>) for negated gafs."
 
 (defun* gaf-predicate (assertion) (:inline t)
   "[Cyc] Return the predicate of gaf ASSERTION."
+  (declare (type assertion-p assertion))
   (formula-arg0 (gaf-hl-formula assertion)))
+
+;; (defun gaf-arg0 (assertion) ...) -- active declaration, no body, Cyc API
 
 (defun* gaf-arg1 (assertion) (:inline t)
   "[Cyc] Return arg 1 of the gaf ASSERTION."
+  (declare (type assertion-p assertion))
   (gaf-arg assertion 1))
 
 (defun* gaf-arg2 (assertion) (:inline t)
   "[Cyc] Return arg 2 of the gaf ASSERTION."
+  (declare (type assertion-p assertion))
   (gaf-arg assertion 2))
 
 (defun* gaf-arg3 (assertion) (:inline t)
   "[Cyc] Return arg 3 of the gaf ASSERTION."
+  (declare (type assertion-p assertion))
   (gaf-arg assertion 3))
+
+;; (defun gaf-arg4 (assertion) ...) -- active declaration, no body, Cyc API
+;; (defun gaf-arg5 (assertion) ...) -- active declaration, no body, Cyc API
 
 (defun* assertion-has-direction? (assertion direction) (:inline t)
   "[Cyc] Return T iff ASSERTION has DIRECTION as its direction."
+  (declare (type assertion-p assertion)
+           (type direction-p direction))
   (eq direction (assertion-direction assertion)))
 
 ;; TODO - deprecate
@@ -193,22 +275,39 @@ This will return (#$not <blah>) for negated gafs."
   (and (assertion-p assertion)
        (eq :forward (assertion-direction assertion))))
 
+;; (defun backward-assertion? (assertion) ...) -- active declaration, no body, Cyc API
+;; (defun code-assertion? (assertion) ...) -- active declaration, no body, Cyc API
+
 (defun* assertion-has-truth? (assertion truth) (:inline t)
   "[Cyc] Return T iff ASSERTION's current truth is TRUTH."
+  (declare (type assertion-p assertion)
+           (type truth-p truth))
   (eq (assertion-truth assertion) truth))
 
 ;; TODO - deprecate
 (defun* assertion-has-truth (assertion truth) (:inline t)
+  (declare (type assertion-p assertion)
+           (type truth-p truth))
   (assertion-has-truth? assertion truth))
 
 (defun* assertion-el-variables (assertion) (:inline t)
   "[Cyc] Return a list of the EL variables, for ASSERTION."
   (mapcar #'intern-el-var (assertion-variable-names assertion)))
 
+;; (defun assertion-hl-variables (assertion) ...) -- active declaration, no body
+;; (defun assertion-free-hl-variables (assertion) ...) -- active declaration, no body
+;; (defun assertion-el-variable-to-hl (assertion el-var) ...) -- active declaration, no body
+;; (defun assertion-hl-variable-to-el (assertion hl-var) ...) -- active declaration, no body
+
 (defun timestamp-asserted-assertion (assertion &optional who when why second)
   (when *recording-hl-transcript-operations?*
     (missing-larkc 32158))
   (timestamp-asserted-assertion-int assertion who when why second))
+
+;; (defun remove-asserted-assertion-timestamp (assertion) ...) -- active declaration, no body
+;; (defun tl-timestamp-asserted-assertion (assertion who when why second) ...) -- active declaration, no body
+;; (defun tl-cache-assertion (tl-assertion hl-assertion) ...) -- active declaration, no body
+;; (defun tl-find-assertion (tl-assertion) ...) -- active declaration, no body
 
 (defglobal *tl-assertion-lookaside-table* nil
     "[Cyc] A lookaside cache for efficiency of tl-timestamp-asserted-assertion.
@@ -217,6 +316,7 @@ TL assertion -> HL assertion.")
 (deflexical *tl-assertion-capacity* 5)
 
 (defun timestamp-asserted-assertion-int (assertion &optional who when why second)
+  (declare (type assertion-p assertion))
   (when (asserted-assertion? assertion)
     (kb-set-assertion-asserted-by assertion who)
     (kb-set-assertion-asserted-when assertion when)
@@ -229,19 +329,34 @@ TL assertion -> HL assertion.")
   (and (assertion-p assertion)
        (not (valid-assertion? assertion))))
 
+;; (defun invalid-assertion-robust? (assertion) ...) -- active declaration, no body
+
 ;; TODO - deprecate
 (defun* valid-assertion (assertion &optional robust?) (:inline t)
   (declare (ignore robust?))
   (valid-assertion? assertion))
 
+;; (defun invalid-assertion (assertion &optional robust?) ...) -- active declaration, no body, obsolete
+;; (defun assertion-id-from-recipe (recipe mt) ...) -- active declaration, no body
+
 (defun* create-assertion (cnf mt &optional var-names (direction :backward)) (:inline t)
   "[Cyc] Create a new assertion with CNF in MT."
+  (declare (type cnf-p cnf)
+           (type hlmt-p mt)
+           (type direction-p direction))
   (create-assertion-int cnf mt var-names direction))
+
+;; (defun create-gaf (formula mt &optional direction) ...) -- active declaration, no body
 
 (defun find-or-create-assertion (cnf mt &optional var-names (direction :backward))
   "[Cyc] Return assertion in MT with CNF, if it exists -- else create it."
+  (declare (type cnf-p cnf)
+           (type hlmt-p mt)
+           (type direction-p direction))
   (or (find-assertion cnf mt)
       (create-assertion cnf mt var-names direction)))
+
+;; (defun find-or-create-gaf (formula mt &optional direction) ...) -- active declaration, no body
 
 (defun create-assertion-int (cnf mt &optional var-names (direction :backward))
   (let ((assertion (kb-create-assertion cnf mt)))
@@ -254,27 +369,61 @@ TL assertion -> HL assertion.")
   "[Cyc] Remove ASSERTION."
   (kb-remove-assertion assertion))
 
+;; (defun remove-broken-assertions () ...) -- active declaration, no body
+;; (defun possibly-remove-broken-assertion (assertion) ...) -- active declaration, no body
+;; (defun matching-argument-on-assertion (assertion argument) ...) -- active declaration, no body
+
 (defun only-argument-of-assertion-p (assertion argument)
   "[Cyc] Returns T if ARGUMENT is the sole argument for ASSERTION; NIL if there are other, different arguments."
+  (declare (type assertion-p assertion)
+           (type argument-p argument))
   (not (member? argument (assertion-arguments assertion) :test #'not-eq)))
 
 (defun asserted-assertion? (assertion)
   "[Cyc] Return non-NIL iff ASSERTION has an asserted argument."
+  (declare (type assertion-p assertion))
   (find-if #'asserted-argument-p (assertion-arguments assertion)))
+
+;; (defun deduced-assertion? (assertion) ...) -- active declaration, no body, Cyc API
+;; (defun forward-deduced-assertion? (assertion) ...) -- active declaration, no body
 
 (defun get-asserted-argument (assertion)
   "[Cyc] Return the asserted argument for ASSERTION, or NIL if none present."
+  (declare (type assertion-p assertion))
   (find-if #'asserted-argument-p (assertion-arguments assertion)))
+
+;; (defun assertion-deductions (assertion) ...) -- active declaration, no body
 
 (defun assertion-dependent-count (assertion)
   "[Cyc] Return the number of arguments depending on ASSERTION."
   (length (assertion-dependents assertion)))
 
+;; (defun assertion-has-dependents-p (assertion) ...) -- active declaration, no body, Cyc API
+;; (defun random-assertion (&optional state) ...) -- active declaration, no body
+;; (defun sample-assertions (&optional a b c) ...) -- active declaration, no body
+;; (defun random-rule () ...) -- active declaration, no body
+;; (defun random-gaf () ...) -- active declaration, no body
+;; (defun assertion-checkpoint-p (object) ...) -- active declaration, no body
+;; (defun new-assertion-checkpoint () ...) -- active declaration, no body
+;; (defun assertion-checkpoint-current? (checkpoint) ...) -- active declaration, no body
+
 (defparameter *assertion-dump-id-table* nil)
+
+;; (defun assertion-dump-id (assertion) ...) -- active declaration, no body
 
 (defun* find-assertion-by-dump-id (dump-id) (:inline t)
   "[Cyc] Return the assertion with DUMP-ID during a KB load."
   (find-assertion-by-id dump-id))
+
+
+;;; Setup
+
+(toplevel
+  (declare-defglobal '*tl-assertion-lookaside-table*)
+  (define-obsolete-register 'assertion-has-type '(assertion-has-type?))
+  (define-obsolete-register 'assertion-has-direction '(assertion-has-direction?))
+  (define-obsolete-register 'valid-assertion '(valid-assertion?))
+  (define-obsolete-register 'invalid-assertion '(invalid-assertion?)))
 
 
 ;;; Cyc API registrations

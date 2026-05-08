@@ -38,6 +38,35 @@ and permission notice:
 
 ;; An abstraction over beliefs (asserted-arguments?) & deductions
 
+;; Reconstructed from Internal Constants: $list0 (parameters), $str1$ "mapping Cyc arguments",
+;; $sym2$ DO-ASSERTIONS, $sym3$ CDOLIST, $sym4$ ASSERTION-ARGUMENTS.
+;; MESSAGE is passed positionally as do-assertions's progress-message arg per its signature
+;; ((var &optional progress-message &key done) &body body) registered in assertion-handles.
+(defmacro do-arguments ((assertion argument &optional (message "mapping Cyc arguments"))
+                        &body body)
+  `(do-assertions (,assertion ,message)
+     (cdolist (,argument (assertion-arguments ,assertion))
+       ,@body)))
+
+;; Reconstructed from Internal Constants: $list5, $str6$ "mapping Cyc belief arguments",
+;; $sym7$ DO-ARGUMENTS, $sym8$ PWHEN, $sym9$ BELIEF-P.
+(defmacro do-beliefs ((assertion argument &optional (message "mapping Cyc belief arguments"))
+                      &body body)
+  `(do-arguments (,assertion ,argument ,message)
+     (pwhen (belief-p ,argument)
+       ,@body)))
+
+;; Reconstructed from Internal Constants: $list10, $str11$ "mapping Cyc asserted arguments",
+;; $sym7$ DO-ARGUMENTS, $sym8$ PWHEN, $sym12$ ASSERTED-ARGUMENT-P.
+(defmacro do-asserted-arguments ((assertion argument
+                                            &optional (message "mapping Cyc asserted arguments"))
+                                 &body body)
+  `(do-arguments (,assertion ,argument ,message)
+     (pwhen (asserted-argument-p ,argument)
+       ,@body)))
+
+;; (defun argument-p (object) ...) -- active declaration, no body, Cyc API
+
 (defun valid-argument (argument &optional robust)
   "[Cyc] Return T if ARGUMENT is a valid argument. ROBUST requests more thorough checking."
   (or (belief-p argument)
@@ -47,6 +76,10 @@ and permission notice:
 (defun* argument-spec-type (argument-spec) (:inline t)
   "[Cyc] Returns the type of the argument specified by ARGUMENT-SPEC."
   (car argument-spec))
+
+;; (defun argument-spec-p (object) ...) -- active declaration, no body
+;; (defun argument-to-argument-spec (argument) ...) -- active declaration, no body
+;; (defun argument-type-p (object) ...) -- active declaration, no body
 
 (deflexical *argument-types* (list :argument
                                    :belief
@@ -80,14 +113,18 @@ Hardcodes the type hierarchy:
   "[Cyc] Returns the genls of ARGUMENT-TYPE in the hard-coded hierarchy."
   (cons argument-type (argument-type-proper-genls argument-type)))
 
+;; (defun argument-equal (argument1 argument2) ...) -- active declaration, no body, Cyc API
+
 (defun argument-truth (argument)
   "[Cyc] Return the truth of ARGUMENT."
+  (declare (type argument-p argument))
   (if (belief-p argument)
       (belief-truth argument)
       (deduction-truth argument)))
 
 (defun argument-tv (argument)
   "[Cyc] Return the HL tv of ARGUMENT."
+  (declare (type argument-p argument))
   (if (belief-p argument)
       (belief-tv argument)
       (tv-from-truth-strength (deduction-truth argument)
@@ -95,6 +132,7 @@ Hardcodes the type hierarchy:
 
 (defun argument-strength (argument)
   "[Cyc] Return the strength of ARGUMENT."
+  (declare (type argument-p argument))
   (if (belief-p argument)
       ;; TODO - belief-strength
       (missing-larkc 31879)
@@ -110,6 +148,8 @@ Hardcodes the type hierarchy:
   "[Cyc] Return T iff OBJECT is an HL belief structure."
   (asserted-argument-p object))
 
+;; (defun belief-spec-p (object) ...) -- active declaration, no body
+;; (defun belief-to-belief-spec (belief) ...) -- active declaration, no body
 
 (defun* remove-belief (belief assertion) (:inline t)
   (kb-remove-asserted-argument assertion belief))
@@ -120,9 +160,15 @@ Hardcodes the type hierarchy:
 (defun* belief-tv (belief) (:inline t)
   (asserted-argument-tv belief))
 
+;; (defun belief-equal (belief1 belief2) ...) -- active declaration, no body
+;; (defun belief-strength (belief) ...) -- active declaration, no body
+
 (defun* asserted-argument-p (object) (:inline t)
   "[Cyc] Return T iff OBJECT is an HL asserted argument structure."
   (asserted-argument-token-p object))
+
+;; (defun asserted-argument-spec-p (object) ...) -- active declaration, no body
+;; (defun asserted-argument-to-asserted-argument-spec (asserted-argument) ...) -- active declaration, no body
 
 (defun* create-asserted-argument (assertion tv) (:inline t)
   "[Cyc] Create an asserted argument for ASSERTION with TV."
@@ -131,6 +177,7 @@ Hardcodes the type hierarchy:
   (asserted-argument-token-from-tv tv))
 
 (defun* create-asserted-argument-spec (strength-spec) (:inline t)
+  (declare (type el-strength-spec-p strength-spec))
   (list :asserted-argument strength-spec))
 
 (defun* asserted-argument-spec-strength-spec (asserted-argument-spec) (:inline t)
@@ -139,6 +186,9 @@ Hardcodes the type hierarchy:
 (defun* kb-remove-asserted-argument-internal (asserted-argument) (:inline t)
   (declare (ignore asserted-argument))
   nil)
+
+;; (defun make-empty-local-support-set () ...) -- active declaration, no body
+;; (defun asserted-argument-equal (aa1 aa2) ...) -- active declaration, no body
 
 (deflexical *asserted-argument-tv-table* '((:asserted-true-mon :true-mon)
                                            (:asserted-true-def :true-def)
@@ -157,6 +207,7 @@ Hardcodes the type hierarchy:
   (member? object *asserted-arguments* #'eq))
 
 (defun* asserted-argument-token-from-tv (tv) (:inline t)
+  (declare (type tv-p tv))
   (car (find tv *asserted-argument-tv-table* :test #'eq :key #'second)))
 
 (defun* tv-from-asserted-argument-token (asserted-argument) (:inline t)
@@ -169,11 +220,20 @@ Hardcodes the type hierarchy:
 (defun* asserted-argument-truth (asserted-argument) (:inline t)
   (tv-truth (asserted-argument-tv asserted-argument)))
 
+;; (defun asserted-argument-strength (asserted-argument) ...) -- active declaration, no body
+;; (defun kb-lookup-asserted-argument (assertion truth strength) ...) -- active declaration, no body, Cyc API
+;; (defun lookup-asserted-argument (assertion truth strength) ...) -- active declaration, no body
+;; (defun list-of-cycl-support-p (object) ...) -- active declaration, no body
+;; (defun cycl-support-p (object) ...) -- active declaration, no body
+
 (defun support-p (object)
-  "[Cyc] Return T iff OBJECT can bea support in an argument."
+  "[Cyc] Return T iff OBJECT can be a support in an argument."
   (or (assertion-p object)
       (kb-hl-support-p object)
       (hl-support-p object)))
+
+;; (defun supports-p (object) ...) -- active declaration, no body
+;; (defun support-list-p (object) ...) -- active declaration, no body
 
 (defun valid-support? (support &optional robust)
   "[Cyc] Return T if SUPPORT is a valid KB deduction support. ROBUST requests more thorough checking."
@@ -182,6 +242,11 @@ Hardcodes the type hierarchy:
     ((kb-hl-support-p support) (valid-kb-hl-support? support robust))
     ;; TODO - valid-hl-support-p or valid-hl-support?
     ((hl-support-p support) (missing-larkc 31885))))
+
+;; (defun ill-formed-hl-support? (hl-support) ...) -- active declaration, no body
+;; (defun hl-support-syntactically-illformed? (hl-support) ...) -- active declaration, no body
+;; (defun kb-hl-support-syntactically-illformed? (kb-hl-support) ...) -- active declaration, no body
+;; (defun assertion-syntactically-illformed? (assertion) ...) -- active declaration, no body
 
 (defun support-equal (support1 support2)
   (cond
@@ -218,11 +283,14 @@ Hardcodes the type hierarchy:
      nil)
     (t (term-< support1 support2))))
 
+;; (defun sort-supports (supports) ...) -- active declaration, no body
+
 (deflexical *assertion-support-module* :assertion
     "[Cyc] The module which denotes that an assertion is the support.")
 
 (defun support-module (support)
   "[Cyc] Return the module of SUPPORT."
+  (declare (type support-p support))
   (cond
     ((assertion-p support) *assertion-support-module*)
     ((kb-hl-support-p support) (missing-larkc 11038))
@@ -230,23 +298,34 @@ Hardcodes the type hierarchy:
 
 (defun support-sentence (support)
   "[Cyc] Return the sentence of SUPPORT."
+  (declare (type support-p support))
   (cond
     ((assertion-p support) (assertion-formula support))
     ((kb-hl-support-p support) (kb-hl-support-sentence support))
     (t (hl-support-sentence support))))
 
+;; (defun support-sentence-operator (support) ...) -- active declaration, no body
+
 (defun* support-formula (support) (:inline t)
   (support-sentence support))
 
+;; (defun support-el-sentence (support) ...) -- active declaration, no body
+;; (defun support-ist-sentence (support) ...) -- active declaration, no body
+;; (defun support-el-ist-sentence (support) ...) -- active declaration, no body
+;; (defun support-cons (support) ...) -- active declaration, no body
+
 (defun support-mt (support)
   "[Cyc] Return the microtheory of SUPPORT."
+  (declare (type support-p support))
   (cond
     ((assertion-p support) (assertion-mt support))
     ((kb-hl-support-p support) (missing-larkc 11039))
     (t (hl-support-mt support))))
 
+;; (defun support-elmt (support) ...) -- active declaration, no body
+
 (defun support-justification (support)
-  "[Cyc] Return the justification of SUPPORT."
+  "[Cyc] Return a justification for SUPPORT."
   (cond
     ((assertion-p support) (list support))
     ((kb-hl-support-p support) (missing-larkc 11036))
@@ -254,7 +333,10 @@ Hardcodes the type hierarchy:
 
 (defun* support-strength (support) (:inline t)
   "[Cyc] Return the strength of SUPPORT."
+  (declare (type support-p support))
   (tv-strength (support-tv support)))
+
+;; (defun support-truth (support) ...) -- active declaration, no body, Cyc API
 
 (defun support-tv (support)
   (cond
@@ -269,7 +351,9 @@ Hardcodes the type hierarchy:
         #'support-<))
 
 (defun canonicalize-support (support &optional (possibly-create-new-kb-hl-supports? t))
-  "[Cyc] Canonicalize SUPPORT. If SUPPORT is an assertion or KB HL support, this simply returns SUPPORT. Otherwise,t eh function attempts to find a KB HL support for SUPPORT or, if POSSIBLY-CREATE-NEW-KB-HL-SUPPORT? is non-NIL, it may create a new one."
+  "[Cyc] Canonicalize SUPPORT.  If SUPPORT is an assertion or KB HL support, this simply returns SUPPORT.
+   Otherwise, the function attempts to find a KB HL support for SUPPORT or, if POSSIBLY-CREATE-NEW-KB-HL-SUPPORT?
+   is non-NIL, it may create a new one."
   (if (or (assertion-p support)
           (kb-hl-support-p support))
       support
@@ -289,7 +373,11 @@ Hardcodes the type hierarchy:
        (length= object 4)
        (hl-support-module-p (car object))))
 
-;; Make some readers. At least the java doesn't define any SET- functions.
+;; [Clyc] Java defines hl-support-module/sentence/mt/tv as four standalone defuns
+;; that each do checkType + car/second/third/fourth. Replaced here with a
+;; list-typed defstruct that auto-generates the four accessors; the type check
+;; the Java performs on each call is dropped as a consequence. Constructor is
+;; suppressed because make-hl-support is defined explicitly below.
 (defstruct (hl-support (:type list)
                        (:constructor nil))
   module
@@ -299,6 +387,10 @@ Hardcodes the type hierarchy:
 
 (defun make-hl-support (hl-module sentence &optional (mt *mt*) (tv :true-def))
   "[Cyc] Construct a new HL support."
+  (declare (type hl-support-module-p hl-module)
+           (type possibly-cycl-sentence-p sentence)
+           (type hlmt-p mt)
+           (type tv-p tv))
   (list hl-module sentence mt tv))
 
 (defun assertion-from-hl-support (hl-support)
@@ -306,15 +398,28 @@ Hardcodes the type hierarchy:
     (find-assertion-cycl (hl-support-sentence hl-support)
                          (hl-support-mt hl-support))))
 
+;; (defun hl-support-from-assertion (assertion) ...) -- active declaration, no body
+;; (defun valid-hl-support? (hl-support) ...) -- active declaration, no body
+;; (defun hl-support-with-module-p (object module) ...) -- active declaration, no body
+;; (defun genl-preds-support-p (support) ...) -- active declaration, no body
+;; (defun hl-justification-p (object) ...) -- active declaration, no body
+;; (defun hl-justification-list-p (object) ...) -- active declaration, no body
+
 (defun non-empty-hl-justification-p (object)
   (and (proper-list-p object)
        (every-in-list #'support-p object)))
+
+;; (defun empty-hl-justification-p (object) ...) -- active declaration, no body
 
 (defun* justification-equal (justification1 justification2) (:inline t)
   (multisets-equal? justification1 justification2 #'support-equal))
 
 (defun* canonicalize-hl-justification (hl-justification) (:inline t)
+  (declare (type hl-justification-p hl-justification))
   (sort (copy-list hl-justification) #'support-<))
+
+;; (defun hl-support-justification-p (object) ...) -- active declaration, no body
+;; (defun hl-justification-to-hl-support-justification (hl-justification) ...) -- active declaration, no body
 
 
 ;;; Cyc API registrations
@@ -373,6 +478,9 @@ Hardcodes the type hierarchy:
     "Return the sentence of SUPPORT."
     '((support support-p))
     '(consp))
+
+
+(define-obsolete-register 'support-formula '(support-sentence))
 
 
 (register-cyc-api-function 'support-mt '(support)

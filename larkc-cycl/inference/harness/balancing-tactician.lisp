@@ -45,8 +45,6 @@ and permission notice:
 
 (defconstant *dtp-balancing-tactician-data* 'balancing-tactician-data)
 
-;; (defun balancing-tactician-data-print-function-trampoline (object stream) ...) -- active declareFunction, no body
-
 (defun balancing-tactician-data-p (object)
   (typep object 'balancing-tactician-data))
 

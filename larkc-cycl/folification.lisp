@@ -375,7 +375,7 @@ and permission notice:
                             (list (reader-make-constant-shell "birthPlace") '?terrorist (reader-make-constant-shell "ContinentOfAsia"))))))
   "[Cyc] Queries used in the second FOLification paper")
 
-;; Commented-out declareFunction entries. All function bodies were stripped from LarKC.
+;; Commented-out declareFunction entries. All function bodies are missing-larkc.
 
 ;; (defun fol-translation-type-property-p (object) ...) -- commented declareFunction, no body
 ;; (defun fol-mt-handling-property-p (object) ...) -- commented declareFunction, no body

@@ -37,8 +37,8 @@ and permission notice:
 (in-package :clyc)
 
 ;; TVA-STRATEGY defstruct
-(defstruct (tva-strategy (:conc-name "TVA-STRAT-")
-                         (:print-function print-tva-strategy))
+;; print-object is missing-larkc 4330 — CL's default print-object handles this.
+(defstruct (tva-strategy (:conc-name "TVA-STRAT-"))
   inverse-mode-p
   argnums-unified
   argnums-remaining
@@ -46,10 +46,6 @@ and permission notice:
   tactics-considered)
 
 (defconstant *dtp-tva-strategy* 'tva-strategy)
-
-(defun tva-strategy-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for printing tva-strategy objects."
-  (missing-larkc 4330))
 
 ;; (defun tva-strategy-p (object) ...) -- no body, commented declareFunction
 ;; (defun tva-strat-inverse-mode-p (strategy) ...) -- no body, commented declareFunction, struct accessor

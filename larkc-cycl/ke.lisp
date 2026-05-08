@@ -218,7 +218,6 @@ it is used, otherwise a unique identifier is generated.
 
 ;; commented declareFunction, but body present in Java -- ported for reference
 (defun ke-assert (formula mt &optional strength direction)
-  "[Cyc] Assert FORMULA in MT, queueing or executing now based on local queue state."
   (when (null strength)
     (setf strength :default))
   (when (ensure-cyclist-ok)
@@ -275,7 +274,6 @@ FORMULA is assumed to be WFF.
   (ke-assert-now-int formula mt strength direction t))
 
 (defun ke-assert-now-int (formula mt strength direction wff?)
-  "[Cyc] Internal implementation for ke-assert-now and ke-assert-wff-now."
   (let ((result nil)
         (error-message nil)
         (v-hlmt (canonicalize-hlmt mt))
@@ -390,7 +388,6 @@ FORMULA is assumed to be WFF.
   (hash-table-count *old-constant-names-table*))
 
 (defun cache-old-constant-name (string constant)
-  "[Cyc] Cache the association of STRING with CONSTANT in the old constant names table."
   (when *old-constant-names-table*
     (let ((entry (old-constant-names string)))
       (setf (gethash string *old-constant-names-table*)
@@ -398,7 +395,6 @@ FORMULA is assumed to be WFF.
     t))
 
 (defun decache-old-constant-name (string constant)
-  "[Cyc] Remove the association of STRING with CONSTANT from the old constant names table."
   (when *old-constant-names-table*
     (let ((entry (old-constant-names string)))
       (when entry
@@ -410,7 +406,6 @@ FORMULA is assumed to be WFF.
 
 ;; commented declareFunction, but body present in Java -- ported for reference
 (defun do-edit-op (form)
-  "[Cyc] Execute FORM either via local queue or direct eval."
   (if *use-local-queue?*
       (add-to-local-queue form t)
       (eval form)))
@@ -428,7 +423,6 @@ FORMULA is assumed to be WFF.
 
 ;; commented declareFunction, but body present in Java -- ported for reference
 (defun ensure-cyclist-ok ()
-  "[Cyc] Ensure the current cyclist is allowed to edit the KB."
   (if (cyclist-is-guest)
       (progn
         (error "KB editing is not allowed for users logged in as #$Guest.")

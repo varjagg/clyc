@@ -38,8 +38,8 @@ and permission notice:
 (in-package :clyc)
 
 ;;; XREF-MODULE struct — 19 slots
-(defstruct (xref-module (:conc-name "XREF-M-")
-                        (:print-function print-xref-module))
+;;; print-object is missing-larkc 8269 — CL's default print-object handles this.
+(defstruct (xref-module (:conc-name "XREF-M-"))
   name
   xref-system
   features
@@ -63,8 +63,8 @@ and permission notice:
 (defconstant *dtp-xref-module* 'xref-module)
 
 ;;; XREF-SYSTEM struct — 15 slots
-(defstruct (xref-system (:conc-name "XREF-S-")
-                        (:print-function print-xref-system))
+;;; print-object is missing-larkc 8270 — CL's default print-object handles this.
+(defstruct (xref-system (:conc-name "XREF-S-"))
   name
   features
   xref-module-table
@@ -102,12 +102,6 @@ and permission notice:
 
 ;;; Functions (ordered by declare_xref_database_file)
 
-(defun xref-module-print-function-trampoline (object stream)
-  ;; Likely prints the XREF-MODULE struct via its registered print method.
-  ;; Evidence: registered with Structures.register_method on $print_object_method_table$
-  ;; for $dtp_xref_module$ in setup.
-  (declare (ignore object stream))
-  (missing-larkc 8269))
 
 ;; xref-module-p (object) -- commented declareFunction, UnaryFunction: missing-larkc 8434
 ;; xref-m-name (xref-module) -- commented declareFunction, no body
@@ -217,12 +211,6 @@ and permission notice:
 ;; xrm-record-top-modifies-global (xref-module top global) -- commented declareFunction, no body
 ;; xrm-record-top-rebinds-global (xref-module top global) -- commented declareFunction, no body
 
-(defun xref-system-print-function-trampoline (object stream)
-  ;; Likely prints the XREF-SYSTEM struct via its registered print method.
-  ;; Evidence: registered with Structures.register_method on $print_object_method_table$
-  ;; for $dtp_xref_system$ in setup.
-  (declare (ignore object stream))
-  (missing-larkc 8270))
 
 ;; xref-system-p (object) -- commented declareFunction, UnaryFunction: missing-larkc 8493
 ;; xref-s-name (xref-system) -- commented declareFunction, no body

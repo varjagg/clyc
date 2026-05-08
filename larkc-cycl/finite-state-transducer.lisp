@@ -37,9 +37,9 @@ and permission notice:
 (in-package :clyc)
 
 ;;; FINITE-STATE-TRANSDUCER defstruct
+;;; print-object is missing-larkc 29478 — CL's default print-object handles this.
 
-(defstruct (finite-state-transducer (:conc-name "FST-")
-                                    (:print-function print-fst))
+(defstruct (finite-state-transducer (:conc-name "FST-"))
   initial-state
   final-states
   machine-table
@@ -53,11 +53,6 @@ and permission notice:
 (defconstant *dtp-finite-state-transducer* 'finite-state-transducer)
 
 ;;; Functions (ordered by declare_finite_state_transducer_file)
-
-(defun finite-state-transducer-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for FINITE-STATE-TRANSDUCER."
-  (declare (ignore object stream))
-  (missing-larkc 29478))
 
 (defun finite-state-transducer-p (object)
   "[Cyc] Return T if OBJECT is a FINITE-STATE-TRANSDUCER struct."

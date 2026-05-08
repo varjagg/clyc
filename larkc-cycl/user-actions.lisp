@@ -38,18 +38,14 @@ and permission notice:
 (in-package :clyc)
 
 ;; ACTION-TYPE struct — 4 slots
-(defstruct (action-type (:print-function print-action-type))
+;; print-object is missing-larkc 29497 — CL's default print-object handles this.
+(defstruct action-type
   key
   summary-fn
   display-fn
   handler-fn)
 
 (defconstant *dtp-action-type* 'action-type)
-
-;; action-type-print-function-trampoline (object stream) — active declareFunction, no body
-(defun action-type-print-function-trampoline (object stream)
-  (declare (ignore object stream))
-  (missing-larkc 29497))
 
 ;; action-type-p is provided by defstruct
 ;; action-type-key is provided by defstruct
@@ -62,11 +58,7 @@ and permission notice:
 ;; _csetf-action-type-handler-fn is setf of action-type-handler-fn
 ;; make-action-type is provided by defstruct
 
-(defun print-action-type (object stream depth)
-  "[Cyc] Print function for action-type structs."
-  (declare (ignore depth))
-  (declare (ignore object stream))
-  (missing-larkc 29497))
+;; (defun print-action-type (object stream depth) ...) -- active declareFunction, no body
 
 ;; defaction-type — active declareMacro
 ;; Reconstructed from Internal Constants evidence:
@@ -98,7 +90,8 @@ and permission notice:
 ;; (defun action-type-by-key (key) ...) -- active declareFunction, no body
 
 ;; USER-ACTION struct — 5 slots
-(defstruct (user-action (:print-function print-user-action))
+;; print-object is missing-larkc 29498 — CL's default print-object handles this.
+(defstruct user-action
   id-string
   type-key
   cyclist
@@ -106,11 +99,6 @@ and permission notice:
   data)
 
 (defconstant *dtp-user-action* 'user-action)
-
-;; user-action-print-function-trampoline (object stream) — active declareFunction, no body
-(defun user-action-print-function-trampoline (object stream)
-  (declare (ignore object stream))
-  (missing-larkc 29498))
 
 ;; user-action-p is provided by defstruct
 ;; user-action-id-string is provided by defstruct

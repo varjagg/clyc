@@ -36,7 +36,7 @@ and permission notice:
 
 (in-package :clyc)
 
-;; Most functions in this file are LarKC-stripped stubs (commented-out
+;; Most functions in this file are missing-larkc stubs (commented-out
 ;; declareFunction entries). Their Internal Constants survive only as
 ;; macro-body / function-body evidence for the missing implementations.
 

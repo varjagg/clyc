@@ -42,15 +42,12 @@ and permission notice:
 (defconstant unicode-carriage-return 13)
 
 ;; UTF8-STREAM defstruct
-(defstruct (utf8-stream (:print-function print-utf8-stream))
+;; print-object is missing-larkc 7064 — CL's default print-object handles this.
+(defstruct utf8-stream
   stream
   cache)
 
 (defconstant *dtp-utf8-stream* 'utf8-stream)
-
-(defun utf8-stream-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for printing utf8-stream objects."
-  (missing-larkc 7064))
 
 ;; (defun utf8-stream-p (object) ...) -- active declareFunction, no body
 ;; (defun utf8-stream-stream (utf8-stream) ...) -- no body

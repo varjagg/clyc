@@ -681,7 +681,7 @@ and returns NIL. This matches the Java source — likely a bug in the original."
 ;; (defun uncache-suf-function-int (arg1 arg2 arg3 &optional arg4) ...) -- no body
 
 (define-defn-metered handle-added-genl-for-suf-functions (spec genl)
- (declare (ignore genl))
+  (declare (ignore genl))
   (dolist (type '(:isa :quoted-isa))
     (let ((function-assertions (suf-function-assertions spec type)))
       (when function-assertions

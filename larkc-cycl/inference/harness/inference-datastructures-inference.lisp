@@ -45,6 +45,7 @@ and permission notice:
 (deflexical *inference-types* '(:simplest))
 
 ;;; inference defstruct -- 68 slots, conc-name "infrnc-"
+;;; print-object is missing-larkc 35787 — CL's default print-object handles this.
 
 (defstruct (inference
             (:conc-name "infrnc-")
@@ -118,9 +119,6 @@ and permission notice:
   type
   data)
 
-(defun inference-print-function-trampoline (object stream)
-  ;; Likely dispatches to print-inference
-  (missing-larkc 35787))
 
 (defun sxhash-inference-method (object)
   (infrnc-suid object))
@@ -1388,7 +1386,6 @@ and permission notice:
   elapsed-creation-time
   step-count)
 
-;; (defun inference-answer-print-function-trampoline (object stream) ...) -- active declareFunction, no body
 ;; (defun valid-inference-answer-p (object) ...) -- active declareFunction, no body
 ;; (defun inference-answer-invalid-p (answer) ...) -- active declareFunction, no body
 ;; (defun print-inference-answer (object stream depth) ...) -- active declareFunction, no body
@@ -1513,7 +1510,6 @@ and permission notice:
   supports
   proofs)
 
-;; (defun inference-answer-justification-print-function-trampoline (object stream) ...) -- active declareFunction, no body
 ;; (defun valid-inference-answer-justification-p (object) ...) -- active declareFunction, no body
 ;; (defun inference-answer-justification-invalid-p (justification) ...) -- active declareFunction, no body
 ;; (defun print-inference-answer-justification (object stream depth) ...) -- active declareFunction, no body

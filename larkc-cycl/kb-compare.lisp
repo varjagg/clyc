@@ -52,6 +52,7 @@ and permission notice:
 
 ;;; KB-INTERSECTION defstruct
 ;; conc-name KB-INTRSCT- derived from _csetf_ accessor prefixes in Java.
+;; print-object is missing-larkc 4602 — CL's default print-object handles this.
 
 (defstruct (kb-intersection (:conc-name "KB-INTRSCT-"))
   remote-image
@@ -64,6 +65,7 @@ and permission notice:
 
 ;;; KB-DIFFERENCE defstruct
 ;; conc-name KB-DIFF- derived from _csetf_ accessor prefixes in Java.
+;; print-object is missing-larkc 4601 — CL's default print-object handles this.
 
 (defstruct (kb-difference (:conc-name "KB-DIFF-"))
   common-intersection
@@ -82,12 +84,6 @@ and permission notice:
 ;; (defmacro with-new-kb-compare-connection (remote-image &body body) ...) -- reconstructed below
 ;; (defun set-kb-compare-connection-common-symbols () ...) -- commented declareFunction, no body
 
-(defun kb-intersection-print-function-trampoline (object stream)
-  "Print function trampoline for KB-INTERSECTION."
-  (declare (ignore object stream))
-  ;; Likely calls print-kb-intersection — evidence: Structures.register_method for
-  ;; print-object targets this trampoline, same pattern as other LarKC-stripped trampolines.
-  (missing-larkc 4602))
 
 ;; (defun kb-intersection-p (object) ...) -- commented declareFunction, no body (defstruct provides predicate)
 ;; kb-intrsct-remote-image — provided by defstruct
@@ -129,12 +125,6 @@ and permission notice:
 ;; (defun kb-intersection-deduction-impossible? (intersection deduction) ...) -- commented declareFunction, no body
 ;; (defun kb-intersection-deduction-impossible-int (int) ...) -- commented declareFunction, no body
 
-(defun kb-difference-print-function-trampoline (object stream)
-  "Print function trampoline for KB-DIFFERENCE."
-  (declare (ignore object stream))
-  ;; Likely calls print-kb-difference — evidence: Structures.register_method for
-  ;; print-object targets this trampoline, same pattern as other LarKC-stripped trampolines.
-  (missing-larkc 4601))
 
 ;; (defun kb-difference-p (object) ...) -- commented declareFunction, no body (defstruct provides predicate)
 ;; kb-diff-common-intersection — provided by defstruct

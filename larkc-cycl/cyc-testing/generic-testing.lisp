@@ -65,8 +65,7 @@ and permission notice:
 
 (defstruct (generic-test-case-table
             (:conc-name "GTCT-")
-            (:constructor make-generic-test-case-table-struct)
-            (:print-function default-struct-print-function))
+            (:constructor make-generic-test-case-table-struct))
   name
   tuples
   test

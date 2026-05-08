@@ -39,7 +39,6 @@ and permission notice:
 ;; (defun ghl-table-p (v-object) ...) -- 1 req, 0 opt; present in original Cyc, not in LarKC
 
 (defun ghl-goal-node? (v-search node &optional (test #'equal))
-  "[Cyc] Determine if NODE is a goal node in SEARCH, using TEST for comparison."
   (if (ghl-goal-fn v-search)
       (funcall (ghl-goal-fn v-search) v-search node)
       (if (listp (ghl-goal v-search))
@@ -50,7 +49,6 @@ and permission notice:
 ;; (defun ghl-node-satisfies-pred-arg-type? (v-search node) ...) -- 2 req, 0 opt; present in original Cyc, not in LarKC
 
 (defun ghl-inverse-cardinality (pred node)
-  "[Cyc] Return the inverse cardinality for PRED at NODE."
   (let ((kb-cardinality (if (sbhl-predicate-p pred)
                             (sbhl-inverse-cardinality (get-sbhl-module pred) node)
                             (missing-larkc 3926)))
@@ -58,7 +56,6 @@ and permission notice:
     (+ kb-cardinality sksi-cardinality)))
 
 (defun ghl-predicate-cardinality (pred node)
-  "[Cyc] Return the predicate cardinality for PRED at NODE."
   (let ((kb-cardinality (if (sbhl-predicate-p pred)
                             (sbhl-predicate-cardinality (get-sbhl-module pred) node)
                             (missing-larkc 3927)))
@@ -66,7 +63,6 @@ and permission notice:
     (+ kb-cardinality sksi-cardinality)))
 
 (defun ghl-resolve-goal-found (v-search node)
-  "[Cyc] Resolve the goal as found, setting result and finished flags."
   (unless (ghl-compute-justify? v-search)
     (ghl-set-result v-search node))
   (set-ghl-goal-found-p v-search t)

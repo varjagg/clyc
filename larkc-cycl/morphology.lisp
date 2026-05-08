@@ -38,7 +38,7 @@ and permission notice:
 
 ;; English-language morphology: vowel/consonant classification, syllable
 ;; estimation, inflection/derivation suffixing, stemming, and part-of-speech
-;; probes. All function bodies were stripped from LarKC.
+;; probes. All function bodies are missing-larkc.
 
 ;;; Functions (declare section ordering, all commented-out declareFunctions)
 

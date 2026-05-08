@@ -472,6 +472,7 @@ and permission notice:
 
 ;;; Setup — register CFASL input functions and output methods
 
+;; TODO - invalid constants should probably raise conditions instead of returning a freak placeholder that needs to be checked. All current uses seem to warn and skip/abort, which is better using conditions.
 (toplevel
   ;; Constants
   (register-cfasl-input-function *cfasl-opcode-constant* 'cfasl-input-constant)

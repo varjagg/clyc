@@ -52,6 +52,11 @@ and permission notice:
 ;; have a "specific license agreement" with Cycorp to distribute
 ;; this version of Cyc under the Apache License 2.0, which has been
 ;; publicly distributed.
+
+;; (defun copyright-notice () ...) -- active declareFunction, no body
+;; (defun kb-content-copyright-notice () ...) -- active declareFunction, no body
+;; (defun write-kb-content-copyright-notice (stream) ...) -- active declareFunction, no body
+
 (defconstant *kb-content-copyright-notice* ";; Copyright (c) 1998-2009 Cycorp, Inc., All Rights Reserved
 ;; This file and its contents are products of Cycorp, Inc.  They are
 ;; released only under specific license agreement with Cycorp, and
@@ -80,10 +85,13 @@ and permission notice:
     (system-code-application-initializations))
   (if (positive-integer-p (kb-loaded))
       (system-kb-initializations)
-      ;; This was commented out in the original, but seems sensible
-      (warn "No KB is loaded.  System KB initializatiosn will not be run."))
+      ;; [Clyc] Uncommented from original — was commented out in Java, but seems sensible
+      (warn "No KB is loaded.  System KB initializations will not be run."))
   (setf *system-code-initializations-marker* (get-process-id))
   t)
+
+;; (defun system-code-initializations-run-p () ...) -- active declareFunction, no body
+;; (defun redo-system-code-initializations () ...) -- active declareFunction, no body
 
 (defun system-code-image-initializations ()
   "[Cyc] System code initializations that have to do with distinguishing the current image from the image that saved out the world being used."
@@ -134,6 +142,8 @@ To be called only by SYSTEM-CODE-INITIALIZATIONS."
   (sleep 0.5)
   t)
 
+;; (defun initialize-file-backed-nl-datastructures () ...) -- active declareFunction, no body
+
 (defglobal *hl-store-caches-directory* nil
     "[Cyc] @HACK Currently, dump directory from which this KB was built; soon a published KB product subdirectory.")
 (defglobal *hl-store-caches-shared-symbols* nil
@@ -180,7 +190,11 @@ To be called only by SYSTEM-CODE-INITIALIZATIONS."
 
 (defun hl-store-content-completely-cached? ()
   (and (deduction-content-completely-cached?)
-       (missing-larkc 32188)))
+       (missing-larkc 32188)
+       (missing-larkc 32199)
+       (missing-larkc 32148)
+       (missing-larkc 32198)
+       (missing-larkc 2251)))
 
 (defun get-hl-store-cache-filename (filename extension)
   (concatenate 'string *hl-store-caches-directory* filename "." extension))
@@ -188,7 +202,10 @@ To be called only by SYSTEM-CODE-INITIALIZATIONS."
 (defun set-hl-store-caches-directory (directory)
   (when (absolute-path? directory)
     (warn "HL Store directory being set to absolute directory ~a.  Saved worlds will depend on this directory and may have problems running on other machines." directory))
-  (setf *hl-store-caches-directory* directory))
+  (setf *hl-store-caches-directory* directory)
+  nil)
+
+;; (defun generic-caches-directory () ...) -- active declareFunction, no body
 
 (defun hl-store-caches-directory ()
   (or (and (stringp *hl-store-caches-directory*) *hl-store-caches-directory*)
@@ -197,13 +214,42 @@ To be called only by SYSTEM-CODE-INITIALIZATIONS."
           (set-hl-store-caches-directory (missing-larkc 30777)))
         *hl-store-caches-directory*)))
 
+;; (defun compute-hl-store-caches-directory () ...) -- active declareFunction, no body
+
+;; (defun cdr-eql? (x y) ...) -- active declareFunction, no body
+;; (defun not-member-equal (item list) ...) -- active declareFunction, no body
+;; (defun get-indexed-obj (index obj &optional default) ...) -- active declareFunction, no body
+;; (defun update-vector-indexed-val (vector index value old-value new-value &optional test key default not-found) ...) -- active declareFunction, no body
+;; (defun get-vector-indexed-val (vector index value key &optional test default) ...) -- active declareFunction, no body
+;; (defun clear-indexed-vectors (vectors) ...) -- active declareFunction, no body
+;; (defun make-indexed-vector (size &optional initial-element) ...) -- active declareFunction, no body
+;; (defun vector-cells-filled (vector) ...) -- active declareFunction, no body
+;; (defun extract-until (string char &optional start) ...) -- active declareFunction, no body
+;; (defun extract-until-any (string chars &optional start) ...) -- active declareFunction, no body
+;; (defun number-list (list) ...) -- active declareFunction, no body
+;; (defun aconsnew (key datum alist &optional test key-fn) ...) -- active declareFunction, no body
+;; (defun print-n-per-line (list n &optional stream) ...) -- active declareFunction, no body
+
 (defun other-binary-arg (arg)
-  ;; TODO - can be really optimized, but not sure this is used in any inner loops
+  ;; TODO - can be really optimized to just (logxor arg 3), but not sure this is used in any inner loops, and that would skip most error checking
   (case arg
     (1 2)
     (2 1)))
 
+;; (defun number-of-non-null-args (&optional a b c d e) ...) -- active declareFunction, no body
+;; (defun boolean-to-keyword (bool) ...) -- active declareFunction, no body
+;; (defun keyword-to-boolean (keyword) ...) -- active declareFunction, no body
+;; (defun get-unqualified-machine-name () ...) -- active declareFunction, no body
+
 (deflexical *hostname-caching-state* nil)
+
+;; (defun clear-hostname () ...) -- active declareFunction, no body
+;; (defun remove-hostname () ...) -- active declareFunction, no body
+;; (defun hostname-internal () ...) -- active declareFunction, no body
+;; (defun hostname () ...) -- active declareFunction, no body; note-globally-cached-function in setup
+;; (defun machine-name () ...) -- active declareFunction, no body
+;; (defun function-spec-function (spec) ...) -- active declareFunction, no body
+
 (deflexical *machine-bogomips* :uninitialized)
 
 (defun machine-bogomips ()
@@ -226,8 +272,8 @@ To be called only by SYSTEM-CODE-INITIALIZATIONS."
 (defun scale-by-bogomips (numbers bogomips)
   "[Cyc] Multiplies each number in NUMBERS by BOGOMIPS/(machine-bogomips).
 If this machine is faster than BOGOMIPS, NUMBERS will get smaller.
-If this amchine is slower than BOGOMIPS, NUMBERS will get bigger.
-If (machine-bogomips) is unknown, return NUMBERS unscaled."
+If this machine is slower than BOGOMIPS, NUMBERS will get bigger.
+If (machine-bogomips) is unknown, returns NUMBERS unscaled."
   (let ((local-bogomips (machine-bogomips)))
     (if (or (null local-bogomips)
             (= local-bogomips bogomips))
@@ -243,3 +289,25 @@ If (machine-bogomips) is unknown, return NUMBERS unscaled."
 
 (defun* initialized-p (object) (:inline t)
   (not (uninitialized-p object)))
+
+;; Reconstructed from Internal Constants:
+;; $list55 = (FORM FORMAT-STRING &REST ARGUMENTS)
+;; $sym56$PUNLESS, $sym57$WARN
+(defmacro warn-unless (form format-string &rest arguments)
+  `(unless ,form (warn ,format-string ,@arguments)))
+
+;; TODO - active declareMacro, no Internal Constants evidence found for reconstruction
+;; (defmacro would-be-nice-if (...) ...)
+
+;; (defun force-room (&optional verbose) ...) -- active declareFunction, no body
+;; (defun subl-variable-binding-list-p (object) ...) -- active declareFunction, no body
+;; (defun subl-variable-binding-p (object) ...) -- active declareFunction, no body
+;; (defun subl-variable-binding-list-variables (list) ...) -- active declareFunction, no body
+;; (defun subl-variable-binding-list-values (list) ...) -- active declareFunction, no body
+
+(toplevel
+  (declare-defglobal '*system-code-initializations-marker*)
+  (register-external-symbol 'system-code-initializations-run-p)
+  (declare-defglobal '*hl-store-caches-directory*)
+  (declare-defglobal '*hl-store-caches-shared-symbols*)
+  (note-globally-cached-function 'hostname))

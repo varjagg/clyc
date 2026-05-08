@@ -175,7 +175,7 @@ and permission notice:
 
 ;;; ======================================================================
 ;;; Orphan Internal Constants
-;;; Used only in commented-out function bodies (stripped from LarKC)
+;;; Used only in commented-out function bodies (missing-larkc)
 ;;; ======================================================================
 
 ;; $sym0$ASSERTION_P = makeSymbol("ASSERTION-P") -- used in commented assertion-tl-* functions

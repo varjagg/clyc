@@ -37,7 +37,7 @@ and permission notice:
 (in-package :clyc)
 
 
-;; (defun sbhl-premark-goal-nodes (node)) -- commented declareFunction (1 0), no body
+;; (defun sbhl-premark-goal-nodes (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-premark-direction (module)
   "[Cyc] @Hack assumes sbhl modules are cheaper to search forward"
@@ -45,9 +45,7 @@ and permission notice:
   (get-sbhl-forward-search-direction))
 
 (defun sbhl-premark-gather-nodes (node)
-  "[Cyc] Used for initial marking for boolean disjoins searches. Applies sbhl-sweep,
-upon NODE, with current *sbhl-module*, forward direction, true search tv, in
-*sbhl-gather-space*, with map-fn sbhl-check-cutoff."
+  "[Cyc] Used for initial marking for boolean disjoins searches. Applies @see sbhl-sweep, upon NODE, with current *sbhl-module*, forward direction, true search tv, in @see *sbhl-gather-space*, with map-fn sbhl-check-cutoff."
   (sbhl-sweep (get-sbhl-module)
               (sbhl-search-direction-to-link-direction
                (sbhl-premark-direction (get-sbhl-module))
@@ -59,13 +57,10 @@ upon NODE, with current *sbhl-module*, forward direction, true search tv, in
               (sbhl-unmarking-search-p))
   nil)
 
-;; (defun sbhl-gather-premarked-justifications (node)) -- commented declareFunction (1 0), no body
+;; (defun sbhl-gather-premarked-justifications (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-mark-all-forward-true-nodes (module node &optional mt tv)
-  "[Cyc] Modifier. Marks the forward true closure of NODE in MODULE with relevance
-determined by MT and TV. Performs this marking in current *sbhl-space* and possibly
-*sbhl-gather-space*, depending on the search behavior that it binds (as determined
-by determine-sbhl-search-behavior)."
+  "[Cyc] Modifier. Marks the forward true closure of NODE in MODULE with relevance determined by MT and TV. performs this marking in current *sbhl-space* and possibly *sbhl-gather-space*, depending on the search behavior that it binds (as determined by @see determine-sbhl-search-behavior)."
   (declare (type (satisfies sbhl-module-p) module))
   (let ((*sbhl-search-module* module)
         (*sbhl-search-module-type* (get-sbhl-module-type module))
@@ -113,7 +108,7 @@ by determine-sbhl-search-behavior)."
                   (update-sbhl-resourced-spaces *sbhl-space*)))))))))
   nil)
 
-;; (defun sbhl-mark-all-backward-true-nodes (module node &optional mt tv)) -- commented declareFunction (2 2), no body
+;; (defun sbhl-mark-all-backward-true-nodes (module node &optional mt tv) ...) -- commented declareFunction, no body
 
 (defun sbhl-mark-closure-as-marked (node)
   "[Cyc] Modifier: marks all nodes accessible to NODE as marked, in the current search space."
@@ -125,13 +120,12 @@ by determine-sbhl-search-behavior)."
                  node (get-sbhl-type-test (get-sbhl-module))))
   nil)
 
-;; (defun sbhl-mark-closure-in-space (node space)) -- commented declareFunction (2 0), no body
+;; (defun sbhl-mark-closure-in-space (node space) ...) -- commented declareFunction, no body
 
 (defun sbhl-mark-forward-true-nodes-in-space (module node &optional
                                                 (space *sbhl-space*)
                                                 (gather-space *sbhl-gather-space*))
-  "[Cyc] Modifier. Binds *sbhl-space* to SPACE and *sbhl-gather-space* to GATHER-SPACE
-and performs sbhl-mark-all-forward-true-nodes."
+  "[Cyc] Modifier: Binds *sbhl-space* to SPACE and *sbhl-gather-space* to GATHER-SPACE and performs @see sbhl-mark-all-forward-true-nodes."
   (declare (type (satisfies sbhl-module-p) module))
   (let ((*sbhl-space* space)
         (*sbhl-gather-space* gather-space)
@@ -139,8 +133,8 @@ and performs sbhl-mark-all-forward-true-nodes."
     (sbhl-mark-all-forward-true-nodes module node))
   nil)
 
-;; (defun sbhl-mark-backward-true-nodes-in-space (module node &optional space gather-space)) -- commented declareFunction (2 2), no body
-;; (defun sbhl-mark-proper-all-forward-true-nodes (module node &optional mt tv)) -- commented declareFunction (2 2), no body
+;; (defun sbhl-mark-backward-true-nodes-in-space (module node &optional space gather-space) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-proper-all-forward-true-nodes (module node &optional mt tv) ...) -- commented declareFunction, no body
 
 (defun sbhl-mark-proper-closure-as-marked (node)
   "[Cyc] Modifier: marks all nodes properly accessible to NODE as marked, thereby
@@ -156,13 +150,13 @@ only marking NODE if it is part of a cycle."
       (sbhl-mark-closure-as-marked node))
   nil)
 
-;; (defun sbhl-unmark-all-marked-forward-true-nodes (module node &optional mt tv)) -- commented declareFunction (2 2), no body
-;; (defun sbhl-unmark-all-marked-backward-true-nodes (module node &optional mt tv)) -- commented declareFunction (2 2), no body
-;; (defun sbhl-unmark-marked-closure (node)) -- commented declareFunction (1 0), no body
-;; (defun sbhl-unmark-initialized-marked-closure (node)) -- commented declareFunction (1 0), no body
-;; (defun sbhl-unmark-proper-marked-closure (node)) -- commented declareFunction (1 0), no body
-;; (defun sbhl-unmark-all-backward-true-nodes-and-map (node fn)) -- commented declareFunction (2 0), no body
-;; (defun sbhl-unmark-marked-closure-and-gather (node)) -- commented declareFunction (1 0), no body
+;; (defun sbhl-unmark-all-marked-forward-true-nodes (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-all-marked-backward-true-nodes (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-marked-closure (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-initialized-marked-closure (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-proper-marked-closure (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-all-backward-true-nodes-and-map (node fn) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-marked-closure-and-gather (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-unmark-marked-closure-and-gather-if (node function)
   "[Cyc] Modifier: unmarks all marked nodes accessible to NODE and pushes them onto
@@ -179,27 +173,27 @@ the result if they pass the test FUNCTION."
         (apply-sbhl-search-behavior (get-sbhl-search-behavior) node)))
   nil)
 
-;; (defun sbhl-unmark-marked-closure-and-mark-in-space (node space)) -- commented declareFunction (2 0), no body
-;; (defun sbhl-unmark-marked-closure-and-unmark-in-space (node space)) -- commented declareFunction (2 0), no body
-;; (defun sbhl-mark-cyclic-closure (node)) -- commented declareFunction (1 0), no body
-;; (defun sbhl-unmark-cyclic-closure (node)) -- commented declareFunction (1 0), no body
-;; (defun sbhl-mark-max-true-disjoins (module node &optional mt tv)) -- commented declareFunction (2 2), no body
-;; (defun sbhl-mark-extremal-disjoins (node)) -- commented declareFunction (1 0), no body
-;; (defun sbhl-unmark-max-true-disjoins (module node &optional mt tv)) -- commented declareFunction (2 2), no body
-;; (defun sbhl-unmark-extremal-disjoins (node)) -- commented declareFunction (1 0), no body
-;; (defun determine-sbhl-mark-between-consider-fn ()) -- commented declareFunction (0 0), no body
-;; (defun sbhl-mark-forward-true-nodes-between-and-all-their-inherited-nodes (module node1 node2 &optional mt tv)) -- commented declareFunction (3 2), no body
-;; (defun sbhl-unmark-marked-closure-and-target-mark-closure (node)) -- commented declareFunction (1 0), no body
-;; (defun sbhl-mark-closure-in-target-space (node)) -- commented declareFunction (1 0), no body
-;; (defun sbhl-mark-node-and-instances-in-target-space (node)) -- commented declareFunction (1 0), no body
-;; (defun sbhl-record-closure (module node direction &optional mt tv)) -- commented declareFunction (3 2), no body
-;; (defun sbhl-record-all-forward-true-nodes (module node &optional mt tv)) -- commented declareFunction (2 2), no body
-;; (defun sbhl-record-all-backward-true-nodes (module node &optional mt tv)) -- commented declareFunction (2 2), no body
-;; (defun sbhl-record-max-true-disjoins (module node &optional mt tv)) -- commented declareFunction (2 2), no body
-;; (defun sbhl-unrecord-max-true-disjoins (module node &optional mt tv)) -- commented declareFunction (2 2), no body
-;; (defun sbhl-unrecord-all-recorded-forward-true-nodes (module node &optional mt tv)) -- commented declareFunction (2 2), no body
-;; (defun unrecord-all-superiors-as-unsearched-ignore-arg2 (node &optional arg2)) -- commented declareFunction (1 1), no body
-;; (defun sbhl-record-node (node &optional arg)) -- commented declareFunction (1 1), no body
-;; (defun sbhl-recorded-node-p (node &optional arg)) -- commented declareFunction (1 1), no body
-;; (defun sbhl-unrecorded-node-p (node &optional arg)) -- commented declareFunction (1 1), no body
-;; (defun sbhl-record-proper-all-forward-true-nodes (module node &optional mt tv)) -- commented declareFunction (2 2), no body
+;; (defun sbhl-unmark-marked-closure-and-mark-in-space (node space) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-marked-closure-and-unmark-in-space (node space) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-cyclic-closure (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-cyclic-closure (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-max-true-disjoins (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-extremal-disjoins (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-max-true-disjoins (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-extremal-disjoins (node) ...) -- commented declareFunction, no body
+;; (defun determine-sbhl-mark-between-consider-fn () ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-forward-true-nodes-between-and-all-their-inherited-nodes (module node1 node2 &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-unmark-marked-closure-and-target-mark-closure (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-closure-in-target-space (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-node-and-instances-in-target-space (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-record-closure (module node direction &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-record-all-forward-true-nodes (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-record-all-backward-true-nodes (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-record-max-true-disjoins (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-unrecord-max-true-disjoins (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun sbhl-unrecord-all-recorded-forward-true-nodes (module node &optional mt tv) ...) -- commented declareFunction, no body
+;; (defun unrecord-all-superiors-as-unsearched-ignore-arg2 (node &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-record-node (node &optional arg) ...) -- commented declareFunction, no body
+;; (defun sbhl-recorded-node-p (node &optional arg) ...) -- commented declareFunction, no body
+;; (defun sbhl-unrecorded-node-p (node &optional arg) ...) -- commented declareFunction, no body
+;; (defun sbhl-record-proper-all-forward-true-nodes (module node &optional mt tv) ...) -- commented declareFunction, no body

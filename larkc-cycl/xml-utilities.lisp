@@ -38,7 +38,7 @@ and permission notice:
 (in-package :clyc)
 
 
-;; NOTE: This Java source (xml_utilities.java) is LarKC-stripped — all 68
+;; NOTE: This Java source (xml_utilities.java) is entirely missing-larkc — all 68
 ;; active declareFunction entries have NO method bodies in the Java at all
 ;; (not even handleMissingMethodError). Function stubs below represent the
 ;; declared arities only. The 4 declareMacro entries are reconstructed from
@@ -116,7 +116,7 @@ and permission notice:
 (defparameter *alists-sort-key* nil)
 
 
-;; Functions (declare phase, all LarKC-stripped — no Java bodies)
+;; Functions (declare phase, all missing-larkc — no Java bodies)
 
 ;; (defun xml-version () ...) -- active declareFunction, no body
 ;; (defun xml-add-indentation (&optional stream) ...) -- active declareFunction, no body

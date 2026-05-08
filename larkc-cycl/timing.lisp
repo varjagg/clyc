@@ -49,10 +49,6 @@ and permission notice:
 ;; (defun clear-timing-info () ...) -- commented declareFunction, 0 required, 0 optional, no body
 ;; (defun clear-time-testing-info () ...) -- commented declareFunction, 0 required, 0 optional, no body
 
-(defun timing-info-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for printing timing-info objects."
-  (missing-larkc 12094))
-
 ;; (defun timing-info-p (object) ...) -- commented declareFunction, 1 required, 0 optional, no body
 ;; (defun timing-info-count (object) ...) -- commented declareFunction, 1 required, 0 optional, no body
 ;; (defun timing-info-total (object) ...) -- commented declareFunction, 1 required, 0 optional, no body
@@ -93,6 +89,7 @@ and permission notice:
   "[Cyc] Those specific functions you're interested in timing")
 
 ;; Struct
+;; print-object is missing-larkc 12094 — CL's default print-object handles this.
 
 (defstruct timing-info
   count

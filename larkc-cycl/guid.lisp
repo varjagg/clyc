@@ -42,14 +42,12 @@ and permission notice:
 
 ;;; GUID struct — wraps a UUID string in a distinct type
 
-(defstruct (guid (:constructor %make-guid)
-                 (:print-function print-guid))
+(defstruct (guid (:constructor %make-guid))
   (string "" :type string))
 
 (defconstant *dtp-guid* 127)
 
-(defun print-guid (guid stream depth)
-  (declare (ignore depth))
+(defmethod print-object ((guid guid) stream)
   (format stream "#G\"~a\"" (guid-string guid)))
 
 ;;; Construction

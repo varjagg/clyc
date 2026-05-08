@@ -53,11 +53,6 @@ and permission notice:
 
 (defconstant *dtp-string-buffer* 'string-buffer)
 
-(defmethod print-object ((object string-buffer) stream)
-  (print-string-buffer object stream 0))
-
-;; Active declareFunction, no body
-;; (defun string-buffer-print-function-trampoline (object stream) ...) -- active declareFunction, no body
 
 ;; (defun string-buffer-p (object) ...) -- commented declareFunction, no body. UnaryFunction: missing-larkc 10485
 ;; (defun strbuf-string (string-buffer) ...) -- commented declareFunction, no body (struct accessor)
@@ -99,11 +94,6 @@ and permission notice:
 
 (defconstant *dtp-stream-buffer* 'stream-buffer)
 
-(defmethod print-object ((object stream-buffer) stream)
-  (print-stream-buffer object stream 0))
-
-;; Active declareFunction, no body
-;; (defun stream-buffer-print-function-trampoline (object stream) ...) -- active declareFunction, no body
 
 ;; (defun stream-buffer-p (object) ...) -- commented declareFunction, no body. UnaryFunction: missing-larkc 10483
 ;; (defun strm-buf-stream (stream-buffer) ...) -- commented declareFunction, no body (struct accessor)

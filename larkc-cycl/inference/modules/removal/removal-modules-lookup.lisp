@@ -46,7 +46,7 @@ and permission notice:
   (inference-completely-asserted-asent? asent (inference-relevant-mt)))
 
 ;; This is a full inline expansion of do-gaf-lookup-index, matching the Java directly.
-;; The macro body for do-gaf-lookup-index is stripped from LarKC, so we port the expansion.
+;; The macro body for do-gaf-lookup-index is missing-larkc, so we port the expansion.
 (defun removal-lookup-pos-iterator (asent)
   (let* ((result nil)
          (l-index (inference-gaf-lookup-index asent :pos))

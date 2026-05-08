@@ -41,15 +41,11 @@ and permission notice:
 (defconstant max-unicode-value 1114111)
 
 ;; UNICODE-CHAR defstruct
-;; The print-function references print-unicode-char below via forward reference.
-(defstruct (unicode-char (:print-function print-unicode-char))
+;; print-object is missing-larkc 30929 — CL's default print-object handles this.
+(defstruct unicode-char
   uchar)
 
 (defconstant *dtp-unicode-char* 'unicode-char)
-
-(defun unicode-char-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for printing unicode-char objects."
-  (missing-larkc 30929))
 
 ;; unicode-char-p -- active declareFunction, provided by defstruct
 ;; unicode-char-uchar -- active declareFunction, provided by defstruct
@@ -65,14 +61,11 @@ and permission notice:
 ;; (defun unicode-char-set-char (unicode-char value) ...) -- active declareFunction, no body
 
 ;; UNICODE-STRING defstruct
-(defstruct (unicode-string (:print-function print-unicode-string))
+;; print-object is missing-larkc 30930 — CL's default print-object handles this.
+(defstruct unicode-string
   vect)
 
 (defconstant *dtp-unicode-string* 'unicode-string)
-
-(defun unicode-string-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for printing unicode-string objects."
-  (missing-larkc 30930))
 
 ;; unicode-string-p -- active declareFunction, provided by defstruct
 ;; unicode-string-vect -- active declareFunction, provided by defstruct

@@ -37,10 +37,10 @@ and permission notice:
 
 (in-package :clyc)
 
-;; interval_span.java is nearly entirely LarKC-stripped: of 18 active
+;; interval_span.java is nearly entirely missing-larkc: of 18 active
 ;; declareFunctions, only interval_span_print_function_trampoline has a
 ;; Java method body (and that body is handleMissingMethodError 29643).
-;; The $interval_span_p$UnaryFunction inner class holds a stripped predicate
+;; The $interval_span_p$UnaryFunction inner class holds a missing-larkc predicate
 ;; override referencing number 29641. The remaining 16 functions exist only
 ;; as declareFunction entries with no corresponding method — they are ported
 ;; as comment stubs per the DIRECT PORT rule (no inventing bodies).
@@ -48,19 +48,12 @@ and permission notice:
 ;; --- defstruct interval-span ---
 ;; struct-decl $list2 = (START END) — slot names
 ;; struct-decl $list4 = (INT-SPAN-START INT-SPAN-END) — accessor names (conc-name INT-SPAN-)
-;; struct-decl $sym6$PRINT_INTERVAL_SPAN — user print function (LarKC-stripped)
-(defstruct (interval-span (:conc-name "INT-SPAN-")
-                          (:print-function interval-span-print-function-trampoline))
+;; print-object is missing-larkc 29643 — CL's default print-object handles this.
+(defstruct (interval-span (:conc-name "INT-SPAN-"))
   start
   end)
 
 (defconstant *dtp-interval-span* 'interval-span)
-
-(defun interval-span-print-function-trampoline (object stream depth)
-  ;; Java declareFunction arity is 2 (object stream), but CL :print-function
-  ;; requires a 3-arg (object stream depth) signature.
-  (declare (ignore object stream depth))
-  (missing-larkc 29643))
 
 ;; (defun interval-span-p (object) ...) -- active declareFunction, no body (predicate provided by defstruct; $interval_span_p$UnaryFunction overrides with missing-larkc 29641)
 ;; (defun int-span-start (interval-span) ...) -- active declareFunction, no body (accessor provided by defstruct)
@@ -85,8 +78,8 @@ and permission notice:
 (deflexical *interval-span-table* (make-hash-table :test 'eql))
 
 ;; --- setup phase ---
-;; Structures.register_method for print-object-method-table is elided —
-;; CL defstruct's :print-function handles this natively.
+;; Structures.register_method for print-object-method-table is now expressed as
+;; the defmethod print-object above.
 ;; Structures.def_csetf calls are elided — CL setf handles defstruct accessors natively.
 (toplevel
   (identity 'interval-span))

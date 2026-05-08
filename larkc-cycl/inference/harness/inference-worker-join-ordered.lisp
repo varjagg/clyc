@@ -46,8 +46,6 @@ and permission notice:
 
 (defconstant *dtp-join-ordered-link-data* 'join-ordered-link-data)
 
-(defun join-ordered-link-data-print-function-trampoline (object stream)
-  (default-struct-print-function object stream 0))
 
 (defun join-ordered-link-data-p (object)
   "[Cyc] Return T iff OBJECT is a join-ordered-link-data structure."

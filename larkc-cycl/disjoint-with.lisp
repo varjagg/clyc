@@ -77,7 +77,7 @@ and permission notice:
 ;; (defun why-instances-of-disjoint-collections (term1 term2 &optional mt tv) ...) -- 2 required, 2 optional, no body
 
 (defun disjoint-with? (c1 c2 &optional mt tv)
-  "[Cyc] Are collections C1 and C2 disjoint?"
+  "[Cyc] are collections <c1> and <c2> disjoint?"
   (if (first-order-naut? c1)
       ;; missing-larkc 10979: likely nat-disjoint-with?, which handles disjointness
       ;; checking for NAUTs (non-atomic unreified terms) by reducing to their
@@ -88,7 +88,7 @@ and permission notice:
 ;; (defun nat-disjoint-with? (c1 c2 &optional mt tv) ...) -- 2 required, 2 optional, no body
 
 (defun any-disjoint-with? (c1s c2 &optional mt tv)
-  "[Cyc] Is any c1 in C1S disjoint with C2?"
+  "[Cyc] is any c1 in <c1s> disjoint with c2?"
   (sbhl-any-with-implied-disjoins-relation-p (get-sbhl-module #$disjointWith) c1s c2 mt tv))
 
 ;; (defun any-disjoint-with-any? (c1s c2s &optional mt tv) ...) -- 2 required, 2 optional, no body

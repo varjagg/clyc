@@ -42,9 +42,6 @@ and permission notice:
   bindings
   supports)
 
-(defun removal-link-data-print-function-trampoline (object stream)
-  (default-struct-print-function object stream 0))
-
 (defun removal-link-data-p (object)
   (typep object 'removal-link-data))
 

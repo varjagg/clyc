@@ -39,6 +39,8 @@ and permission notice:
 
 (defparameter *auxiliary-indices* nil)
 
+;; (defun auxiliary-indices () ...) -- active declaration, no body
+
 (defun declare-auxiliary-index (aux-index name)
   (pushnew aux-index *auxiliary-indices*)
   (put aux-index :index-name name)
@@ -55,6 +57,9 @@ and permission notice:
       (put aux-index :index new-index)
       (remprop aux-index :index))
   aux-index)
+
+;; (defun clear-auxiliary-index (aux-index) ...) -- active declaration, no body
+;; (defun auxiliary-index-name (aux-index) ...) -- active declaration, no body
 
 (defun num-unbound-rule-index (&optional sense mt direction)
   "[Cyc] Return the unbound rule count at SENSE MT DIRECTION."
@@ -96,6 +101,8 @@ and permission notice:
              (incf count (num-unbound-rule-index sense mt))))))
     count))
 
+;; (defun relevant-key-unbound-rule-index (&optional sense) ...) -- active declaration, no body
+
 (defun key-unbound-rule-index (&optional sense mt)
   "[Cyc] Return a list of the keys to the next unbound rule index level below SENSE MT."
   (cond
@@ -120,6 +127,11 @@ and permission notice:
 (defun get-unbound-rule-subindex (sense &optional mt direction)
   "[Cyc] Returns NIL or subindex-p."
   (get-subindex (unbound-rule-index) (list sense mt direction)))
+
+;; (defun add-unbound-rule-index (assertion sense mt direction) ...) -- active declaration, no body
+;; (defun rem-unbound-rule-index (assertion sense mt direction) ...) -- active declaration, no body
+;; (defun map-unbound-rule-index (fn sense &optional mt) ...) -- active declaration, no body
+;; (defun map-unbound-rule-mt-index (fn sense mt &optional direction) ...) -- active declaration, no body
 
 (defun* unbound-rule-index () (:inline t)
   :unbound-rule-index)
@@ -146,6 +158,10 @@ and permission notice:
   ;; TODO - return value assertion
   )
 
+;; (defun unbound-predicate-rule-p (rule) ...) -- active declaration, no body
+;; (defun clear-unbound-rule-index () ...) -- active declaration, no body
+;; (defun unbound-rule-assertion-p (assertion) ...) -- active declaration, no body
+
 (defun unbound-predicate-literal (literal)
   (and (consp literal)
        (variable-p (literal-predicate literal))))
@@ -156,13 +172,24 @@ and permission notice:
                       (neg-lits clause))))
     (find-if #'unbound-predicate-literal literals)))
 
+;; (defun reconstruct-auxiliary-indices () ...) -- active declaration, no body
+;; (defun reconstruct-unbound-rule-indices () ...) -- active declaration, no body
+;; (defun dump-auxiliary-indices (stream) ...) -- active declaration, no body
+
 (defun load-auxiliary-indices (stream)
   (load-unbound-rule-index stream)
   (cfasl-input stream))
 
+;; (defun dump-unbound-rule-index (stream) ...) -- active declaration, no body
+
 (defun load-unbound-rule-index (stream)
   (reset-auxiliary-index (unbound-rule-index) (cfasl-input stream)))
 
+
+;;; Setup
+
+(toplevel
+  (declare-auxiliary-index :unbound-rule-index "Unbound Rule Index"))
 
 
 (declare-index :unbound-rule-index-pos

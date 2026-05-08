@@ -97,8 +97,8 @@ Used for boolean disjoins searches."
   "[Cyc] Accessor. Returns the predicate of GAF-FORMULA."
   (first gaf-formula))
 
-;; (defun hl-default-tv (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-find-first-matching-gaf (arg1)) -- commented declareFunction, no body
+;; (defun hl-default-tv (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-find-first-matching-gaf (arg1) ...) -- commented declareFunction, no body
 
 (defun sbhl-find-gaf (gaf-formula mt tv)
   "[Cyc] Accessor. Returns the assertion associated with GAF-FORMULA and MT.
@@ -245,10 +245,10 @@ governed by BEHAVIOR."
   (make-transitivity-support (get-sbhl-link-pred module)
                              #$UniversalVocabularyMt))
 
-;; (defun sbhl-set-empty-extent-justification (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-temporal-faux-link (arg1 arg2)) -- commented declareFunction, no body
-;; (defun any-support-chain-of-temporal-link (arg1)) -- commented declareFunction, no body
-;; (defun any-support-chain-of-link-disjunction-consequent (arg1 arg2)) -- commented declareFunction, no body
+;; (defun sbhl-set-empty-extent-justification (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-temporal-faux-link (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun any-support-chain-of-temporal-link (arg1) ...) -- commented declareFunction, no body
+;; (defun any-support-chain-of-link-disjunction-consequent (arg1 arg2) ...) -- commented declareFunction, no body
 
 (defun apply-sbhl-add-node-test (test-fn node)
   "[Cyc] Applies TEST-FN (to NODE, where appropriate). Used to determine whether
@@ -261,7 +261,7 @@ to add node to result."
      (sbhl-warn 3 "Using potentially unsupported gather gating behavior: ~a" test-fn)
      (funcall test-fn node))))
 
-;; (defun apply-sbhl-add-unmarked-node-test (arg1)) -- commented declareFunction, no body
+;; (defun apply-sbhl-add-unmarked-node-test (arg1) ...) -- commented declareFunction, no body
 
 (defun sbhl-push-onto-result (node)
   "[Cyc] Modifier. Will push NODE onto *sbhl-result*."
@@ -277,8 +277,8 @@ to node gives a non-nil answer."
       (sbhl-push-onto-result node)))
   nil)
 
-;; (defun sbhl-push-onto-result-if-and-stop-unless (node)) -- commented declareFunction, no body
-;; (defun sbhl-push-onto-result-with-prune (node)) -- commented declareFunction, no body
+;; (defun sbhl-push-onto-result-if-and-stop-unless (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-push-onto-result-with-prune (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-push-unwind-onto-result (nodelist)
   "[Cyc] Modifier: will push a list of *sbhl-module*, the nodes in NODELIST,
@@ -310,8 +310,8 @@ instead calls sbhl-temporal-justification-unwind."
         (funcall compose-fn node)))
   nil)
 
-;; (defun sbhl-apply-compose-fn-if (node)) -- commented declareFunction, no body
-;; (defun sbhl-apply-compose-fn-and-combine-with-result (node)) -- commented declareFunction, no body
+;; (defun sbhl-apply-compose-fn-if (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-apply-compose-fn-and-combine-with-result (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-gather-first-non-nil-result (node)
   "[Cyc] Modifier. Applies *sbhl-compose-fn* to node. If the result is non-nil,
@@ -352,10 +352,10 @@ to the result, and sets *sbhl-finished?* to true. If the result is nil, sets
               (missing-larkc 2474)))))
   nil)
 
-;; (defun sbhl-gather-first-dead-end-node-and-enqueue-others (node)) -- commented declareFunction, no body
-;; (defun sbhl-gather-first-node (node)) -- commented declareFunction, no body
-;; (defun sbhl-gather-first-target-unmarked-node (node)) -- commented declareFunction, no body
-;; (defun sbhl-search-has-multiple-goals-p ()) -- commented declareFunction, no body
+;; (defun sbhl-gather-first-dead-end-node-and-enqueue-others (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-gather-first-node (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-gather-first-target-unmarked-node (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-search-has-multiple-goals-p () ...) -- commented declareFunction, no body
 
 (defun set-sbhl-boolean-goal-conditions ()
   "[Cyc] Modifier. Sets *sbhl-result* to true, and sets *sbhl-finished?* to indicate
@@ -385,8 +385,8 @@ calls set-sbhl-boolean-goal-conditions."
     (set-sbhl-boolean-goal-conditions))
   nil)
 
-;; (defun sbhl-node-is-a-goal-node (node)) -- commented declareFunction, no body
-;; (defun sbhl-reached-cutoff-p ()) -- commented declareFunction, no body
+;; (defun sbhl-node-is-a-goal-node (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-reached-cutoff-p () ...) -- commented declareFunction, no body
 
 (defun sbhl-check-cutoff (node)
   "[Cyc] Modifier. Checks cutoff conditions and terminates search if cutoff is reached."
@@ -514,7 +514,7 @@ Dynamically rebinds *sbhl-search-parent-marking*."
                   (when (sbhl-apply-unwind-function-p)
                     (sbhl-apply-unwind-function (list node link-node))))))))))))
 
-;; (defun sbhl-mark-sweep-and-unwind (node)) -- commented declareFunction, no body
+;; (defun sbhl-mark-sweep-and-unwind (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-step-and-suspend-mark (node suspend-test-p)
   "[Cyc] Modifier: Steps over NODE's accessible links, ignoring NODE's marking
@@ -540,7 +540,7 @@ if SUSPEND-TEST-P is true. Does not mark node. Applies sbhl-mapping-function."
                   (sbhl-apply-unwind-function (list node link-node))))))))))
   nil)
 
-;; (defun sbhl-step-and-suspend-unmark (node)) -- commented declareFunction, no body
+;; (defun sbhl-step-and-suspend-unmark (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-step-and-mark (node)
   "[Cyc] Modifier: Steps over NODE's accessible unmarked links, testing their markings
@@ -612,7 +612,7 @@ and subsequently marking them. Applies sbhl-mapping-function."
                             (list node link-node)))))))))))))))
   nil)
 
-;; (defun sbhl-step-and-unmark (node)) -- commented declareFunction, no body
+;; (defun sbhl-step-and-unmark (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-sweep (module link-direction tv space map-fn node &optional unmarking?)
   "[Cyc] Takes MODULE, TV, LINK-DIRECTION, SPACE, and MAP-FN parameter and binds them
@@ -643,7 +643,7 @@ for the execution of sbhl-unmark-and-sweep, as applied to NODE."
     (sbhl-unmark-and-sweep node))
   nil)
 
-;; (defun sbhl-sweep-and-unwind (module link-direction tv space map-fn node &optional unmarking?)) -- commented declareFunction, no body
+;; (defun sbhl-sweep-and-unwind (module link-direction tv space map-fn node &optional unmarking?) ...) -- commented declareFunction, no body
 
 (defun sbhl-step (module link-direction tv space map-fn node
                   &optional suspend-marking-p suspend-test-p)
@@ -680,7 +680,7 @@ for the execution of sbhl-step-and-mark, as applied to NODE."
       (sbhl-step module link-direction tv space map-fn node))
   nil)
 
-;; (defun sbhl-unmark-step (module link-direction tv space map-fn node &optional unmarking?)) -- commented declareFunction, no body
+;; (defun sbhl-unmark-step (module link-direction tv space map-fn node &optional unmarking?) ...) -- commented declareFunction, no body
 
 (defun apply-sbhl-search-behavior (behavior node)
   "[Cyc] Applies BEHAVIOR to NODE."
@@ -750,7 +750,7 @@ in *sbhl-space*, with map-fn sbhl-consider-node."
               'sbhl-consider-node node (sbhl-unmarking-search-p))
   nil)
 
-;; (defun sbhl-simple-true-search-and-unwind (node)) -- commented declareFunction, no body
+;; (defun sbhl-simple-true-search-and-unwind (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-simple-false-search (node)
   "[Cyc] Used as first part of false searches; it gathers all nodes related by true
@@ -769,7 +769,7 @@ predicate links that would carry a false relation to NODE."
                       'sbhl-sweep-opposite-for-false node)
   nil)
 
-;; (defun sbhl-sweep-opposite-for-false (node)) -- commented declareFunction, no body
+;; (defun sbhl-sweep-opposite-for-false (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-step-and-sweep-with-tt-module (node)
   "[Cyc] Used for step part of step and sweep searches."
@@ -913,7 +913,7 @@ from them."
                       'sbhl-sweep-forward-nots node)
   nil)
 
-;; (defun sbhl-sweep-forward-nots (node)) -- commented declareFunction, no body
+;; (defun sbhl-sweep-forward-nots (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-sweep-and-gather-disjoins (node)
   "[Cyc] Used to gather the extremal disjoins. Sweeps the transfer through module
@@ -938,16 +938,16 @@ and gathers asserted disjoins."
                                  'sbhl-consider-node node (sbhl-unmarking-search-p))
   nil)
 
-;; (defun sbhl-sweep-and-gather-first-disjoin (node)) -- commented declareFunction, no body
-;; (defun sbhl-step-gather-first-disjoin (node)) -- commented declareFunction, no body
-;; (defun determine-sbhl-sample-leaf-consider-fn (&optional arg1)) -- commented declareFunction, no body
-;; (defun sbhl-enqueue-node-in-leaf-queue (node)) -- commented declareFunction, no body
-;; (defun sbhl-leaf-instances-sweep (node)) -- commented declareFunction, no body
-;; (defun sbhl-leaf-instances-step (node)) -- commented declareFunction, no body
-;; (defun sbhl-mark-and-sweep-extremal-independent-nodes (node)) -- commented declareFunction, no body
-;; (defun sbhl-min-backward-true-nodes-such-that (arg1 arg2 arg3 &optional arg4 arg5)) -- commented declareFunction, no body
-;; (defun sbhl-extremal-independent-nodes-such-that (arg1 arg2)) -- commented declareFunction, no body
-;; (defun sbhl-test-for-previous-extremal-paths (node)) -- commented declareFunction, no body
+;; (defun sbhl-sweep-and-gather-first-disjoin (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-step-gather-first-disjoin (node) ...) -- commented declareFunction, no body
+;; (defun determine-sbhl-sample-leaf-consider-fn (&optional arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-enqueue-node-in-leaf-queue (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-leaf-instances-sweep (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-leaf-instances-step (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-and-sweep-extremal-independent-nodes (node) ...) -- commented declareFunction, no body
+;; (defun sbhl-min-backward-true-nodes-such-that (arg1 arg2 arg3 &optional arg4 arg5) ...) -- commented declareFunction, no body
+;; (defun sbhl-extremal-independent-nodes-such-that (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-test-for-previous-extremal-paths (node) ...) -- commented declareFunction, no body
 
 (defun sbhl-check-disjoins-of-all-backward-nodes (node)
   "[Cyc] Used for implied false relations, which need to check the disjoins of all
@@ -968,4 +968,4 @@ of the backward closure of NODE."
                   'sbhl-step-and-check-markings node)))
   nil)
 
-;; (defun note-kb-access-sbhl-link (arg1 arg2)) -- commented declareFunction, no body
+;; (defun note-kb-access-sbhl-link (arg1 arg2) ...) -- commented declareFunction, no body

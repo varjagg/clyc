@@ -51,7 +51,7 @@ and permission notice:
 (defun-cached get-sbhl-predicates () (:test eq)
   (get-sbhl-predicates-internal))
 
-;; (defun remove-get-sbhl-predicates ()) -- commented declareFunction, no body
+;; (defun remove-get-sbhl-predicates () ...) -- commented declareFunction, no body
 
 (defun get-sbhl-predicates-internal ()
   (get-sbhl-predicates-int))
@@ -60,8 +60,8 @@ and permission notice:
   "[Cyc] Whether PRED is a member of *sbhl-predicates*"
   (member-eq? object (get-sbhl-predicates)))
 
-;; (defun sbhl-module-or-predicate-p (object)) -- commented declareFunction, no body
-;; (defun sbhl-non-time-module-p (object)) -- commented declareFunction, no body
+;; (defun sbhl-module-or-predicate-p (object) ...) -- commented declareFunction, no body
+;; (defun sbhl-non-time-module-p (object) ...) -- commented declareFunction, no body
 
 (defun sbhl-non-time-predicate-p (object)
   "[Cyc] Whether PRED is a member of *sbhl-predicates* and not an sbhl-time-module"
@@ -69,7 +69,7 @@ and permission notice:
        (not (sbhl-time-module-p (get-sbhl-module object)))
        t))
 
-;; (defun sbhl-graph-p (object)) -- commented declareFunction, no body
+;; (defun sbhl-graph-p (object) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-link-pred (module)
   "[Cyc] Accessor: the link predicate associated with MODULE / *sbhl-module*"
@@ -81,7 +81,7 @@ and permission notice:
   (declare (type (satisfies sbhl-module-p) module))
   (sbhl-mod-link-style module))
 
-;; (defun get-sbhl-module-naut-forward-true-generators (module)) -- commented declareFunction, no body
+;; (defun get-sbhl-module-naut-forward-true-generators (module) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-module-type (module)
   "[Cyc] Accessor: the type of module that MODULE / *sbhl-module* is."
@@ -103,29 +103,29 @@ and permission notice:
   (declare (type (satisfies sbhl-module-p) module))
   (sbhl-mod-unmarking-fn module))
 
-;; (defun get-sbhl-module-marking-increment (module)) -- commented declareFunction, no body
+;; (defun get-sbhl-module-marking-increment (module) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-index-arg (module)
   "[Cyc] Accessor: the number corresponding to the index-arg position for MODULE / *sbhl-module*."
   (declare (type (satisfies sbhl-module-p) module))
   (sbhl-mod-index-arg module))
 
-;; (defun get-sbhl-gather-arg (module)) -- commented declareFunction, no body
+;; (defun get-sbhl-gather-arg (module) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-add-node-to-result-test (module)
   "[Cyc] Accessor: the function applied to a node's marking before pushing it onto the result"
   (declare (type (satisfies sbhl-module-p) module))
   (get-sbhl-module-property module :add-node-to-result-test))
 
-;; (defun get-sbhl-add-unmarked-node-to-result-test (module)) -- commented declareFunction, no body
+;; (defun get-sbhl-add-unmarked-node-to-result-test (module) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-type-test (module)
   "[Cyc] Accessor: the function used to test the type of objects used in *sbhl-module* / MODULE"
   (declare (type (satisfies sbhl-module-p) module))
   (sbhl-mod-type-test module))
 
-;; (defun get-sbhl-module-root (module)) -- commented declareFunction, no body
-;; (defun get-sbhl-transfers-via-arg (module)) -- commented declareFunction, no body
+;; (defun get-sbhl-module-root (module) ...) -- commented declareFunction, no body
+;; (defun get-sbhl-transfers-via-arg (module) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-accessible-link-preds (module)
   "[Cyc] Accessor: the list of sbhl predicates allowed by MODULE / *sbhl-module* for following links."
@@ -137,7 +137,7 @@ and permission notice:
   (declare (type (satisfies sbhl-module-p) module))
   (get-sbhl-module-property module :predicate-search-p))
 
-;; (defun get-sbhl-node-modules (object)) -- commented declareFunction, no body
+;; (defun get-sbhl-node-modules (object) ...) -- commented declareFunction, no body
 
 (defun sbhl-disjoins-search-p ()
   "[Cyc] Accessor: whether the current search module is a disjoins module"
@@ -147,9 +147,9 @@ and permission notice:
   "[Cyc] Accessor: whether the current module is a time module."
   (sbhl-time-module-type-p (get-sbhl-search-module-type)))
 
-;; (defun sbhl-root-p (node module)) -- commented declareFunction, no body
-;; (defun get-sbhl-inverse-link-module (module)) -- commented declareFunction, no body
-;; (defun get-sbhl-module-relevant-naut-link-generators (arg1 arg2 arg3)) -- commented declareFunction, no body
+;; (defun sbhl-root-p (node module) ...) -- commented declareFunction, no body
+;; (defun get-sbhl-inverse-link-module (module) ...) -- commented declareFunction, no body
+;; (defun get-sbhl-module-relevant-naut-link-generators (arg1 arg2 arg3) ...) -- commented declareFunction, no body
 
 (defun sbhl-simple-module-p (module)
   "[Cyc] Accessor: does module type of MODULE / *sbhl-module* satisfy
@@ -173,8 +173,8 @@ sbhl-simple-reflexive-module-type-p or sbhl-simple-non-reflexive-module-type-p."
   (declare (type (satisfies sbhl-module-p) module))
   (and (get-sbhl-module-which-this-module-inverts-arguments-of module) t))
 
-;; (defun get-sbhl-inverse-module (module)) -- commented declareFunction, no body
-;; (defun get-sbhl-module-with-inverted-arguments (module)) -- commented declareFunction, no body
+;; (defun get-sbhl-inverse-module (module) ...) -- commented declareFunction, no body
+;; (defun get-sbhl-module-with-inverted-arguments (module) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-module-which-this-module-inverts-arguments-of (module)
   "[Cyc] Accessor: the module which MODULE / *sbhl-module* inverts arguments of."
@@ -191,7 +191,7 @@ sbhl-simple-reflexive-module-type-p or sbhl-simple-non-reflexive-module-type-p."
        inverts-arguments-of-module)
       (t nil))))
 
-;; (defun get-sbhl-module-tag (module)) -- commented declareFunction, no body
+;; (defun get-sbhl-module-tag (module) ...) -- commented declareFunction, no body
 
 (defun new-sbhl-module-graph (module)
   "[Cyc] Modifier: stores a hash-table in the :graph field of MODULE"
@@ -205,7 +205,7 @@ sbhl-simple-reflexive-module-type-p or sbhl-simple-non-reflexive-module-type-p."
   (declare (type (satisfies sbhl-module-p) module))
   (sbhl-mod-graph module))
 
-;; (defun get-sbhl-graphs ()) -- commented declareFunction, no body
+;; (defun get-sbhl-graphs () ...) -- commented declareFunction, no body
 
 (defun sbhl-disjoins-module-p (module)
   "[Cyc] Accessor: does module type of MODULE / *sbhl-module* satisfy sbhl-disjoins-module-type-p."
@@ -277,8 +277,8 @@ sbhl-simple-reflexive-module-type-p or sbhl-simple-non-reflexive-module-type-p."
       (get-sbhl-transfers-through-module module)
       module))
 
-;; (defun sbhl-search-direction-p (direction)) -- commented declareFunction, no body
-;; (defun sbhl-forward-direction-for-module-p (direction module)) -- commented declareFunction, no body
+;; (defun sbhl-search-direction-p (direction) ...) -- commented declareFunction, no body
+;; (defun sbhl-forward-direction-for-module-p (direction module) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-module-forward-direction (module)
   "[Cyc] Accessor: the keyword that relates MODULE / *sbhl-module* to either :predicate or :link direction"
@@ -294,7 +294,7 @@ sbhl-simple-reflexive-module-type-p or sbhl-simple-non-reflexive-module-type-p."
       (get-sbhl-backward-directed-direction)
       (get-sbhl-undirected-direction)))
 
-;; (defun get-sbhl-opposite-search-direction (&optional direction)) -- commented declareFunction, no body
+;; (defun get-sbhl-opposite-search-direction (&optional direction) ...) -- commented declareFunction, no body
 
 (defun sbhl-module-directed-links? (module)
   "[Cyc] Accessor: whether MODULE / *sbhl-module* is a directed or undirected graph"
@@ -313,7 +313,7 @@ sbhl-simple-reflexive-module-type-p or sbhl-simple-non-reflexive-module-type-p."
      (sbhl-error 1 "invalid sbhl-search-direction ~a" direction)
      nil)))
 
-;; (defun sbhl-search-direction-to-opposite-link-direction (direction module)) -- commented declareFunction, no body
+;; (defun sbhl-search-direction-to-opposite-link-direction (direction module) ...) -- commented declareFunction, no body
 
 (defun get-relevant-sbhl-directions (module)
   "[Cyc] Accessor: list of the keywords for relevant directions for links of MODULE / *sbhl-module*. If *sbhl-link-direction* is specified, it will return with a list of either the forward-direction for MODULE / *sbhl-module* or the backward-direction for MODULE / *sbhl-module*"
@@ -340,9 +340,9 @@ sbhl-simple-reflexive-module-type-p or sbhl-simple-non-reflexive-module-type-p."
       0
       (spec-cardinality node)))
 
-;; (defun sbhl-module-hl-support-module (module)) -- commented declareFunction, no body
-;; (defun sbhl-pred-hl-support-module (pred)) -- commented declareFunction, no body
-;; (defun sbhl-old-mode (arg1 arg2)) -- commented declareFunction, no body
+;; (defun sbhl-module-hl-support-module (module) ...) -- commented declareFunction, no body
+;; (defun sbhl-pred-hl-support-module (pred) ...) -- commented declareFunction, no body
+;; (defun sbhl-old-mode (arg1 arg2) ...) -- commented declareFunction, no body
 
 (defun sbhl-pred-get-hl-module (pred)
   (declare (type (satisfies sbhl-predicate-p) pred))
@@ -359,14 +359,14 @@ sbhl-simple-reflexive-module-type-p or sbhl-simple-non-reflexive-module-type-p."
     ((eq pred #$negationMt) :genlmt)
     (t nil)))
 
-;; (defun sbhl-old-module (module)) -- commented declareFunction, no body
-;; (defun sbhl-predicate-for-hl-module (hl-module)) -- commented declareFunction, no body
-;; (defun sbhl-predicate-from-fort-type (fort-type)) -- commented declareFunction, no body
-;; (defun sbhl-node-has-type-associated-to-predicate-p (node predicate)) -- commented declareFunction, no body
-;; (defun determine-sbhl-predicate-from-fort-type (fort-type &optional arg)) -- commented declareFunction, no body
-;; (defun determine-sbhl-module-from-fort-type (fort-type &optional arg)) -- commented declareFunction, no body
-;; (defun sbhl-node-with-any-sbhl-type-p (node &optional arg)) -- commented declareFunction, no body
-;; (defun sbhl-fort? (fort)) -- commented declareFunction, no body
+;; (defun sbhl-old-module (module) ...) -- commented declareFunction, no body
+;; (defun sbhl-predicate-for-hl-module (hl-module) ...) -- commented declareFunction, no body
+;; (defun sbhl-predicate-from-fort-type (fort-type) ...) -- commented declareFunction, no body
+;; (defun sbhl-node-has-type-associated-to-predicate-p (node predicate) ...) -- commented declareFunction, no body
+;; (defun determine-sbhl-predicate-from-fort-type (fort-type &optional arg) ...) -- commented declareFunction, no body
+;; (defun determine-sbhl-module-from-fort-type (fort-type &optional arg) ...) -- commented declareFunction, no body
+;; (defun sbhl-node-with-any-sbhl-type-p (node &optional arg) ...) -- commented declareFunction, no body
+;; (defun sbhl-fort? (fort) ...) -- commented declareFunction, no body
 
 (defun sbhl-isa-collection-p (node)
   (isa-collection? (naut-to-nart node)))
@@ -389,4 +389,4 @@ sbhl-simple-reflexive-module-type-p or sbhl-simple-non-reflexive-module-type-p."
           (t nil))
         t)))
 
-;; (defun sbhl-module-meets-requisites? (module)) -- commented declareFunction, no body
+;; (defun sbhl-module-meets-requisites? (module) ...) -- commented declareFunction, no body

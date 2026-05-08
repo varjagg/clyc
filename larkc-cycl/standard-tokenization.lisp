@@ -38,11 +38,10 @@ and permission notice:
 (in-package :clyc)
 
 ;; This is a near-total stub port — standard_tokenization.java has 42 commented
-;; declareFunction entries and only 1 active one (dot-analysis-print-function-trampoline,
-;; whose body is handleMissingMethodError 9013). The tokenizer, chunker, dot-analysis
-;; DFA, and interval/string token accessors all had their bodies stripped by LarKC.
-;; What remains is: 3 character-class constants, the DOT-ANALYSIS defstruct, the
-;; *DTP-DOT-ANALYSIS* defconstant, the print-function trampoline, and comment stubs.
+;; declareFunction entries; the tokenizer, chunker, dot-analysis DFA, and
+;; interval/string token accessors all had their bodies stripped by LarKC.
+;; What remains is: 3 character-class constants, the DOT-ANALYSIS defstruct,
+;; the *DTP-DOT-ANALYSIS* defconstant, and comment stubs.
 
 
 ;;;; Variables
@@ -60,10 +59,10 @@ and permission notice:
 
 ;;;; DOT-ANALYSIS struct
 ;; Slots FOUND REMAINS ACCUMULATOR STATE per $list11, with default conc-name
-;; DOT-ANALYSIS- per $list13 accessor names. Print function is pprint-dot-analysis
-;; per $sym15$PPRINT_DOT_ANALYSIS in the struct decl.
+;; DOT-ANALYSIS- per $list13 accessor names.
+;; print-object is missing-larkc 9013 — CL's default print-object handles this.
 
-(defstruct (dot-analysis (:print-function pprint-dot-analysis))
+(defstruct dot-analysis
   found
   remains
   accumulator
@@ -81,15 +80,6 @@ and permission notice:
 ;; (defun standard-white-space-chars () ...) -- commented declareFunction, no body
 ;; (defun tokenize-sentence (string &optional punctuation-chars white-space-chars word-final-punctuation-chars) ...) -- commented declareFunction, no body
 ;; (defun scanner-char-classify (char punctuation-chars white-space-chars word-final-punctuation-chars) ...) -- commented declareFunction, no body
-
-(defun dot-analysis-print-function-trampoline (object stream depth)
-  ;; Likely calls pprint-dot-analysis (the struct's print function per
-  ;; $sym15$PPRINT_DOT_ANALYSIS) or otherwise emits the format fragments
-  ;; $str30..$str33 ("#<AP:Found ... Remains ... Accumulator ... State ...>"
-  ;; from Internal Constants). Java declareFunction arity is 2 (object stream),
-  ;; but CL :print-function requires the 3-arg (object stream depth) signature.
-  (declare (ignore object stream depth))
-  (missing-larkc 9013))
 
 ;; (defun dot-analysis-p (object) ...) -- commented declareFunction, no body (accessor provided by defstruct)
 ;; (defun dot-analysis-found (object) ...) -- commented declareFunction, no body (accessor provided by defstruct)

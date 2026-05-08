@@ -45,6 +45,7 @@ and permission notice:
 
 
 ;;; Struct: proof
+;;; print-object is missing-larkc 35406 — CL's default print-object handles this.
 
 (defstruct (proof
             (:conc-name "prf-")
@@ -57,12 +58,6 @@ and permission notice:
 
 (defconstant *dtp-proof* 'proof)
 
-
-;;; Defstruct print trampoline and sxhash — both missing-larkc
-
-(defun proof-print-function-trampoline (object stream)
-  ;; Likely dispatches to print-proof for custom printing
-  (missing-larkc 35406))
 
 ;; (defun print-proof (object stream depth) ...) -- active declareFunction, no body
 ;; (defun sxhash-proof-method (object) ...) -- active declareFunction, body is missing-larkc 35414

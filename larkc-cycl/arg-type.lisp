@@ -50,7 +50,6 @@ and permission notice:
 ;; Declare phase — ordered per declare_arg_type_file()
 
 (defun formula-args-ok-wrt-type? (formula &optional mt)
-  "[Cyc] Return T iff all the args of FORMULA satisfy arg-type constraints."
   (if (mt-designating-literal? formula)
       (missing-larkc 23217) ;; likely calls mt-literal-args-ok-wrt-type? to handle mt-designating literals
       (formula-args-ok-wrt-type-int? formula mt)))
@@ -74,7 +73,6 @@ and permission notice:
 ;; (defun at-considering-atomic-sentence-p () ...) -- no body, active declareFunction
 
 (defun formula-args-ok-wrt-type-int? (formula &optional mt)
-  "[Cyc] Internal implementation for checking formula args wrt arg-type constraints."
   (let ((args (formula-args formula))
         (seqvar (sequence-var formula))
         (ok? t)
@@ -126,7 +124,6 @@ and permission notice:
           ok?)))))
 
 (defun relation-arg-ok? (relation arg argnum &optional mt)
-  "[Cyc] Return T iff ARG is ok as argument ARGNUM of RELATION."
   (if (and (within-wff?)
            (logical-connective-p relation))
       t
@@ -147,7 +144,6 @@ and permission notice:
 ;; (defun cached-relation-arg-ok? (v1 v2 v3 v4 v5 v6) ...) -- no body, active declareFunction
 
 (defun relation-arg-ok-int? (relation arg argnum &optional mt)
-  "[Cyc] Internal implementation of relation-arg-ok?."
   (let ((ok? nil))
     (let ((*at-reln* relation)
           (*at-arg* arg)
@@ -179,7 +175,6 @@ and permission notice:
     ok?))
 
 (defun at-within-negation? (formula-arg0 arg)
-  "[Cyc] Return whether we are within a negation context for arg-type checking."
   (if (or (eq formula-arg0 #$not)
           (and (implication-op? formula-arg0)
                (eql arg 1)))
@@ -187,12 +182,10 @@ and permission notice:
       (within-negation?)))
 
 (defun at-within-predicate? (formula-arg0)
-  "[Cyc] Return whether we are within a predicate context for arg-type checking."
   (or *within-predicate?*
       (predicate-spec? formula-arg0)))
 
 (defun at-within-function? (&optional formula-arg0)
-  "[Cyc] Return whether we are within a function context for arg-type checking."
   (or *within-function?*
       (functor? formula-arg0)))
 
@@ -213,14 +206,12 @@ and permission notice:
         (t t)))))
 
 (defun appraising-disjunct? (formula &optional mt)
-  "[Cyc] Return whether we are appraising a disjunct."
   (when *relax-arg-constraints-for-disjunctions?*
     (when (not (reifiable-function-term? formula mt))
       (or *appraising-disjunct?*
           (within-disjunction?)))))
 
 (defun at-within-disjunct? (formula argnum)
-  "[Cyc] Return whether we are within a disjunct for arg-type checking."
   (or (within-disjunction?)
       (and (formula-arity>= formula 2)
            (if (within-negation?)
@@ -235,7 +226,6 @@ and permission notice:
 ;; (defun appraising-disjunct-cnf? (cnf) ...) -- no body, active declareFunction
 
 (defun at-within-decontextualized? (formula)
-  "[Cyc] Return whether we are within a decontextualized context."
   (or *within-decontextualized?*
       (decontextualized-literal? formula)))
 
@@ -256,7 +246,6 @@ but each of their args must be ok."
     (t t)))
 
 (defun weak-fort-arg-ok? (relation arg argnum &optional mt)
-  "[Cyc] Returns t iff ARG satisfies the weaker arg-types as a fort."
   (weak-fort-types-ok? relation arg argnum mt))
 
 ;; (defun naut-arg-ok? (relation arg argnum mt) ...) -- no body, active declareFunction
@@ -287,7 +276,6 @@ an instance of every applicable arg-type."
 ;; (defun naut-args-ok-wrt-type? (naut &optional mt) ...) -- no body, active declareFunction
 
 (defun weak-fort-types-ok? (reln arg argnum &optional mt)
-  "[Cyc] Check weak fort types for arg-type constraints."
   (let ((isa-ok? (not *at-check-not-isa-disjoint?*))
         (quoted-isa-ok? (not *at-check-not-quoted-isa-disjoint?*))
         (not-isa-ok? (not *at-check-arg-not-isa?*))
@@ -346,7 +334,6 @@ an instance of every applicable arg-type."
                                     (arg *at-arg*)
                                     (argnum *at-argnum*)
                                     (mt *mt*))
-  "[Cyc] Check strong fort arg types for arg-type constraints."
   (let ((isa-ok? (not *at-check-arg-isa?*))
         (quoted-isa-ok? (not *at-check-arg-quoted-isa?*))
         (not-isa-ok? (not *at-check-arg-not-isa?*))
@@ -384,7 +371,6 @@ an instance of every applicable arg-type."
                                (arg *at-arg*)
                                (argnum *at-argnum*)
                                (mt *mt*))
-  "[Cyc] Check opaque arg types for arg-type constraints."
   (let ((isa-ok? (not *at-check-arg-isa?*))
         (quoted-isa-ok? (not *at-check-arg-quoted-isa?*))
         (not-isa-ok? (not *at-check-arg-not-isa?*))
@@ -425,7 +411,6 @@ an instance of every applicable arg-type."
 ;; (defun arg-isa-arg-types-ok? (&optional reln arg argnum mt) ...) -- no body, active declareFunction
 
 (defun arg-test-ok? (reln arg argnum &optional (test :isa))
-  "[Cyc] Check if ARG passes the given TEST for arg-type constraints."
   (let ((not-ok? nil))
     (if (eq reln #$Quote)
         (let ((*within-quote-form* t))
@@ -485,7 +470,6 @@ an instance of every applicable arg-type."
     (not not-ok?)))
 
 (defun inter-arg-test-fails? (reln arg argnum &optional (test :isa))
-  "[Cyc] Check if inter-arg tests fail for the given TEST."
   (let ((ind-argnum 0)
         (not-ok? nil)
         (done? nil))
@@ -499,7 +483,6 @@ an instance of every applicable arg-type."
     not-ok?))
 
 (defun mal-intra-arg? (reln arg argnum test)
-  "[Cyc] Check if intra-arg constraints are violated."
   (case test
     (:isa (mal-arg-isa? reln arg argnum))
     (:quoted-isa (mal-arg-quoted-isa? reln arg argnum))
@@ -514,7 +497,6 @@ an instance of every applicable arg-type."
      nil)))
 
 (defun mal-inter-arg? (reln ind-arg ind-argnum dep-arg dep-argnum test)
-  "[Cyc] Check if inter-arg constraints are violated."
   (case test
     (:isa (mal-inter-arg-isa? reln ind-arg ind-argnum dep-arg dep-argnum))
     (:not-isa (mal-inter-arg-not-isa? reln ind-arg ind-argnum dep-arg dep-argnum))
@@ -544,7 +526,6 @@ an instance of every applicable arg-type."
 ;; (defun defining-mts-ok-int? (fort &optional mt) ...) -- no body, active declareFunction
 
 (defun relator-constraints-ok? (relation &optional mt)
-  "[Cyc] Check if relator constraints are satisfied."
   (let ((relator (formula-arg0 relation))
         (ok? t))
     (cond
@@ -555,7 +536,6 @@ an instance of every applicable arg-type."
     ok?))
 
 (defun predicate-constraints-ok? (literal &optional mt)
-  "[Cyc] Check if predicate constraints are satisfied."
   (let ((ok? t)
         (predicate (literal-predicate literal))
         (done? nil))
@@ -613,7 +593,6 @@ an instance of every applicable arg-type."
 ;; (defun anti-symmetric-violations (gaf mt) ...) -- no body, active declareFunction
 
 (defun gaf-ok-wrt-irreflexive-pred? (gaf &optional mt)
-  "[Cyc] Check if GAF is ok wrt irreflexive predicate constraints."
   (let ((ok? t)
         (arg1 (reify-arg-when-closed-naut gaf 1))
         (arg2 (reify-arg-when-closed-naut gaf 2)))
@@ -652,7 +631,6 @@ an instance of every applicable arg-type."
 ;; (defun select-anti-transitive-pred-violation-via-pred (assertion) ...) -- no body, active declareFunction
 
 (defun find-accessible-gaf (gaf &optional index mt (truth :true))
-  "[Cyc] Find an accessible GAF assertion matching GAF."
   (let ((assertion nil))
     (let ((*mapping-target* gaf)
           (*mapping-answer* nil))
@@ -686,7 +664,6 @@ an instance of every applicable arg-type."
 ;; (defun select-target-gaf (assertion) ...) -- no body, active declareFunction
 
 (defun gaf-ok-wrt-negation-preds? (gaf &optional mt)
-  "[Cyc] Check if GAF is ok wrt negation predicate constraints."
   (let ((pred (reify-arg-when-closed-naut gaf 0))
         (arg1 (reify-arg-when-closed-naut gaf 1))
         (arg2 (reify-arg-when-closed-naut gaf 2))
@@ -698,7 +675,6 @@ an instance of every applicable arg-type."
     (null violations)))
 
 (defun negation-pred-violations (pred arg1 arg2)
-  "[Cyc] Find negation predicate violations."
   (let ((done? nil)
         (violations nil)
         (args (list arg1 arg2)))
@@ -720,7 +696,6 @@ an instance of every applicable arg-type."
     violations))
 
 (defun gaf-ok-wrt-negation-inverses? (gaf &optional mt)
-  "[Cyc] Check if GAF is ok wrt negation inverse constraints."
   (let ((pred (reify-arg-when-closed-naut gaf 0))
         (arg1 (reify-arg-when-closed-naut gaf 1))
         (arg2 (reify-arg-when-closed-naut gaf 2))
@@ -732,7 +707,6 @@ an instance of every applicable arg-type."
     (null violations)))
 
 (defun negation-inverse-violations (pred arg1 arg2)
-  "[Cyc] Find negation inverse violations."
   (let ((done? nil)
         (violations nil)
         (args (list arg2 arg1)))
@@ -754,7 +728,6 @@ an instance of every applicable arg-type."
     violations))
 
 (defun clear-cached-format-ok? ()
-  "[Cyc] Clear the cached-format-ok? caching state."
   (let ((cs *cached-format-ok?-caching-state*))
     (when cs
       (caching-state-clear cs)))
@@ -765,11 +738,9 @@ an instance of every applicable arg-type."
 ;; (defun cached-format-ok? (v1) ...) -- no body, active declareFunction
 
 (defun memoized-format-ok?-internal (format literal argnum mt)
-  "[Cyc] Internal function for memoized format ok check."
   (at-format-ok? format literal argnum mt))
 
 (defun memoized-format-ok? (format literal argnum mt)
-  "[Cyc] Memoized check for format ok."
   (let ((v-memoization-state *memoization-state*))
     (if (null v-memoization-state)
         (memoized-format-ok?-internal format literal argnum mt)
@@ -805,7 +776,6 @@ an instance of every applicable arg-type."
                         (literal *at-formula*)
                         (argnum *at-argnum*)
                         (mt *mt*))
-  "[Cyc] Check if FORMAT is ok for the given literal/argnum/mt."
   (case format
     (#$SingleEntry (single-entry-ok? literal argnum mt))
     (#$IntervalEntry (missing-larkc 23213)) ;; likely interval-entry-ok?
@@ -821,7 +791,6 @@ an instance of every applicable arg-type."
      t)))
 
 (defun single-entry-ok? (literal argnum mt)
-  "[Cyc] Check if literal satisfies single-entry format constraints."
   (when *at-check-sef?*
     (null (sef-violations literal argnum mt))))
 
@@ -829,7 +798,6 @@ an instance of every applicable arg-type."
 ;; (defun why-not-literal-single-entry-ok? (literal argnum mt &optional v4) ...) -- no body, active declareFunction
 
 (defun sef-violations (literal argnum mt)
-  "[Cyc] Find single-entry format violations for LITERAL."
   (let ((violations nil)
         (find-formula (replace-nth argnum (find-variable-by-id 0) literal))
         (arg (reify-arg-when-closed-naut literal argnum)))
@@ -908,7 +876,6 @@ an instance of every applicable arg-type."
 ;; (defun check-inter-assert-format-w/o-arg-index? (predicate) ...) -- no body, active declareFunction
 
 (defun sef-violating-assertion? (assertion find-formula arg argnum)
-  "[Cyc] Check if ASSERTION is a single-entry format violation."
   (when (gaf-assertion? assertion)
     (let ((gaf (gaf-formula assertion)))
       (when (asent-unify find-formula gaf t)
@@ -927,12 +894,10 @@ an instance of every applicable arg-type."
 ;; (defun interval-entry-ok? (literal argnum mt) ...) -- no body, active declareFunction
 
 (defun set-entry-ok? (literal argnum mt)
-  "[Cyc] Check if literal satisfies set-entry format constraints. Always returns T."
   (declare (ignore literal argnum mt))
   t)
 
 (defun variable-wrt-arg-type? (arg)
-  "[Cyc] Check if ARG should be treated as a variable wrt arg-type checking."
   (cond
     ((not *recognize-variables?*) nil)
     ((variable-term-wrt-arg-type? arg) t)
@@ -947,7 +912,6 @@ an instance of every applicable arg-type."
     (t nil)))
 
 (defun variable-term-wrt-arg-type? (v-term)
-  "[Cyc] Check if V-TERM is a variable wrt arg-type checking."
   (or (el-var? v-term)
       (kb-var? v-term)
       (and *permit-generic-arg-variables?*
@@ -960,7 +924,6 @@ an instance of every applicable arg-type."
            (nart-p v-term))))
 
 (defun naut-wrt-arg-type? (v-term mt)
-  "[Cyc] Check if V-TERM is a NAUT wrt arg-type checking."
   (declare (ignore mt))
   (or (and *within-decontextualized?*
            (naut-p v-term))
@@ -970,27 +933,22 @@ an instance of every applicable arg-type."
                (not (missing-larkc 8828)))))) ;; likely checks if functor is closable
 
 (defun tou-wrt-arg-type? (v-term)
-  "[Cyc] Check if we are in a termOfUnit relation context."
   (declare (ignore v-term))
   (eql *at-reln* #$termOfUnit))
 
 (defun nat-function-wrt-arg-type? (v-term)
-  "[Cyc] Check if we are in a natFunction relation context."
   (declare (ignore v-term))
   (eq *at-reln* #$natFunction))
 
 (defun nat-argument-wrt-arg-type? (v-term)
-  "[Cyc] Check if we are in a natArgument relation context."
   (declare (ignore v-term))
   (eq *at-reln* #$natArgument))
 
 (defun strong-fort-wrt-arg-type? (v-term &optional mt)
-  "[Cyc] Check if V-TERM is a strong fort wrt arg-type checking."
   (declare (ignore mt))
   (fort-p v-term))
 
 (defun weak-fort-wrt-arg-type? (v-term)
-  "[Cyc] Check if V-TERM is a weak fort wrt arg-type checking."
   (or (and (or *appraising-disjunct?*
                *within-decontextualized?*
                (wff-lenient?))
@@ -1009,15 +967,9 @@ an instance of every applicable arg-type."
 ;; (defun why-not-cnf-semantically-valid-int (cnf mt) ...) -- no body, active declareFunction
 ;; (defun why-not-literal-semantically-valid? (literal &optional mt) ...) -- no body, active declareFunction
 
-(defun arg-constraint-print-function-trampoline (object stream depth)
-  "[Cyc] Print function trampoline for arg-constraint structures."
-  (declare (ignore object stream depth))
-  (missing-larkc 23227) ;; likely print-arg-constraint
-  nil)
-
 ;; arg-constraint struct definition
-(defstruct (arg-constraint (:conc-name "ARGCONST-")
-                           (:print-function arg-constraint-print-function-trampoline))
+;; print-object is missing-larkc 23227 — CL's default print-object handles this.
+(defstruct (arg-constraint (:conc-name "ARGCONST-"))
   sentence
   mt
   test-function

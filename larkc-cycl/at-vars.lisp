@@ -69,6 +69,8 @@ and permission notice:
   "[Cyc] Enforce argNotIsa constraints?")
 (def-at-state-var *at-check-arg-types?* t
   "[Cyc] Enforce arg-typing constraints?")
+
+;; (defun at-check-arg-types-p () ...) -- active declaration, no body
 (def-at-state-var *at-possibly-check-defining-mts?* nil
   "[Cyc] Is #$definingMt constraint enforcement available?")
 (def-at-state-var *at-check-defining-mts?* t
@@ -335,6 +337,15 @@ This is true, for example, during assert, but false, for example, when wff-check
 (defun permitting-denotational-terms-admitted-by-defn-via-isa? ()
   *permitting-denotational-terms-admitted-by-defn-via-isa?*)
 
+;; Reconstructed from Internal Constants: $sym243$ CLET,
+;; $list244$ = ((*PERMITTING-DENOTATIONAL-TERMS-ADMITTED-BY-DEFN-VIA-ISA?* NIL)).
+(defmacro without-permitting-denotational-terms-admitted-by-defn-via-isa? (&body body)
+  "[Cyc] Execute BODY with *permitting-denotational-terms-admitted-by-defn-via-isa?* bound to NIL."
+  `(let ((*permitting-denotational-terms-admitted-by-defn-via-isa?* nil))
+     ,@body))
+
+;; (defun defn-collection () ...) -- active declaration, no body
+
 (def-defn-state-var *at-defn* nil
   "[Cyc] Current defn-assertion being considered.")
 (def-defn-state-var *at-defns* nil
@@ -359,3 +370,9 @@ This is true, for example, during assert, but false, for example, when wff-check
   "[Cyc] The cache used (by the current quoted defn invocation) to prevent multiple calls to a single defn function.")
 (def-defn-state-var *defn-stack* :uninitialized
   "[Cyc] A stack of defns being called, to prevent infinite recursion. The key for the hashtable is the collection-defn function, and the value is a list of arguments. It's a list because it's fine to recurse on a defn with a different argument.")
+
+;; (defun default-at-parameter-state? (state) ...) -- active declaration, no body
+;; (defun new-at-parameter-state-from-context () ...) -- active declaration, no body
+;; (defun no-arg-format-at-parameter-state? (state) ...) -- active declaration, no body
+;; (defun no-arg-types-at-parameter-state? (state) ...) -- active declaration, no body
+;; (defun no-defining-mts-at-parameter-state? (state) ...) -- active declaration, no body

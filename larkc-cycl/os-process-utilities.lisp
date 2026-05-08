@@ -37,7 +37,7 @@ and permission notice:
 (in-package :clyc)
 
 ;; Struct: os-process-impl
-;; Print function print-os-process-impl has no body (missing-larkc 30768).
+;; print-object is missing-larkc 30768 — CL's default print-object handles this.
 ;; os-process-impl-p has no body (missing-larkc 30749).
 (defstruct (os-process-impl
             (:conc-name "OS-PROCESS-IMPL-")
@@ -71,10 +71,6 @@ and permission notice:
 ;; (defun os-process-p (object) ...) -- active declareFunction, no body
 
 (defconstant *dtp-os-process-impl* 'os-process-impl)
-
-(defun os-process-impl-print-function-trampoline (object stream)
-  ;; Likely calls print-os-process-impl — evidence: standard defstruct print trampoline
-  (missing-larkc 30768))
 
 (defconstant *valid-os-process-status* '(:initializing :running :dead :failure)
   "[Cyc] The valid OS process status values.")

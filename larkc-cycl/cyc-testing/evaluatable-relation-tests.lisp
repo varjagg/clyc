@@ -50,13 +50,6 @@ and permission notice:
 
 (defconstant *dtp-evaluatable-relation-test* 'evaluatable-relation-test)
 
-(defmethod print-object ((object evaluatable-relation-test) stream)
-  (evaluatable-relation-test-print-function-trampoline object stream))
-
-(defun evaluatable-relation-test-print-function-trampoline (object stream)
-  (default-struct-print-function object stream 0)
-  nil)
-
 ;; (defun evaluatable-relation-test-p (object) ...) -- active declareFunction, no body. UnaryFunction: missing-larkc 32269
 ;; (defun ert-relation (ert) ...) -- active declareFunction, no body (struct accessor)
 ;; (defun ert-id (ert) ...) -- active declareFunction, no body (struct accessor). UnaryFunction: missing-larkc 32245

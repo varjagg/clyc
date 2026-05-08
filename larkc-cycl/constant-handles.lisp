@@ -53,9 +53,10 @@ and permission notice:
   ;; TODO - String, but a lot of code tests for stringp of this in terms of registering it in tables. Why?
   name)
 
-(defun print-constant (object stream depth)
+;; (defun print-constant (object stream depth) ...) -- active declareFunction; body inlined into defmethod print-object
+
+(defmethod print-object ((object constant) stream)
   "[Cyc] Print CONSTANT to STREAM."
-  (declare (ignore depth))
   (let ((name (c-name object))
         (suid (c-suid object)))
     (cond
@@ -67,9 +68,6 @@ and permission notice:
        (format stream "<Constant ~a>" suid))
       (t
        (format stream "<Constant ??>")))))
-
-(defmethod print-object ((obj constant) stream)
-  (print-constant obj stream 0))
 
 (declaim (inline constant-handle-valid?))
 (defun constant-handle-valid? (constant)
@@ -184,19 +182,23 @@ and permission notice:
   (and (constant-p constant)
        (not (valid-constant? constant))))
 
+;; Maps constant name (string) -> constant struct for constants that have been
+;; mentioned (e.g. via #$ reader or make-constant-shell) but not yet installed
+;; in the KB with a SUID. When make-constant-shell creates a new constant
+;; struct for a name that doesn't exist in the KB yet, it registers it here so
+;; that subsequent references to the same name reuse the same struct rather than
+;; creating duplicates. Once the constant is actually created in the KB (via
+;; kb-create in constants-low), it is deregistered from here. The table is also
+;; consulted during constant-completion when *require-valid-constants* is nil,
+;; and by initialize-constant-names-in-code to seed the completion list before
+;; the KB is loaded.
+;; TODO - this entire thing should be pretty much removed. There should probably be a single canonical place to find constant shells by name, but certainly all of this external registration & unregistration should be automatically handled via assigning or clearing the SUID.
 (defglobal *invalid-constants* (make-hash-table :test #'equal))
-
-(defun invalid-constant-names ()
-  (hash-table-keys *invalid-constants*))
-
-(defun find-invalid-constant (name)
-  (gethash name *invalid-constants*))
-
-(defun register-invalid-constant-by-name (constant name)
-  (setf (gethash name *invalid-constants*) constant))
-
-(defun deregister-invalid-constant-by-name (name)
-  (remhash name *invalid-constants*))
+;; Application interface for hash table
+(defun invalid-constant-names () (hash-table-keys *invalid-constants*))
+(defun find-invalid-constant (name) (gethash name *invalid-constants*))
+(defun register-invalid-constant-by-name (constant name) (setf (gethash name *invalid-constants*) constant))
+(defun deregister-invalid-constant-by-name (name) (remhash name *invalid-constants*))
 
 (defun make-constant-shell (name &optional use-existing?)
   (declare (type (satisfies constant-name-spec-p) name))

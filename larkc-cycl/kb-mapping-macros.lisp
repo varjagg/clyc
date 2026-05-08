@@ -719,7 +719,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
             (setf direction-keys (list direction))
             (setf direction-keys (key-decontextualized-ist-predicate-rule-index predicate sense-key)))))))
 
-;; declareMacro "DO-DECONTEXTUALIZED-IST-PREDICATE-RULE-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-DECONTEXTUALIZED-IST-PREDICATE-RULE-INDEX"; body is missing-larkc.
 (defmacro do-decontextualized-ist-predicate-rule-index ((var predicate &key sense direction done) &body body)
   "[Cyc] Iterate over all decontextualized-ist predicate rule assertions for PREDICATE."
   (let ((done-var (gensym "DONE"))
@@ -767,7 +767,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
 (defun do-isa-rule-index-key-validator (collection sense direction)
   (do-pred-arg2-rule-index-key-validator collection sense direction))
 
-;; declareMacro "DO-ISA-RULE-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-ISA-RULE-INDEX"; body is missing-larkc.
 ;; Reconstructed: routes through pred-arg2-rule with #$isa as the pred.
 (defmacro do-isa-rule-index ((var collection &key sense direction done) &body body)
   "[Cyc] Iterate over all rule assertions in the isa rule index of COLLECTION."
@@ -815,7 +815,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
 (defun do-quoted-isa-rule-index-key-validator (collection sense direction)
   (do-pred-arg2-rule-index-key-validator collection sense direction))
 
-;; declareMacro "DO-QUOTED-ISA-RULE-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-QUOTED-ISA-RULE-INDEX"; body is missing-larkc.
 ;; Reconstructed: routes through pred-arg2-rule with #$quotedIsa as the pred.
 (defmacro do-quoted-isa-rule-index ((var collection &key sense direction done) &body body)
   "[Cyc] Iterate over all rule assertions in the quoted-isa rule index of COLLECTION."
@@ -863,7 +863,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
 (defun do-genls-rule-index-key-validator (collection sense direction)
   (do-pred-arg2-rule-index-key-validator collection sense direction))
 
-;; declareMacro "DO-GENLS-RULE-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-GENLS-RULE-INDEX"; body is missing-larkc.
 (defmacro do-genls-rule-index ((var collection &key sense direction done) &body body)
   "[Cyc] Iterate over all rule assertions in the genls rule index of COLLECTION."
   (let ((done-var (gensym "DONE"))
@@ -910,7 +910,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
 (defun do-genl-mt-rule-index-key-validator (genl-mt sense direction)
   (do-pred-arg2-rule-index-key-validator genl-mt sense direction))
 
-;; declareMacro "DO-GENL-MT-RULE-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-GENL-MT-RULE-INDEX"; body is missing-larkc.
 (defmacro do-genl-mt-rule-index ((var genl-mt &key sense direction done) &body body)
   "[Cyc] Iterate over all rule assertions in the genl-mt rule index of GENL-MT."
   (let ((done-var (gensym "DONE"))
@@ -1067,7 +1067,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
        (or (not direction)
            (direction-p direction))))
 
-;; declareMacro "DO-FUNCTION-RULE-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-FUNCTION-RULE-INDEX"; body is missing-larkc.
 (defmacro do-function-rule-index ((var function &key direction done) &body body)
   "[Cyc] Iterate over all rule assertions in the function rule index of FUNCTION."
   (let ((done-var (gensym "DONE"))
@@ -1118,7 +1118,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
        (or (not direction)
            (direction-p direction))))
 
-;; declareMacro "DO-EXCEPTION-RULE-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-EXCEPTION-RULE-INDEX"; body is missing-larkc.
 (defmacro do-exception-rule-index ((var rule &key direction done) &body body)
   "[Cyc] Iterate over all rule assertions in the exception rule index of RULE."
   (let ((done-var (gensym "DONE"))
@@ -1169,7 +1169,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
        (or (not direction)
            (direction-p direction))))
 
-;; declareMacro "DO-PRAGMA-RULE-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-PRAGMA-RULE-INDEX"; body is missing-larkc.
 (defmacro do-pragma-rule-index ((var rule &key direction done) &body body)
   "[Cyc] Iterate over all rule assertions in the pragma rule index of RULE."
   (let ((done-var (gensym "DONE"))
@@ -1228,7 +1228,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
   ;; Active declareFunction; body not recovered from LarKC Java
   (new-singleton-iterator nil))
 
-;; declareMacro "DO-UNBOUND-PREDICATE-RULE-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-UNBOUND-PREDICATE-RULE-INDEX"; body is missing-larkc.
 (defmacro do-unbound-predicate-rule-index ((var &key sense direction done) &body body)
   "[Cyc] Iterate over all unbound predicate rule assertions."
   (let ((done-var (gensym "DONE"))
@@ -1429,7 +1429,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
 
 
 
-;; declareMacro "DO-MT-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-MT-INDEX"; body is missing-larkc.
 ;; Reconstructed: uses mt-final-index-spec (which exists) to get a single spec, then iterates.
 (defmacro do-mt-index ((var mt &key type truth direction done) &body body)
   "[Cyc] Iterate over all assertions in the MT index of MT."
@@ -1453,12 +1453,12 @@ Return 1: Whether quiescence terminated early due to running out of keys."
   ;; Stub: would filter assertions by type/truth/direction in a broad MT context
   t)
 
-;; declareMacro "DO-BROAD-MT-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-BROAD-MT-INDEX"; body is missing-larkc.
 ;; Reconstructed from $list230: ((var mt &key type truth done) &body body)
 (defmacro do-broad-mt-index ((var mt &key type truth done) &body body)
   "[Cyc] Iterate over all assertions in the broad MT index of MT."
   (declare (ignore var mt type truth done body))
-  ;; declareMacro; body stripped from LarKC
+  ;; declareMacro; body is missing-larkc
   nil)
 
 ;; Active declareFunction; body not in decompiled Java source.
@@ -1468,7 +1468,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
   ;; Returns the method of iteration to use for MT-CONTENTS
   :mt-index)
 
-;; declareMacro "DO-MT-CONTENTS"; body stripped from LarKC.
+;; declareMacro "DO-MT-CONTENTS"; body is missing-larkc.
 ;; Reconstructed from $list240: dispatches between do-mt-index and do-broad-mt-index
 (defmacro do-mt-contents ((var mt &key type truth done) &body body)
   "[Cyc] Iterate over all assertions in the mt contents of MT."
@@ -1477,41 +1477,41 @@ Return 1: Whether quiescence terminated early due to running out of keys."
      (:broad-mt-index (do-broad-mt-index (,var ,mt :type ,type :truth ,truth :done ,done) ,@body))
      (otherwise nil)))
 
-;; declareMacro "DO-OVERLAP-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-OVERLAP-INDEX"; body is missing-larkc.
 ;; Reconstructed from $list243: ((assertion-var terms &key truth done) &body body)
 (defmacro do-overlap-index ((assertion-var terms &key truth done) &body body)
   "[Cyc] Iterate over assertions that overlap between TERMS."
   (declare (ignore assertion-var terms truth done body))
-  ;; declareMacro; body stripped from LarKC
+  ;; declareMacro; body is missing-larkc
   nil)
 
-;; declareMacro "DO-BEST-GAF-LOOKUP-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-BEST-GAF-LOOKUP-INDEX"; body is missing-larkc.
 ;; Reconstructed from $list246: ((assertion-var asent &key methods truth done) &body body)
 (defmacro do-best-gaf-lookup-index ((assertion-var asent &key methods truth done) &body body)
   "[Cyc] Iterate over assertions using the best GAF lookup method for ASENT."
   (declare (ignore assertion-var asent methods truth done body))
-  ;; declareMacro; body stripped from LarKC
+  ;; declareMacro; body is missing-larkc
   nil)
 
-;; declareMacro "DO-GAF-LOOKUP-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-GAF-LOOKUP-INDEX"; body is missing-larkc.
 ;; Reconstructed from $list251: ((assertion-var lookup-index &key truth done) &body body)
 (defmacro do-gaf-lookup-index ((assertion-var lookup-index &key truth done) &body body)
   "[Cyc] Iterate over assertions using a GAF LOOKUP-INDEX."
   (declare (ignore assertion-var lookup-index truth done body))
-  ;; declareMacro; body stripped from LarKC
+  ;; declareMacro; body is missing-larkc
   nil)
 
-;; declareMacro "DO-GLI-VIA-GAF-ARG"; body stripped from LarKC (sub-macro of do-gaf-lookup-index)
+;; declareMacro "DO-GLI-VIA-GAF-ARG"; body is missing-larkc (sub-macro of do-gaf-lookup-index)
 (defmacro do-gli-via-gaf-arg ((assertion-var lookup-index &key truth done) &body body)
   (declare (ignore assertion-var lookup-index truth done body))
   nil)
 
-;; declareMacro "DO-GLI-VIA-PREDICATE-EXTENT"; body stripped from LarKC (sub-macro)
+;; declareMacro "DO-GLI-VIA-PREDICATE-EXTENT"; body is missing-larkc (sub-macro)
 (defmacro do-gli-via-predicate-extent ((assertion-var lookup-index &key truth done) &body body)
   (declare (ignore assertion-var lookup-index truth done body))
   nil)
 
-;; declareMacro "DO-GLI-VIA-OVERLAP"; body stripped from LarKC (sub-macro)
+;; declareMacro "DO-GLI-VIA-OVERLAP"; body is missing-larkc (sub-macro)
 (defmacro do-gli-via-overlap ((assertion-var lookup-index &key truth done) &body body)
   (declare (ignore assertion-var lookup-index truth done body))
   nil)
@@ -1538,20 +1538,20 @@ Return 1: Whether quiescence terminated early due to running out of keys."
   ;; no body; active declareFunction "DO-GLI-VO-EXTRACT-KEY" (1 0)
   (lookup-index-get-property lookup-index :terms))
 
-;; declareMacro "DO-BEST-NAT-LOOKUP-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-BEST-NAT-LOOKUP-INDEX"; body is missing-larkc.
 ;; Reconstructed from $list276: ((assertion-var nart-hl-formula &key methods done) &body body)
 (defmacro do-best-nat-lookup-index ((assertion-var nart-hl-formula &key methods done) &body body)
   "[Cyc] Iterate over assertions using the best NAT lookup method for NART-HL-FORMULA."
   (declare (ignore assertion-var nart-hl-formula methods done body))
-  ;; declareMacro; body stripped from LarKC
+  ;; declareMacro; body is missing-larkc
   nil)
 
-;; declareMacro "DO-NAT-LOOKUP-INDEX"; body stripped from LarKC.
+;; declareMacro "DO-NAT-LOOKUP-INDEX"; body is missing-larkc.
 ;; Reconstructed from $list280: ((assertion-var lookup-index &key done) &body body)
 (defmacro do-nat-lookup-index ((assertion-var lookup-index &key done) &body body)
   "[Cyc] Iterate over assertions using a NAT LOOKUP-INDEX."
   (declare (ignore assertion-var lookup-index done body))
-  ;; declareMacro; body stripped from LarKC
+  ;; declareMacro; body is missing-larkc
   nil)
 
 ;; Active declareFunction; body not in decompiled Java source.
@@ -1565,7 +1565,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
   ;; no body; active declareFunction "DO-NLI-METHOD-ERROR" (2 0)
   (error "Unknown NLI method ~s for ~s" method macro))
 
-;; declareMacro "DO-NLI-VIA-NART-ARG"; body stripped from LarKC (sub-macro)
+;; declareMacro "DO-NLI-VIA-NART-ARG"; body is missing-larkc (sub-macro)
 (defmacro do-nli-via-nart-arg ((assertion-var lookup-index &key done) &body body)
   (declare (ignore assertion-var lookup-index done body))
   nil)
@@ -1578,7 +1578,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
           (lookup-index-get-property lookup-index :argnum)
           (lookup-index-get-property lookup-index :functor)))
 
-;; declareMacro "DO-NLI-VIA-FUNCTION-EXTENT"; body stripped from LarKC (sub-macro)
+;; declareMacro "DO-NLI-VIA-FUNCTION-EXTENT"; body is missing-larkc (sub-macro)
 (defmacro do-nli-via-function-extent ((assertion-var lookup-index &key done) &body body)
   (declare (ignore assertion-var lookup-index done body))
   nil)
@@ -1589,7 +1589,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
   ;; no body; active declareFunction "DO-NLI-VFE-EXTRACT-KEY" (1 0)
   (lookup-index-get-property lookup-index :functor))
 
-;; declareMacro "DO-NLI-VIA-OVERLAP"; body stripped from LarKC (sub-macro)
+;; declareMacro "DO-NLI-VIA-OVERLAP"; body is missing-larkc (sub-macro)
 (defmacro do-nli-via-overlap ((assertion-var lookup-index &key done) &body body)
   (declare (ignore assertion-var lookup-index done body))
   nil)

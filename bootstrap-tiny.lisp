@@ -35,6 +35,9 @@ and permission notice:
 |#
 
 
+;;; -*- mode: lisp; package: clyc -*-
+;;; Converted KB — 8899 assertions
+
 (ke-assert '(#$termOfUnit (#$CollectionRuleTemplateFn #$ArgIsaPredicate) (#$CollectionRuleTemplateFn #$ArgIsaPredicate)) #$BaseKB :monotonic :forward)
 (ke-assert '(#$termOfUnit (#$CollectionRuleTemplateFn #$HypotheticalContext) (#$CollectionRuleTemplateFn #$HypotheticalContext)) #$BaseKB :monotonic :forward)
 (ke-assert '(#$afterAdding #$afterAdding (#$SubLQuoteFn decache-after-addings)) #$LogicalTruthImplementationMt :monotonic :forward)

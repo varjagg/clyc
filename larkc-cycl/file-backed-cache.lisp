@@ -44,6 +44,7 @@ and permission notice:
 ;; NOTE: Java uses red_infrastructure_macros.red_def_helper for config lookup,
 ;; but red-infrastructure-macros is ELIDED. Using the default value directly.
 
+;; print-object is missing-larkc 7781 — CL's default print-object handles this.
 (defstruct (file-backed-cache (:conc-name "FBC-"))
   file-hash-table-cache
   local-cache
@@ -56,10 +57,6 @@ and permission notice:
   is-busy)
 
 (defconstant *dtp-file-backed-cache* 'file-backed-cache)
-
-(defun file-backed-cache-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for file-backed-cache."
-  (missing-larkc 7781))
 
 ;; file-backed-cache-p - commented, no body (1 0)
 ;; fbc-file-hash-table-cache - commented, no body (1 0)

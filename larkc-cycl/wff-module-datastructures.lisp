@@ -38,20 +38,14 @@ and permission notice:
 
 ;; WFF module data structure and store.
 ;; A wff-module has a name and a property list (plist).
+;; print-object is missing-larkc 31864 — CL's default print-object handles this.
 
 (defstruct (wff-module (:conc-name "WFF-MOD-")
                        (:constructor make-wff-module (&key name plist)))
   name
   plist)
 
-;; Reconstructed from $str15$ = "[WFF Module: ~a]"; original trampoline and
-;; print-wff-module bodies are both missing-larkc 31864.  The Java struct
-;; declaration stores print-wff-module as the print function, and the setup
-;; phase registers the trampoline on $print_object_method_table$ — both are
-;; replaced by this single defmethod.  print-wff-module is never called from
-;; outside this file, so it is elided.
-(defmethod print-object ((object wff-module) stream)
-  (format stream "[WFF Module: ~a]" (wff-mod-name object)))
+;; (defun print-wff-module (object stream depth) ...) -- active declareFunction, no body
 
 (defun new-wff-module (name plist)
   "[Cyc] @return wff-module-p; a new WFF module with NAME and properties PLIST"

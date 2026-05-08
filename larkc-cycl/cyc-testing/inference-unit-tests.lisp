@@ -37,7 +37,7 @@ and permission notice:
 
 (in-package :clyc)
 
-;; All functions in this file except the print trampoline are LarKC-stripped —
+;; All functions in this file except the print trampoline are missing-larkc —
 ;; the Java has active declareFunction entries with no bodies, so they are
 ;; ported as one-line comment stubs. The two declareMacro entries
 ;; (DO-INFERENCE-UNIT-TESTS and DEFINE-INFERENCE-UNIT-TEST) are reconstructed
@@ -82,18 +82,11 @@ of an inference unit test, so they can be optionally cleaned up later.")
       *inference-unit-tests-by-name*
       (make-hash-table :size 212 :test #'eq)))
 
-;;; Declare-phase function ports (all LarKC-stripped except print trampoline)
+;;; Declare-phase function ports (all missing-larkc)
 
 ;; (defun within-inference-unit-test? () ...) -- active declareFunction, no body
 ;; (defun note-assertion-for-inference-unit-test (assertion) ...) -- active declareFunction, no body
 ;; (defun inference-unit-test-cleanup () ...) -- active declareFunction, no body
-
-(defun inference-unit-test-print-function-trampoline (object stream)
-  (default-struct-print-function object stream 0)
-  nil)
-
-(defmethod print-object ((object inference-unit-test) stream)
-  (inference-unit-test-print-function-trampoline object stream))
 
 (defun inference-unit-test-p (object)
   ;; UnaryFunction wrapper's handleMissingMethodError was number 32335.

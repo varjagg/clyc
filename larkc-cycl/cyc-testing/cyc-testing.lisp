@@ -165,10 +165,10 @@ and permission notice:
   (dolist (ct (cyc-tests))
     (index-cyc-test-by-name ct (cyc-test-name ct))))
 
+;; print-object is missing-larkc 32446 — CL's default print-object handles this.
 (defstruct (cyc-test
             (:conc-name "CT-")
-            (:constructor make-cyc-test-struct)
-            (:print-function print-cyc-test))
+            (:constructor make-cyc-test-struct))
   file
   guts)
 
@@ -180,10 +180,6 @@ and permission notice:
         (:guts (setf (ct-guts obj) value))
         (otherwise (error "Invalid slot ~S for construction function" key))))
     obj))
-
-(defun cyc-test-print-function-trampoline (object stream)
-  ;; Likely calls print-cyc-test -- evidence: $sym35$PRINT_CYC_TEST is the print function
-  (missing-larkc 32446))
 
 ;; (defun print-cyc-test (object stream depth) ...) -- active declareFunction, no body
 
@@ -366,15 +362,11 @@ and permission notice:
 
 ;; (defun cyc-test-file-count () ...) -- active declareFunction, no body
 
+;; print-object is missing-larkc 32447 — CL's default print-object handles this.
 (defstruct (cyc-test-file
-            (:conc-name "CTF-")
-            (:print-function print-cyc-test-file))
+            (:conc-name "CTF-"))
   filename
   kb)
-
-(defun cyc-test-file-print-function-trampoline (object stream)
-  ;; Likely calls print-cyc-test-file -- evidence: $sym141$PRINT_CYC_TEST_FILE is the print function
-  (missing-larkc 32447))
 
 ;; (defun print-cyc-test-file (object stream depth) ...) -- active declareFunction, no body
 ;; (defun new-cyc-test-file (filename kb) ...) -- active declareFunction, no body

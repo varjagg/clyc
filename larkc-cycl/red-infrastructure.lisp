@@ -69,6 +69,7 @@ and permission notice:
   "[Cyc] Set by def-red-set-vars to T")
 
 ;;; red-symbol struct
+;;; print-object is missing-larkc 30850 — CL's default print-object handles this.
 
 (defstruct (red-symbol
             (:conc-name "RED-SYMBOL-")
@@ -81,11 +82,6 @@ and permission notice:
   valuetype)
 
 (defconstant *dtp-red-symbol* 'red-symbol)
-
-(defun red-symbol-print-function-trampoline (object stream)
-  ;; Likely calls print-red-symbol -- evidence: registered as print method in setup
-  (declare (ignore object stream))
-  (missing-larkc 30850))
 
 ;; (defun red-symbol-p (object) ...) -- active declareFunction, no body
 ;; Accessors red-symbol-name, red-symbol-red-key, red-symbol-default-value,

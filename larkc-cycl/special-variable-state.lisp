@@ -38,6 +38,7 @@ and permission notice:
 
 ;; Struct definition — generates svs-variables, svs-values, make-special-variable-state,
 ;; special-variable-state-p, and setf accessors (covering Java declare entries 5-10)
+;; print-object is missing-larkc 31670 — CL's default print-object handles this.
 
 (defstruct (special-variable-state (:conc-name "SVS-"))
   variables
@@ -49,7 +50,6 @@ and permission notice:
 ;; (defun bound-special-variable-p (object) ...) -- active declaration, no body
 ;; (defun bound-special-variable-list-p (object) ...) -- active declaration, no body
 
-;; special-variable-state-print-function-trampoline — missing-larkc 31670
 ;; special-variable-state-p — provided by defstruct
 ;; svs-variables — provided by defstruct
 ;; svs-values — provided by defstruct

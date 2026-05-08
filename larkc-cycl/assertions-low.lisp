@@ -45,6 +45,10 @@ and permission notice:
 ;;   $sym48$VALID_ARGUMENT      -- used in valid-assertion-robust? (stripped)
 ;;   $sym54$DEDUCTION_P         -- used in mark-dependent-deduction (stripped)
 
+;; [Clyc] Java uses a SubLStructNative with manual AS-CONTENT-* and _CSETF-AS-CONTENT-*
+;; accessors, registered via Structures.def_csetf in the setup phase so that `(setf (as-content-X ...))`
+;; works. CL's defstruct generates equivalent readers and setf expanders natively, so the
+;; def-csetf calls are unneeded here.
 (defstruct (assertion-content (:constructor make-assertion-content
                                             (&key formula-data mt (flags 0) arguments plist))
                               (:conc-name "AS-CONTENT-"))
@@ -503,22 +507,22 @@ using the bit in the flags.")
 
 (defun set-assertion-asserted-by (assertion assertor)
   (destructure-assert-info (who when why second) (assertion-assert-info assertion)
-    (setq who assertor)
+    (setf who assertor)
     (reset-assertion-assert-info assertion (make-assert-info who when why second))))
 
 (defun set-assertion-asserted-when (assertion universal-date)
   (destructure-assert-info (who when why second) (assertion-assert-info assertion)
-    (setq when universal-date)
+    (setf when universal-date)
     (reset-assertion-assert-info assertion (make-assert-info who when why second))))
 
 (defun set-assertion-asserted-why (assertion reason)
   (destructure-assert-info (who when why second) (assertion-assert-info assertion)
-    (setq why reason)
+    (setf why reason)
     (reset-assertion-assert-info assertion (make-assert-info who when why second))))
 
 (defun set-assertion-asserted-second (assertion universal-second)
   (destructure-assert-info (who when why second) (assertion-assert-info assertion)
-    (setq second universal-second)
+    (setf second universal-second)
     (reset-assertion-assert-info assertion (make-assert-info who when why second))))
 
 ;; (defun valid-assertion-robust? (assertion) ...) -- no body
@@ -581,7 +585,7 @@ using the bit in the flags.")
               (new-clause-struc (missing-larkc 11343)))
          (missing-larkc 11316)
          (missing-larkc 11317)
-         (setq formula-data new-clause-struc)
+         (setf formula-data new-clause-struc)
          (missing-larkc 32001)))
       ((cnf-p formula-data-hook))
       ((el-formula-p formula-data-hook))

@@ -37,7 +37,7 @@ and permission notice:
 (in-package :clyc)
 
 (defun gt-term-p (obj)
-  "[Cyc] Whether OBJ is a valid term in GT searches."
+  "[Cyc] @return booleanp; Whether OBJ is a valid term in GT searches."
   (if (reified-term-p obj)
       t
       nil))

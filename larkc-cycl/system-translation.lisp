@@ -49,9 +49,7 @@ and permission notice:
 
 ;;; SYSTEM-TRANSLATION defstruct
 ;;; Slots and conc-name SYS-TR- per Java $list4 / $list6 accessor names.
-;;; The print_object_method_table register_method call is elided per Clyc
-;;; convention; the print trampoline body is missing-larkc so we do not
-;;; hook in a defmethod print-object.
+;;; print-object is missing-larkc 8676 — CL's default print-object handles this.
 
 (defstruct (system-translation (:conc-name "SYS-TR-"))
   system
@@ -85,13 +83,6 @@ and permission notice:
 
 ;; (defun current-system-translation-secure? () ...) -- commented declareFunction, no body
 ;; (defun current-system-translation-security-level () ...) -- commented declareFunction, no body
-
-(defun system-translation-print-function-trampoline (object stream)
-  ;; Likely called (print-system-translation object stream 0) — the trampoline
-  ;; invoked the stripped print-system-translation method via the Java
-  ;; print_object_method_table dispatch.
-  (declare (ignore object stream))
-  (missing-larkc 8676))
 
 ;; (defun system-translation-p (object) ...) -- commented declareFunction, no body
 ;;   UnaryFunction override calls missing-larkc 8756

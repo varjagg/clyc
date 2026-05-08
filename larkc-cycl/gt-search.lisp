@@ -101,7 +101,6 @@ and permission notice:
 ;; (defun gt-mark-as-unsearched (node) ...) -- commented declareFunction, stub with no body
 
 (defun gt-searched? (node)
-  "[Cyc] Return non-NIL iff NODE has been searched."
   (when (gt-term-p node)
     (gethash node *gt-marking-table*)))
 

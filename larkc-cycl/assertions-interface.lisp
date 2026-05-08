@@ -40,10 +40,13 @@ and permission notice:
 
 (define-hl-creator kb-create-assertion (cnf mt)
     "[Cyc] Create a new assertion with CNF in MT."
-    nil
+    (declare (type cnf-p cnf)
+             (type hlmt-p mt))
   (if (hl-modify-remote?)
       (missing-larkc 32157)
       (kb-create-assertion-local cnf mt)))
+
+;; (defun kb-create-assertion-remote (cnf mt) ...) -- active declaration, no body
 
 (defun kb-create-assertion-local (cnf mt)
   (let ((internal-id (kb-create-assertion-kb-store cnf mt)))
@@ -51,7 +54,7 @@ and permission notice:
 
 (define-hl-modifier kb-remove-assertion (assertion)
     "[Cyc] Remove ASSERTION from the KB."
-    nil
+    (declare (type assertion-p assertion))
   (kb-remove-assertion-internal assertion))
 
 
@@ -59,14 +62,24 @@ and permission notice:
 
 ;; TODO DESIGN - instead of all these remote checks everywhere, can't we manifest a simpler struct cached locally and use the normal local accessors on it?
 
+;; [Clyc] Java defines each kb-<name> as its own defun that does checkType on each
+;; parameter, then dispatches hl-access-remote? → missing-larkc vs local internal call.
+;; Replaced with a macro that synthesises the defun from a name + parameter list.
+;; The Java checkType becomes a (declare (type <p>-p <p>)) inferred from the parameter
+;; name — all call sites here use assertion/cnf/mt, which map to the canonical predicates.
 (defmacro define-kb-non-remote (name params &body (docstring &optional (internal-func (symbolicate name "-INTERNAL"))))
-  "Helper for these annoyingly repetetive functions. Maps the function KB-<name> to <name>-INTERNAL with the same parameters, after a hl-access-remote? check."
-  `(defun ,(symbolicate "KB-" name) ,params
-     ,docstring
-     (if (hl-access-remote?)
-         ;; These were different per instantiation, but whatever.
-         (missing-larkc 29511)
-         (,internal-func ,@params))))
+  "Helper for these annoyingly repetitive functions. Maps the function KB-<name> to <name>-INTERNAL with the same parameters, after a hl-access-remote? check."
+  (let ((decls (loop for p in params
+                     append (cond ((eq p 'assertion) '((type assertion-p assertion)))
+                                  ((eq p 'cnf) '((type cnf-p cnf)))
+                                  ((eq p 'mt) '((type hlmt-p mt)))))))
+    `(defun ,(symbolicate "KB-" name) ,params
+       ,docstring
+       ,@(when decls `((declare ,@decls)))
+       (if (hl-access-remote?)
+           ;; These were different per instantiation, but whatever.
+           (missing-larkc 29511)
+           (,internal-func ,@params)))))
 
 (define-kb-non-remote assertion-cnf (assertion)
   "[Cyc] Return the CNF for ASSERTION.")
@@ -83,7 +96,7 @@ and permission notice:
 
 ;; TODO - ? vs -P disconnect
 (define-kb-non-remote gaf-assertion? (assertion)
-  "[Cyc} Return T iff ASSERTION is a ground atomic formula (gaf)."
+  "[Cyc] Return T iff ASSERTION is a ground atomic formula (gaf)."
   assertion-gaf-p)
 
 (define-kb-non-remote assertion-gaf-hl-formula (assertion)
@@ -123,12 +136,21 @@ Ignores the truth - i.e. returns <blah> instead of (#$not <blah>) for negated ga
   asserted-second-internal)
 
 
+;; [Clyc] Java defines each kb-set-* as its own hl-modifier with checkType on each
+;; parameter plus the standard lock/preamble dance. Replaced with a macro that forwards
+;; to define-hl-modifier and infers declare types from the parameter names.
 (defmacro define-kb-hl-modifier (name params &body (docstring &optional (new-func (symbolicate name "-INTERNAL"))))
-  `(define-hl-modifier ,(symbolicate "KB-" name) ,params
-       ,docstring
-       nil
-     ;; TODO - original code had old-* variables that were unused, which read the overwritten value. Skipping since I don't believe it has side effects.
-     (,new-func ,@params)))
+  (let ((decls (loop for p in params
+                     append (cond ((eq p 'assertion) '((type assertion-p assertion)))
+                                  ((eq p 'new-direction) '((type direction-p new-direction)))
+                                  ((eq p 'new-truth) '((type truth-p new-truth)))
+                                  ((eq p 'new-strength) '((type el-strength-p new-strength)))
+                                  ((eq p 'new-variable-names) '((type listp new-variable-names)))))))
+    `(define-hl-modifier ,(symbolicate "KB-" name) ,params
+         ,docstring
+         ,(if decls `(declare ,@decls) nil)
+       ;; TODO - original code had old-* variables that were unused, which read the overwritten value. Skipping since I don't believe it has side effects.
+       (,new-func ,@params))))
 
 (define-kb-hl-modifier set-assertion-direction (assertion new-direction)
   "[Cyc] Change direction of ASSERTION to NEW-DIRECTION."
@@ -171,6 +193,8 @@ Ignores the truth - i.e. returns <blah> instead of (#$not <blah>) for negated ga
 
 (define-kb-non-remote assertion-dependents (assertion)
   "[Cyc] Return the dependents of ASSERTION.")
+
+;; (defun all-dependent-assertions (assertion) ...) -- active declaration, no body
 
 
 

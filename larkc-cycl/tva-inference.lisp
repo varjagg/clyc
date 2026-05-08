@@ -38,6 +38,7 @@ and permission notice:
 (in-package :clyc)
 
 ;;; Defstruct
+;;; print-object is missing-larkc 4648 — CL's default print-object handles this.
 
 (defstruct (tva-inference (:conc-name "tva-inf-")
                           (:constructor make-tva-inference (&key problem asent-pred
@@ -45,8 +46,7 @@ and permission notice:
                                                                 term-argnums var-argnums
                                                                 precomputations reused-spaces
                                                                 one-answer? justify?
-                                                                restricted-assertion answers))
-                          (:print-function tva-inference-print-function-trampoline))
+                                                                restricted-assertion answers)))
   problem
   asent-pred
   asent-args
@@ -74,11 +74,6 @@ and permission notice:
   "[Cyc] Reuse search spaces when the same transitive predicate and goal-node are used multiple times.  Saves time and space.")
 
 ;;; Functions
-
-(defun tva-inference-print-function-trampoline (object stream depth)
-  ;; Likely dispatches to print-tva-inference for struct printing
-  (declare (ignore depth))
-  (missing-larkc 4648))
 
 (defun determine-term-argnums (asent)
   "[Cyc] @return listp. Determines the argnums for each of the fully bound terms in ASENT."

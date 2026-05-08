@@ -89,6 +89,8 @@ and permission notice:
   (cond
     ((constant-p term) (when-let ((id (constant-suid term)))
                          (mark-constant-index-as-muted id)))
+    ;; 30874 likely (when-let ((id (nart-id term))) (mark-nart-index-as-muted id)),
+    ;; parallel to the constant branch above (Java also calls missing-larkc 32147 for the inner mark).
     ((nart-p term) (missing-larkc 30874))
     ((kb-unrepresented-term-p term) (when-let ((id (unrepresented-term-suid term)))
                                       (mark-unrepresented-term-index-as-muted id)))))
@@ -132,7 +134,10 @@ and permission notice:
            ;; TODO - macro usage, subtracting constants
            (if (= good-key-count (- 3 1))
                (when-let ((mt-subindex (get-gaf-arg-subindex term argnum pred)))
+                 ;; 12807 likely (setf num (relevant-mt-subindex-count mt-subindex))
                  (missing-larkc 12807))
+               ;; 4718 likely walks gaf-arg-subindex levels manually when good-key-count
+               ;; doesn't match the all-keys-set fast path
                (missing-larkc 4718)))))
     num))
 
@@ -161,6 +166,8 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
            (if (= good-key-count (- 3 1))
                (when-let ((mt-subindex (get-gaf-arg-subindex term argnum pred)))
                  (setf num (relevant-mt-subindex-count-with-cutoff mt-subindex cutoff)))
+               ;; 4719 likely the with-cutoff variant of 4718 above — manual walk of
+               ;; gaf-arg-subindex levels with cutoff support
                (missing-larkc 4719)))))
     num))
 
@@ -287,6 +294,8 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
            (if (= good-key-count (- 1 1))
                (when-let ((mt-subindex (get-predicate-extent-subindex pred)))
                  (setf num (relevant-mt-subindex-count-with-cutoff mt-subindex cutoff)))
+               ;; 4722 likely the predicate-extent-index variant of the manual
+               ;; subindex walk — same fallback shape as 4718/4719/4724
                (missing-larkc 4722)))))
     num))
 
@@ -298,6 +307,7 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
         (let ((keys-accum nil))
           (dolist (ass (do-simple-index-term-assertion-list pred))
             (declare (ignore ass))
+            ;; 30241 likely (setf keys-accum (simple-key-predicate-extent-index ass keys-accum pred))
             (missing-larkc 30241))
           (setf keys keys-accum))
         (setf keys (let ((next-level-subindex (get-predicate-extent-subindex pred)))
@@ -352,7 +362,9 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
       (t (let ((good-key-count (number-of-non-null-args-in-order sense)))
            (if (= good-key-count (- 2 1))
                (when-let ((mt-subindex (get-predicate-rule-subindex pred sense)))
+                 ;; 12809 likely (setf num (relevant-mt-subindex-count mt-subindex))
                  (missing-larkc 12809))
+               ;; 4724 likely the predicate-rule-index variant of the manual fallback walk
                (missing-larkc 4724)))))
     num))
 
@@ -363,6 +375,7 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
     (if (simple-indexed-term-p pred)
         (dolist (ass (do-simple-index-term-assertion-list pred))
           (declare (ignore ass))
+          ;; 30242 likely (setf keys (simple-key-predicate-rule-index ass keys pred sense mt))
           (missing-larkc 30242))
         (let ((next-level-subindex (get-predicate-rule-subindex pred sense mt)))
           (when (intermediate-index-p next-level-subindex)
@@ -391,6 +404,7 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
     (if (simple-indexed-term-p pred)
         (dolist (ass (do-simple-index-term-assertion-list pred))
           (declare (ignore ass))
+          ;; 30235 likely (setf keys (simple-key-decontextualized-ist-predicate-rule-index ass keys pred sense))
           (missing-larkc 30235))
         (let ((next-level-subindex (get-decontextualized-ist-predicate-rule-subindex pred sense)))
           (when (intermediate-index-p next-level-subindex)
@@ -408,6 +422,7 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
     (if (simple-indexed-term-p col)
         (dolist (ass (do-simple-index-term-assertion-list col))
           (declare (ignore ass))
+          ;; 30239 likely (setf keys (simple-key-isa-rule-index ass keys col sense mt))
           (missing-larkc 30239))
         (let ((next-level-subindex (get-isa-rule-subindex col sense mt)))
           (when (intermediate-index-p next-level-subindex)
@@ -426,6 +441,8 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
         (dolist (ass (do-simple-index-term-assertion-list col))
           (when (matches-quoted-isa-rule-index ass col sense mt direction)
             (incf num)))
+        ;; 12641 likely (when-let ((subindex (get-quoted-isa-rule-subindex col sense mt direction)))
+        ;;                (setf num (subindex-leaf-count subindex))) — same shape as num-genls-rule-index
         (missing-larkc 12641))
     num))
 
@@ -448,6 +465,7 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
     (if (simple-indexed-term-p col)
         (dolist (ass (do-simple-index-term-assertion-list col))
           (declare (ignore ass))
+          ;; 30238 likely (setf keys (simple-key-genls-rule-index ass keys col sense mt))
           (missing-larkc 30238))
         (let ((next-level-subindex (get-genls-rule-subindex col sense mt)))
           (when (intermediate-index-p next-level-subindex)
@@ -471,6 +489,7 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
     (if (simple-indexed-term-p col)
         (dolist (ass (do-simple-index-term-assertion-list col))
           (declare (ignore ass))
+          ;; 30237 likely (setf keys (simple-key-genl-mt-rule-index ass keys col sense mt))
           (missing-larkc 30237))
         (let ((next-level-subindex (get-genl-mt-rule-subindex col sense mt)))
           (when (intermediate-index-p next-level-subindex)
@@ -488,6 +507,7 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
     (if (simple-indexed-term-p func)
         (dolist (ass (do-simple-index-term-assertion-list func))
           (declare (ignore ass))
+          ;; 30236 likely (setf keys (simple-key-function-rule-index ass keys func mt))
           (missing-larkc 30236))
         (let ((next-level-subindex (get-function-rule-subindex func mt)))
           (when (intermediate-index-p next-level-subindex)
@@ -506,6 +526,7 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
   (let ((num 0))
     ;; TODO - macro
     (cond
+      ;; 12801 likely (setf num (num-pragma-rule-index rule)) — fast path when all mts are relevant
       ((all-mt-subindex-keys-relevant-p) (missing-larkc 12801))
 
       ((simple-indexed-term-p rule)
@@ -516,7 +537,10 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
 
       (t (let ((good-key-count (number-of-non-null-args-in-order)))
            (if (= good-key-count (- 1 1))
+               ;; 12737 likely (when-let ((mt-subindex (get-pragma-rule-subindex rule)))
+               ;;                (setf num (relevant-mt-subindex-count mt-subindex)))
                (missing-larkc 12737)
+               ;; 4745 likely the pragma-rule variant of the manual subindex walk fallback
                (missing-larkc 4745)))))
     num))
 
@@ -633,6 +657,8 @@ CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant 
       (tms-remove-assertion-list (gather-function-extent-index term)))
     (dolist (argnum (sort (key-nart-arg-index term) #'>))
       (declare (ignore argnum))
+      ;; 9445 likely (tms-remove-assertion-list (gather-nart-arg-index term argnum nil nil)),
+      ;; parallel to the gaf-arg-index loop below
       (missing-larkc 9445))
     (dolist (argnum (sort (key-gaf-arg-index term) #'>))
       (when (/= 1 argnum)
@@ -703,6 +729,8 @@ Return 1: listp, a listof terms not indexed by any other argnum"
                          (equal term arg)))
             (add-gaf-arg-index arg argnum pred mt assertion)))
         (cond
+          ;; 12694 likely (add-nart-arg-index ...) — termOfUnit assertions index by NART arg
+          ;; instead of by other-index
           ((eq pred #$termOfUnit) (missing-larkc 12694))
           (t (dolist (fort others)
                (when (and (fully-indexed-term-p fort)
@@ -732,6 +760,7 @@ Return 1: listp, a listof terms not indexed by any other argnum"
                          (equal term arg)))
             (rem-gaf-arg-index arg argnum pred mt assertion)))
         (if (eq pred #$termOfUnit)
+            ;; 12831 likely (rem-nart-arg-index ...) — termOfUnit removal counterpart of 12694
             (missing-larkc 12831)
             (dolist (fort others)
               (when (and (fully-indexed-term-p fort)
@@ -807,10 +836,15 @@ Return 2: A list of terms to be indexed via 'other' indexing."
               ;; Shuffled the non-missing-larkc ones to the top
               (:pred (add-predicate-rule-index neg-term :neg mt dir assertion))
               (:genls (add-genls-rule-index neg-term :neg mt dir assertion))
+              ;; 12690 likely (add-ist-pred-rule-index neg-term :neg mt dir assertion)
               (:ist-pred (missing-larkc 12690))
+              ;; 12695 likely (add-function-rule-index neg-term mt dir assertion)
               (:func (missing-larkc 12695))
+              ;; 12698 likely (add-isa-rule-index neg-term :neg mt dir assertion)
               (:isa (missing-larkc 12698))
+              ;; 12701 likely (add-quoted-isa-rule-index neg-term :neg mt dir assertion)
               (:quoted-isa (missing-larkc 12701))
+              ;; 12696 likely (add-genl-mt-rule-index neg-term :neg mt dir assertion)
               (:genl-mt (missing-larkc 12696))
               (:pragma (cerror "So don't!" "Can't index a pragmatic requirement as a neg-lit ~s" assertion))
               (:exception (cerror "So don't!" "Can't index an exception as a neg-lit ~s" assertion))
@@ -824,11 +858,17 @@ Return 2: A list of terms to be indexed via 'other' indexing."
               ;; Shuffled the non-missing-larkc ones to the top
               (:pred (add-predicate-rule-index pos-term :pos mt dir assertion))
               (:genls (add-genls-rule-index pos-term :pos mt dir assertion))
+              ;; 12691 likely (add-ist-pred-rule-index pos-term :pos mt dir assertion)
               (:ist-pred (missing-larkc 12691))
+              ;; 12699 likely (add-isa-rule-index pos-term :pos mt dir assertion)
               (:isa (missing-larkc 12699))
+              ;; 12702 likely (add-quoted-isa-rule-index pos-term :pos mt dir assertion)
               (:quoted-isa (missing-larkc 12702))
+              ;; 12697 likely (add-genl-mt-rule-index pos-term :pos mt dir assertion)
               (:genl-mt (missing-larkc 12697))
+              ;; 12700 likely (add-pragma-rule-index pos-term mt dir assertion)
               (:pragma (missing-larkc 12700))
+              ;; 12692 likely (add-exception-rule-index pos-term mt dir assertion)
               (:exception (missing-larkc 12692))
               (:func (cerror "So don't!" "Can't index a function rule as a pos-lit ~s" assertion))
               (otherwise (cerror "So don't!" "Don't know how to handle indexing type ~s" pos-indexing-type))))))
@@ -858,10 +898,15 @@ Return 2: A list of terms to be indexed via 'other' indexing."
               ;; Shuffled the non-missing-larkc ones to the top
               (:pred (rem-predicate-rule-index neg-term :neg mt dir assertion))
               (:genls (rem-genls-rule-index neg-term :neg mt dir assertion))
+              ;; 12827 likely (rem-ist-pred-rule-index neg-term :neg mt dir assertion)
               (:ist-pred (missing-larkc 12827))
+              ;; 12835 likely (rem-isa-rule-index neg-term :neg mt dir assertion)
               (:isa (missing-larkc 12835))
+              ;; 12838 likely (rem-quoted-isa-rule-index neg-term :neg mt dir assertion)
               (:quoted-isa (missing-larkc 12838))
+              ;; 12833 likely (rem-genl-mt-rule-index neg-term :neg mt dir assertion)
               (:genl-mt (missing-larkc 12833))
+              ;; 12832 likely (rem-function-rule-index neg-term mt dir assertion)
               (:func (missing-larkc 12832))
               (:pragma (cerror "So don't!" "Can't remove the index of a pragmatic requirement as a neg-lit ~s" assertion))
               (:exception (cerror "So don't!" "Can't remove the index of an exception as a neg-lit ~s" assertion))
@@ -874,11 +919,17 @@ Return 2: A list of terms to be indexed via 'other' indexing."
             (case pos-indexing-type
               (:pred (rem-predicate-rule-index pos-term :pos mt dir assertion))
               (:genls (rem-genls-rule-index pos-term :pos mt dir assertion))
+              ;; 12828 likely (rem-ist-pred-rule-index pos-term :pos mt dir assertion)
               (:ist-pred (missing-larkc 12828))
+              ;; 12836 likely (rem-isa-rule-index pos-term :pos mt dir assertion)
               (:isa (missing-larkc 12836))
+              ;; 12839 likely (rem-quoted-isa-rule-index pos-term :pos mt dir assertion)
               (:quoted-isa (missing-larkc 12839))
+              ;; 12834 likely (rem-genl-mt-rule-index pos-term :pos mt dir assertion)
               (:genl-mt (missing-larkc 12834))
+              ;; 12829 likely (rem-exception-rule-index pos-term mt dir assertion)
               (:exception (missing-larkc 12829))
+              ;; 12837 likely (rem-pragma-rule-index pos-term mt dir assertion)
               (:pragma (missing-larkc 12837))
               (:func (cerror "So don't!" "Can't remove the index of a function rule as a pos-lit ~s" assertion))
               (otherwise (cerror "So don't!" "Don't know how to handle indexing type ~s" pos-indexing-type))))))
@@ -924,10 +975,15 @@ Return 1: The term to be indexed with that type of indexing."
                            (:pred (num-predicate-rule-index pos-term :pos))
                            (:quoted-isa (num-quoted-isa-rule-index pos-term :pos))
                            (:genls (num-genls-rule-index pos-term :pos))
+                           ;; 12773 likely (num-ist-pred-rule-index pos-term :pos)
                            (:ist-pred (missing-larkc 12773))
+                           ;; 12795 likely (num-isa-rule-index pos-term :pos)
                            (:isa (missing-larkc 12795))
+                           ;; 12791 likely (num-genl-mt-rule-index pos-term :pos)
                            (:genl-mt (missing-larkc 12791))
+                           ;; 12803 likely (num-pragma-rule-index pos-term)
                            (:pragma (missing-larkc 12803))
+                           ;; 12779 likely (num-exception-rule-index pos-term)
                            (:exception (missing-larkc 12779))
                            (otherwise (cerror "So don't!" "Don't know how to handle indexing type ~s" pos-indexing-type)
                                       most-positive-fixnum))))
@@ -951,9 +1007,13 @@ Return 1: The term to be indexed with that type of indexing."
                            (:pred (num-predicate-rule-index neg-term :neg))
                            (:quoted-isa (num-quoted-isa-rule-index neg-term :neg))
                            (:genls (num-genls-rule-index neg-term :neg))
+                           ;; 12774 likely (num-ist-pred-rule-index neg-term :neg)
                            (:ist-pred (missing-larkc 12774))
+                           ;; 12796 likely (num-isa-rule-index neg-term :neg)
                            (:isa (missing-larkc 12796))
+                           ;; 12792 likely (num-genl-mt-rule-index neg-term :neg)
                            (:genl-mt (missing-larkc 12792))
+                           ;; 12787 likely (num-function-rule-index neg-term)
                            (:func (missing-larkc 12787))
                            (otherwise (cerror "So don't!" "Don't know how to handle indexing type ~s" neg-indexing-type)
 			              most-positive-fixnum))))
@@ -1023,7 +1083,10 @@ METHODS: The allowable methods (index-types) that the function can return. If NI
     ((or (lookup-methods-include? :predicate-extent methods)
          (lookup-methods-include? :gaf-arg methods))
      (best-gaf-lookup-index-try-all-allowed asent truth methods))
-    
+
+    ;; 12767 likely the overlap-only fallback for best-gaf-lookup-index when neither
+    ;; :predicate-extent nor :gaf-arg is in methods — likely (lookup-index-for-overlap asent)
+    ;; (Java has 12754 for an alternate path; commented out below.)
     ((missing-larkc 12767))
     ;;(missing-larkc 12754)
     ))
@@ -1034,6 +1097,7 @@ METHODS: The allowable methods (index-types) that the function can return. If NI
          (lookup-methods-include? :gaf-arg methods))
      (num-best-gaf-lookup-index-try-all-allowed asent truth methods))
 
+    ;; 12768 likely the count version of 12767 — overlap-only fallback returning a count
     ((missing-larkc 12768))
     ;;(missing-larkc 5114)
     ;;(t 0)
@@ -1048,6 +1112,7 @@ METHODS: The allowable methods (index-types) that the function can return. If NI
     (cond
       ((and (lookup-methods-include? :overlap methods)
             (lookup-should-use-index-overlap? asent best-count))
+       ;; 12755 likely (lookup-index-for-overlap asent)
        (missing-larkc 12755))
       ((and (not best-fort)
             (not best-index-argnum)
@@ -1073,6 +1138,7 @@ METHODS: The allowable methods (index-types) that the function can return. If NI
     (cond
       ((and (lookup-methods-include? :overlap methods)
             (lookup-should-use-index-overlap? asent best-count))
+       ;; 5115 likely the overlap-count for num-best-gaf-lookup-index
        (missing-larkc 5115))
       (t best-count))))
 
@@ -1209,18 +1275,31 @@ First look for mt-insensitive counts, then, if not all mts are relevant, try to 
           (:other (map-other-index #'find-cnf-internal term nil nil))
           (:pred-neg (map-predicate-rule-index #'find-cnf-internal term :neg))
           (:pred-pos (map-predicate-rule-index #'find-cnf-internal term :pos))
+          ;; 9446 likely (map-ist-pred-rule-index #'find-cnf-internal term :neg)
           (:ist-pred-neg (missing-larkc 9446))
+          ;; 9447 likely (map-ist-pred-rule-index #'find-cnf-internal term :pos)
           (:ist-pred-pos (missing-larkc 9447))
+          ;; 9463 likely (map-isa-rule-index #'find-cnf-internal term :neg)
           (:isa-neg (missing-larkc 9463))
+          ;; 9464 likely (map-isa-rule-index #'find-cnf-internal term :pos)
           (:isa-pos (missing-larkc 9464))
+          ;; 9460 likely (map-genls-rule-index #'find-cnf-internal term :neg)
           (:genls-neg (missing-larkc 9460))
+          ;; 9461 likely (map-genls-rule-index #'find-cnf-internal term :pos)
           (:genls-pos (missing-larkc 9461))
+          ;; 9458 likely (map-genl-mt-rule-index #'find-cnf-internal term :neg)
           (:genl-mt-neg (missing-larkc 9458))
+          ;; 9459 likely (map-genl-mt-rule-index #'find-cnf-internal term :pos)
           (:genl-mt-pos (missing-larkc 9459))
+          ;; 9451 likely (map-function-rule-index #'find-cnf-internal term)
           (:func (missing-larkc 9451))
+          ;; 9448 likely (map-exception-rule-index #'find-cnf-internal term)
           (:exception (missing-larkc 9448))
+          ;; 9468 likely (map-pragma-rule-index #'find-cnf-internal term)
           (:pragma (missing-larkc 9468))
+          ;; 9476 likely (map-quoted-isa-rule-index #'find-cnf-internal term :neg)
           (:quoted-isa-neg (missing-larkc 9476))
+          ;; 9477 likely (map-quoted-isa-rule-index #'find-cnf-internal term :pos)
           (:quoted-isa-pos (missing-larkc 9477))))
       *mapping-answer*)))
 
@@ -1374,7 +1453,10 @@ First look for mt-insensitive counts, then, if not all mts are relevant, try to 
                                            (destroy-final-index-iterator final-index-iterator)))))
                                    (setf done-var (or (not valid)
                                                       result))))))))
+      ;; 5149 likely the overlap-method handler — iterates the overlap-index entries
+      ;; and runs find-gaf-internal on each
       (:overlap (missing-larkc 5149))
+      ;; 30381 likely an error reporting an unknown lookup method from best-gaf-lookup-index
       (otherwise (missing-larkc 30381)))
     result))
 
@@ -1632,3 +1714,141 @@ First look for mt-insensitive counts, then, if not all mts are relevant, try to 
    @note destructible"
     '((gaf-formula el-formula-p))
     '((nil-or (list assertion-p))))
+
+
+;;; Commented declareFunctions and declareMacros from kb-indexing.java — stubs only.
+;;; Argument names are placeholders (arg0, arg1, ...); the arities match the Java declarations.
+
+;; (defun relevant-mt-subindex-count (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-mt-subindex-keys (arg0) ...) -- commented declareFunction, no body
+;; (defun remove-key-gaf-arg-index-cached (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun gaf-arg-indices (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-key-gaf-arg-index (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun mts-gaf-arg-index (arg0 arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
+;; (defun relevant-num-nart-arg-index (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun relevant-num-nart-arg-index-with-cutoff (arg0 arg1 &optional arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun relevant-key-nart-arg-index (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun mts-nart-arg-index (arg0 arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
+;; (defun add-nart-arg-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun rem-nart-arg-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun relevant-num-predicate-extent-index (arg0) ...) -- commented declareFunction, no body
+;; (defun no-predicate-extent-p (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-key-predicate-extent-index (arg0) ...) -- commented declareFunction, no body
+;; (defun num-function-extent-index (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-num-function-extent-index (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-num-function-extent-index-with-cutoff (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun get-function-extent-subindex (arg0) ...) -- commented declareFunction, no body
+;; (defun add-function-extent-index (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun rem-function-extent-index (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun function-extent-top-level-key () ...) -- commented declareFunction, no body
+;; (defun relevant-num-predicate-rule-index-with-cutoff (arg0 arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun relevant-key-predicate-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun num-decontextualized-ist-predicate-rule-index (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun add-decontextualized-ist-predicate-rule-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun rem-decontextualized-ist-predicate-rule-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun num-isa-rule-index (arg0 &optional arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun relevant-num-isa-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun relevant-num-isa-rule-index-with-cutoff (arg0 arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun relevant-key-isa-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun add-isa-rule-index (arg0 arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun rem-isa-rule-index (arg0 arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun relevant-num-quoted-isa-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun relevant-num-quoted-isa-rule-index-with-cutoff (arg0 arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun key-quoted-isa-rule-index (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun relevant-key-quoted-isa-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun get-quoted-isa-rule-subindex (arg0 &optional arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun add-quoted-isa-rule-index (arg0 arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun rem-quoted-isa-rule-index (arg0 arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun relevant-num-genls-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun relevant-num-genls-rule-index-with-cutoff (arg0 arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun relevant-key-genls-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun num-genl-mt-rule-index (arg0 &optional arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun relevant-num-genl-mt-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun relevant-num-genl-mt-rule-index-with-cutoff (arg0 arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun relevant-key-genl-mt-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun add-genl-mt-rule-index (arg0 arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun rem-genl-mt-rule-index (arg0 arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun num-function-rule-index (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun relevant-num-function-rule-index (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-num-function-rule-index-with-cutoff (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun relevant-key-function-rule-index (arg0) ...) -- commented declareFunction, no body
+;; (defun add-function-rule-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun rem-function-rule-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun num-exception-rule-index (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun relevant-num-exception-rule-index (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-num-exception-rule-index-with-cutoff (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun key-exception-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun relevant-key-exception-rule-index (arg0) ...) -- commented declareFunction, no body
+;; (defun exception-rule-top-level-key () ...) -- commented declareFunction, no body
+;; (defun get-exception-rule-subindex (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun add-exception-rule-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun rem-exception-rule-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun num-pragma-rule-index (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun relevant-num-pragma-rule-index-with-cutoff (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun key-pragma-rule-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun relevant-key-pragma-rule-index (arg0) ...) -- commented declareFunction, no body
+;; (defun pragma-rule-top-level-key () ...) -- commented declareFunction, no body
+;; (defun get-pragma-rule-subindex (arg0 &optional arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun add-pragma-rule-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun rem-pragma-rule-index (arg0 arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun rule-with-some-pragmatic-somewhere? (arg0) ...) -- commented declareFunction, no body
+;; (defun rule-with-some-pragmatic? (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun rule-with-some-asserted-more-specifically-pragmatic? (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun num-mt-index (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-num-mt-index (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-num-mt-index-with-cutoff (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun get-mt-subindex (arg0) ...) -- commented declareFunction, no body
+;; (defun broad-mt-index-cleanup () ...) -- commented declareFunction, no body
+;; (defun rem-broad-mt-index (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-num-other-index (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-num-other-index-with-cutoff (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun num-index-slow (arg0) ...) -- commented declareFunction, no body
+;; (defun relevant-num-index (arg0) ...) -- commented declareFunction, no body
+;; (defun perform-indexing-pre-dump-cleanup () ...) -- commented declareFunction, no body
+;; (defun unindexed-syntax-constant-index-cleanup () ...) -- commented declareFunction, no body
+;; (defun unindexed-syntax-constant-index-cleanup-internal (arg0) ...) -- commented declareFunction, no body
+;; (defun term-mt-count (arg0) ...) -- commented declareFunction, no body
+;; (defun mts-of-indexed-term (arg0) ...) -- commented declareFunction, no body
+;; (defun determine-function-indices (arg0) ...) -- commented declareFunction, no body
+;; (defun add-function-indices (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun rem-function-indices (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun best-nat-lookup-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun num-best-nat-lookup-index (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun best-nat-lookup-index-try-all-allowed (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun num-best-nat-lookup-index-try-all-allowed (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun best-nat-lookup-index-wrt-methods (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun best-nat-lookup-index-int (arg0) ...) -- commented declareFunction, no body
+;; (defun decent-nat-index-from-terms (arg0) ...) -- commented declareFunction, no body
+;; (defun decent-nat-index (arg0) ...) -- commented declareFunction, no body
+;; (defun best-nat-index-count (arg0) ...) -- commented declareFunction, no body
+;; (defun all-rule-indices (arg0) ...) -- commented declareFunction, no body
+;; (defun lookup-index-p (arg0) ...) -- commented declareFunction, no body
+;; (defun lookup-index-predicate-extent-value (arg0) ...) -- commented declareFunction, no body
+;; (defun lookup-index-overlap-value (arg0) ...) -- commented declareFunction, no body
+;; (defun lookup-index-for-overlap (arg0) ...) -- commented declareFunction, no body
+;; (defun lookup-index-for-function-extent (arg0) ...) -- commented declareFunction, no body
+;; (defun lookup-index-for-nart-arg (arg0 arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun lookup-methods-allow-only? (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun reindex-all-assertions () ...) -- commented declareFunction, no body
+;; (defun reindex-one-of-all-assertions (arg0) ...) -- commented declareFunction, no body
+;; (defun reindex-all-term-assertions (arg0) ...) -- commented declareFunction, no body
+;; (defun reindex-assertions (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun reindex-assertion (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun find-assertion-genl-mts (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun find-all-assertions (arg0) ...) -- commented declareFunction, no body
+;; (defun find-all-assertions-genl-mts (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun find-gaf-genl-mts (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun find-all-gafs (arg0) ...) -- commented declareFunction, no body
+;; (defun find-gaf-possibly-in-mt (arg0 &optional arg1) ...) -- commented declareFunction, no body
+;; (defun gaf-mts (arg0) ...) -- commented declareFunction, no body
+;; (defun find-rule-cnf-via-index (arg0 arg1) ...) -- commented declareFunction, no body
+;; (defun asent-kb-lookup (arg0) ...) -- commented declareFunction, no body
+;; (defun asent-kb-lookup-in-any-mt (arg0) ...) -- commented declareFunction, no body
+;; (defun find-clause-struc (arg0) ...) -- commented declareFunction, no body
+;; (defun gather-all-el-rule-assertions-for-term (arg0) ...) -- commented declareFunction, no body
+;; (defun gather-all-rule-assertions-for-term (arg0) ...) -- commented declareFunction, no body
+;; (defun gather-all-rule-assertions-for-pred (arg0) ...) -- commented declareFunction, no body
+;; (defun gather-one-rule-assertion (arg0) ...) -- commented declareFunction, no body
+;; (defun gather-all-isa-rule-assertions-for-col (arg0) ...) -- commented declareFunction, no body
+;; (defun gather-all-genls-rule-assertions-for-col (arg0) ...) -- commented declareFunction, no body
+;; (defun gather-all-other-rule-assertions-for-term (arg0) ...) -- commented declareFunction, no body

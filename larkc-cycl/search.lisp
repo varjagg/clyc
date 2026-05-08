@@ -37,7 +37,8 @@ and permission notice:
 (in-package :clyc)
 
 ;; SEARCH-STRUC defstruct — generic search state container with function slots
-(defstruct (search-struc (:print-function print-search))
+;; print-object is missing-larkc 12679 — CL's default print-object handles this.
+(defstruct search-struc
   tree
   leaves
   goals
@@ -55,10 +56,6 @@ and permission notice:
   current-node)
 
 (defconstant *dtp-search-struc* 'search-struc)
-
-(defun search-struc-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for printing search-struc objects."
-  (missing-larkc 12679))
 
 ;; (defun search-struc-p (object) ...) -- no body, commented declareFunction
 ;; (defun search-tree (search-struc) ...) -- no body, struct accessor
@@ -106,8 +103,8 @@ and permission notice:
   "[Cyc] Lock for SEARCH-STRUC object free list.")
 
 ;; SEARCH-NODE defstruct — node in a search tree
-(defstruct (search-node (:conc-name "SNODE-")
-                        (:print-function print-snode))
+;; print-object is missing-larkc 12680 — CL's default print-object handles this.
+(defstruct (search-node (:conc-name "SNODE-"))
   search
   parent
   children
@@ -116,10 +113,6 @@ and permission notice:
   state)
 
 (defconstant *dtp-search-node* 'search-node)
-
-(defun search-node-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for printing search-node objects."
-  (missing-larkc 12680))
 
 ;; (defun search-node-p (object) ...) -- no body, commented declareFunction
 ;; (defun snode-search (search-node) ...) -- no body, struct accessor

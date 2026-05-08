@@ -40,7 +40,8 @@ and permission notice:
 ;; Covers: cycml-kp-info-p, cycml-kp-info-knowledge-package-id, etc.,
 ;; _csetf-cycml-kp-info-*, make-cycml-kp-info
 
-(defstruct (cycml-kp-info (:print-function print-cycml-kp-info))
+;; print-object is missing-larkc 4133 — CL's default print-object handles this.
+(defstruct cycml-kp-info
   knowledge-package-id
   knowledge-package-dependencies
   operations)
@@ -71,12 +72,6 @@ and permission notice:
 ;; (defun cycml-serialize-namespace (namespace &optional stream) ...) -- commented declareFunction, no body
 ;; (defun cycml-serialize-false (object &optional stream) ...) -- commented declareFunction, no body
 ;; (defun cycml-serialize-true (object &optional stream) ...) -- commented declareFunction, no body
-
-;; Active declareFunction with body (missing-larkc 4133)
-(defun cycml-kp-info-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for print method."
-  (declare (ignore object stream))
-  (missing-larkc 4133))
 
 ;; (defun cycml-kp-info-p (object) ...) -- commented declareFunction, no body
 ;; (defun cycml-kp-info-knowledge-package-id (info) ...) -- commented declareFunction, no body

@@ -39,6 +39,7 @@ and permission notice:
 ;; Struct definition — generates accessors, predicate, constructor, and setf accessors.
 ;; Covers: cycl-query-specification-p, cycl-query-spec-*, _csetf-cycl-query-spec-*,
 ;; make-cycl-query-specification
+;; print-object is missing-larkc 23853 — CL's default print-object handles this.
 
 (defstruct (cycl-query-specification (:conc-name "CYCL-QUERY-SPEC-"))
   cycl-id
@@ -60,12 +61,6 @@ and permission notice:
 (defconstant *dtp-cycl-query-specification* 'cycl-query-specification)
 
 ;; Declare phase (following declare_cycl_query_specification_file order)
-
-;; cycl-query-specification-print-function-trampoline — missing-larkc 23853
-(defun cycl-query-specification-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for print method."
-  (declare (ignore object stream))
-  (missing-larkc 23853))
 
 ;; cycl-query-specification-p — provided by defstruct
 ;; cycl-query-spec-cycl-id — provided by defstruct

@@ -43,10 +43,6 @@ and permission notice:
 
 (defconstant *dtp-neural-net* 'neural-net)
 
-(defun neural-net-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for neural-net structs."
-  (default-struct-print-function object stream 0))
-
 ;; neural-net-p is provided by defstruct
 
 ;; nn-input-nodes is provided by defstruct (neural-net-input-nodes accessor)
@@ -77,10 +73,6 @@ and permission notice:
   weights)
 
 (defconstant *dtp-nn-input-node* 'nn-input-node)
-
-(defun nn-input-node-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for nn-input-node structs."
-  (default-struct-print-function object stream 0))
 
 ;; nn-input-node-p is provided by defstruct
 

@@ -291,6 +291,6 @@ be useful but small enough to be manageable.")
 (toplevel
   ;; note-globally-cached-function calls for cached-load-all-haystacks,
   ;; cached-load-all-instantiated-haystacks, cached-load-all-crippled-haystacks
-  ;; are elided because all three defun-cached bodies are LarKC-stripped.
+  ;; are elided because all three defun-cached bodies are missing-larkc.
   (declare-defglobal '*rule-bindings-wff-table*)
   (declare-defglobal '*problem-creation-times*))

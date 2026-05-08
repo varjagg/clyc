@@ -38,11 +38,28 @@ and permission notice:
 
 ;; TODO - this will not work as send-api-result is missing-larkc, but can be reconstituted.
 
+;; Reconstructed from Internal Constants: $sym11$ CLET, $list12$ = binding list for
+;; (*API-INPUT-PROTOCOL* *DEFAULT-API-INPUT-PROTOCOL*) etc. across the four protocol/method pairs.
+(defmacro with-api-protocol-bindings (&body body)
+  `(let ((*api-input-protocol* *default-api-input-protocol*)
+         (*api-validate-method* *default-api-validate-method*)
+         (*api-result-method* *default-api-result-method*)
+         (*api-output-protocol* *default-api-output-protocol*))
+     ,@body))
+
 (defun api-server-handler (in-stream out-stream)
   (api-server-top-level in-stream out-stream))
 
 (defparameter *within-api-server* nil)
 
+;; [Clyc] Java wraps the server loop in Threads.set_process_priority to temporarily
+;; boost priority for the duration of the connection, restoring the original on exit.
+;; bordeaux-threads exposes no portable priority API (verified by searching its package
+;; for PRIO — zero results), so this simplification drops the priority boost and only
+;; sets up the dynamic bindings around the catch. If a priority hook is ever needed,
+;; the path forward is an sbcl-only shim in subl-support.lisp using sb-thread:thread-os-thread
+;; plus sb-posix:setpriority (POSIX nice values aren't a perfect match for SubL's numeric
+;; priorities, so the mapping needs care).
 (defun api-server-top-level (in-stream out-stream)
   (let ((*package* (find-package "CLYC"))
         (*read-default-float-format* 'double-float)
@@ -56,6 +73,8 @@ and permission notice:
   "[Cyc] Explicitly quit this API connection."
   (when *within-api-server*
     (throw :api-quit nil)))
+
+;; (defun abort-api-server-process (process) ...) -- active declaration, no body
 
 (defparameter *default-api-input-protocol* 'default-api-input-protocol
     "[Cyc] The default API input protocol to use.")
@@ -151,6 +170,8 @@ and permission notice:
       (funcall *api-validate-method* api-request)
       t))
 
+;; (defun default-validate-api-request (api-request) ...) -- active declaration, no body
+
 (defun valid-api-function-symbol (symbol)
   (and (symbolp symbol)
        (fboundp symbol)))
@@ -185,12 +206,16 @@ and permission notice:
         (funcall *api-result-method* result)
         result)))
 
+;; (defun daml-api-result-transform (result) ...) -- active declaration, no body
+
 (defun send-api-result (out-stream api-result error?)
-  "[CYc] Send API-RESULT to OUT-STREAM respecting ERROR?"
+  "[Cyc] Send API-RESULT to OUT-STREAM respecting ERROR?"
   ;; TODO - this contained a nonsensical (+ 1 2)?
   ;; TODO - should be easy to reimplement, likely api-output-protocol?  don't want to edit it in in translation yet though
   (on-error (funcall (missing-larkc 31555) out-stream api-result error?)
     (api-quit)))
+
+;; (defun default-api-input-protocol (stream &optional eof-error-p eof-value) ...) -- active declaration, no body
 
 (defparameter *api-success-code* 200)
 (defparameter *api-error-code* 500)
@@ -201,6 +226,9 @@ and permission notice:
   (missing-larkc 7458)
   (force-output out-stream)
   api-result)
+
+;; (defun change-api-protocol (input-protocol output-protocol) ...) -- active declaration, no body
+;; (defun change-api-result-method (result-method) ...) -- active declaration, no body
 
 (defparameter *new-api-input-protocol* nil)
 (defparameter *new-api-output-protocol* nil)
@@ -214,16 +242,37 @@ and permission notice:
     (setf *new-api-output-protocol* nil)))
 
 (defun set-api-input-protocol (input-protocol)
-  (setf *api-input-protocol* input-protocol))
+  ;; TODO Java does checkType(input-protocol, FUNCTION-SPEC-P); function-spec-p is
+  ;; referenced in this codebase (forward-modules.lisp) but not yet defined.
+  (setf *api-input-protocol* input-protocol)
+  t)
 
 (defun set-api-output-protocol (output-protocol)
-  (setf *api-output-protocol* output-protocol))
+  ;; TODO Java does checkType(output-protocol, FUNCTION-SPEC-P); see above.
+  (setf *api-output-protocol* output-protocol)
+  t)
 
 (defun api-port ()
   "[Cyc] Returns the local api-port according to defined system parameters."
   (+ *base-tcp-port* *fi-port-offset*))
 
+;; (defun cyc-api-remote-eval (api-request machine port) ...) -- active declaration, no body, Cyc API
+;; (defun cyc-api-channel-eval (api-request channel) ...) -- active declaration, no body
+;; (defun cyc-api-channel-eval-internal (api-request channel) ...) -- active declaration, no body
+;; (defun cyc-api-channel-output (channel api-result) ...) -- active declaration, no body
+;; (defun cyc-api-channel-input (channel api-request) ...) -- active declaration, no body
+;; (defun fi-server-top-level (in-stream out-stream) ...) -- active declaration, no body
+;; (defun fi-quit () ...) -- active declaration, no body
+;; (defun fi-port () ...) -- active declaration, no body
+
 (deflexical *cyc-api-eof-exception* :eof)
+
+
+;;; Setup
+
+(toplevel
+  (register-tcp-server-type :cyc-api 'api-server-handler :text)
+  (declare-defglobal '*api-input-eof-marker*))
 
 
 ;;; Cyc API registrations

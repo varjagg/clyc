@@ -1,5 +1,10 @@
 # Clyc: A port of Cyc to Common Lisp
 
+## Short Summary
+A port of the Cyc inference engine to Common Lisp, at least the subset that was Apache 2.0 licensed in 2009. Fully ported, not in a complete working state yet.
+
+Good AI-based documentation of the entire system's workings in [docs/ai-docs/README.md](docs/ai-docs/README.md).
+
 ## Project Intent
 
 The primary purpose of Clyc is to explore the internals of Cyc, a uniquely mature and scalable commercial inference engine, from its only known open source release. Cycorp donated source code portions of a [circa 2009 Java version of Cyc](https://sourceforge.net/p/larkc/code/HEAD/tree/trunk/platform/src/main/java/com/cyc/cycjava/cycl/) to the Large Knowledge Collider project ("LarKC", [larkc.eu](https://web.archive.org/web/20141217165050/http://larkc.org/) archived), released under the permissive Apache License 2.0.  Random documentation publicly found on cyc.com (live or through archive.org) is also consulted.
@@ -19,7 +24,10 @@ The AGPL is the most forced-open major license of which we're aware. If there wa
 [*]: Creative Commons is [not recommended](https://creativecommons.org/faq/#can-i-apply-a-creative-commons-license-to-software) for software, and does not mandate making source code available.
 
 ## Current Status
+
 All of the files have been converted to Lisp. The project loads without errors and with many warnings, but has not been tested much.
+
+AI has been used to create initial [comprehensive documentation](docs/ai-docs/README.md) covering all systems, their features, purpose, and uses.
 
 Many of the macro sites remain expanded as they were in Java, and need to be reconstructed back to their macro call forms. References to dynamic variable bindings can usually roughly indicate which macro is in use, and many of the defmacros have already been reconstructed.
 
@@ -27,11 +35,10 @@ The original LarKC distribution has most of its Cyc source code in a flat direct
 
 The `cyc-testing` directory contains test harness & registration, but no actual test function bodies.
 
-### AI Slop
-
-AI assistance has gotten this project past the automation complexity humps, and all AI ported files are meticulously (at least the earlier ones) human-reviewed. AI is commonly munging some Cyc-originated comments, which will be mechanically fixed later, but also commenting ideas for some of the redacted function calls, and successfully reconstructing `defmacro`s from leftover internal constant literals and corresponding expanded instances. While it's catching some macroexpansions and reverting them back to their original forms, I'm leaving most of the missed ones to be scanned individually after everything has had its initial port. It simply can't keep all of them "in mind" as it ports each file, and the more visible Lisp examples the better.
 
 ## Rough Plan
+
+**Change of plans:** Now that the code is fully ported back to Lisp, and has good system documentation to work from, I would rather seek to reimplement Clyc than getting the low level details of the current port debugged and working. This would eliminate weird Java/SubL concessions, get rid of obvious technical debt, eliminate programming styles catered to hardware limitations, and take better advantage of modern tools. I haven't decided either way on this yet. Community feedback is welcome.
 
 1. Convert code as-is to loadable, hopefully runnable Common Lisp
   - leave as-is dependency ordering problems, repetitive complexity, orphaned vars/funs, etc
@@ -107,9 +114,10 @@ Compilation warnings can be made visible by evaluating the following before quic
 `glob` - Some dual-indexed data container.  
 `bag` - A multi-set. Possible to recreate.  
 `accumulation` - A data accumulation interface that can append its values to various different concrete datastructures.  Probably reconstructable.  
-`red-*` - Some form of generic on-disk data repository, maybe similar to the Windows registry?  
+`red-`* - Some form of generic on-disk data repository, maybe similar to the Windows registry?  
 `file-hash-table` - On-disk key/value store. Huge function list.  
 `sparse-matrix` `sparse-vector` `heap` - Self explanatory.  
+`sksi` - General architecture for inferring over external data sources.
 
 ## Utilities
 
@@ -119,6 +127,57 @@ Compilation warnings can be made visible by evaluating the following before quic
 `special-variable-state.lisp` - Snapshots a list of CL special variables.  
 `misc-utilities.lisp` - Startup code.  
 
+## Syntax & Semantics
+
+### Constant syntax
+
+The `#$` prefix is a Lisp reader macro prefixing CycL constants. In CycL source code, the prefix is not used, just the bare name. However, in documentation, `#$` is often included to be explicit about a symbol being a literal constant.
+
+#### Conventions
+
+Constant names are in `CamelCase`, with the first letter usually capitalized, except for predicates & relations, which start lowercase.
+
+`Fn` suffix for functions
+`Mt`|`PSC` suffix for microtheories/problem solving contexts
+`The` prefix for literal collection constructors, e.g. `(TheList 1 2 3)`, `(TheEmptyList)`
+
+### Variable syntax
+
+Variables are symbols prefixed with `?` in CycL source code as well as in Lisp, and are by convention uppercased as the default Lisp reader would do.
+
+`?VAR` prefixing a number is an internally generated variable name, usually generated by canonicalization to explicitly bind values together.
+
+A `??` prefix is for a "don't-care" variable, which won't be unified with other occurrences of that same `??`-prefixed variable names, effectively ignoring that positional slot.
+
+`:?` prefixing is used in some specialized contexts as Lisp keywords (TODO).
+
+### Literal lists vs Function applications
+
+All parenthetical expressions are considered function applications. Lists use the function `#$TheList`, sets use `#$TheSet`, etc.
+
+```lisp
+(MotherFn Bart)             ;; Application of MotherFn
+(TheList MotherFn FatherFn) ;; List of functors
+```
+
+### Functions, NARTs, NAUTs, and TOUs
+
+NAUTs are list-shaped Function expressions, `(functor arg1 ... argN)` indicating a derivation of a referred value, while NARTs are internal opaque singleton objects that reify occurrences of the exact same NAUT expression.
+
+In order for a NAUT to be reified, its functor must be reifiable (`(isa functor #$ReifiableFunction)`), and the NAUT must be "closed", meaning it contains no variables. Non-reifiable functors might be `#$EvaluatableFunction`s like `#$PlusFn` which performs arithmetic on its arguments. Its referent is just a calculable number that doesn't need to reference an object in the KB; it is self-describing.
+
+When a NART is created, `(#$termOfUnit NART NAUT)` is asserted, canonically signifying the reification in CycL. As NART objects are used, their syntactic expansion is available via this association. The SubL tracks a `*tou-mt*` which defaults to `$#BaseKB`, and asserts generated TOUs into this MT. This may be overridden to store TOUs in other MTs, but it might not be fully supported.
+
+While many functions might evaluate to the same conceptual object (for instance, `MotherFn` for different siblings all point to the same mother), NART reification does not reflect the referred value of the function, but rather the NAUT shape itself. Each sibling's `(MotherFn sibN)` NAUT gets its own NART. The equality between different NARTs' evaluations is not tracked by the reification. `equals` assertions bind the equality of shared-referent NARTs as well as the referent itself. For example:
+
+```lisp
+(equals (MotherFn Bart) (MotherFn Lisa)) ;; Different NARTs, same referent
+(equals (MotherFn Bart) Marge)           ;; Equating a NART to a referent.
+```
+
+NAUTs may nest any other FORTS (constants, NARTs) inside them, except circularly. A NART is considered "dependent on" any FORTs inside its respective NAUT at any depth. The functor is also included in this. e.g. `(BirthplaceFn (MotherFn Bart))` is dependent on 4 FORTs: the 3 symbolic terms, and the NART for `(MotherFn Bart)`. `(YearFn 2000)` is only dependent on `YearFn`, as `2000` is an integer and not a CycL named constant.
+
+Syntactically, NART objects simply print as their NAUT. There is no visible distinction for a NART in CycL, it is effectively an internal optimization.
 
 ## Glossary
 
@@ -155,7 +214,7 @@ Compilation warnings can be made visible by evaluating the following before quic
 `NAUT` = Non-Atomic Unreified Term. A function NAT, before reification, having only the Fn and args.  
 `NART` = Non-Atomic Reified Term. Internal identifier that a NAUT resolved to.  
 `TOU` = Term Of Unit, predicate that maps a NART to a NAUT.  
-`FORT` = First-Order Reified Term, which is a constant or a NART.  
+`FORT` = First-Order Reified Term, which is a constant or a NART, both singleton identity-comparable objects.  
 `WFF` = Well-Formed Formula.  Arity, argument types, connectives, MT it's in, semantics are all checked, valid, and coherent.  
 `EL` = Epistemological Level, expressive human-editable form.  
 `HL` = Heuristic Level, efficient low-level form.  
@@ -164,7 +223,7 @@ Compilation warnings can be made visible by evaluating the following before quic
 `FOL` = First-Order Logic, the full sentence style of EL.  
 `CNF` = Conjunctive Normal Form, the style of HL. `(#$and (#$or ?term+)+)`, where terms may also be negated.  
 `GUID` = Globally Unique ID, external identifier.  
-`SUID` = (System?) Unique ID, internal identifier.  
+`SUID` = (Serial? Scoped?) Unique ID, internal identifier, incrementing counter per type.  
 `TV` = Truth value. Default or monotonically true or false, unknown truth, etc.  
 `CZER` = Canonicalizer.  
 `AT` = the `arg-type` mechanisms.  
@@ -173,4 +232,3 @@ Compilation warnings can be made visible by evaluating the following before quic
 `ASENT` = Atomic Sentence, a sentence that contains no variables or logical connectives.  
 `KE` = Knowledge Editor, high-level API for KB modifications.  
 `FI` = Functional Interface, older interface for KB operations, superseded by KE and Cyc API.  
-

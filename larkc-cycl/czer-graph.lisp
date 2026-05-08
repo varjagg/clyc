@@ -38,7 +38,7 @@ and permission notice:
 (in-package :clyc)
 
 ;; Graph structures used by the canonicalizer for formula graph isomorphism.
-;; All function bodies were stripped from LarKC; only struct definitions and
+;; All function bodies are missing-larkc; only struct definitions and
 ;; print trampolines survive.
 
 ;;; V-COLOUR struct — vertex colouring for graph isomorphism comparison

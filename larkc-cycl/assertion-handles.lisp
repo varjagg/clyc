@@ -41,6 +41,29 @@ and permission notice:
   ;; This is an id-index
   "[Cyc] The ID -> ASSERTION mapping table.")
 
+;; Reconstructed from Internal Constants: $list1$ arglist, $sym6$ DO-KB-SUID-TABLE,
+;; $list7$ (DO-ASSERTIONS-TABLE).
+(defmacro do-assertions ((var &optional (progress-message "mapping Cyc assertions")
+                              &key done)
+                         &body body)
+  `(do-kb-suid-table (,var (do-assertions-table)
+                      :progress-message ,progress-message :done ,done)
+     ,@body))
+
+;; Reconstructed from Internal Constants: $list11$ arglist, $sym13$ DO-KB-SUID-TABLE-OLD-OBJECTS.
+(defmacro do-old-assertions ((assertion &key progress-message done) &body body)
+  `(do-kb-suid-table-old-objects (,assertion (do-assertions-table)
+                                  :progress-message ,progress-message :done ,done)
+     ,@body))
+
+;; Reconstructed from Internal Constants: $list11$ arglist, $sym14$ DO-KB-SUID-TABLE-NEW-OBJECTS.
+(defmacro do-new-assertions ((assertion &key progress-message done) &body body)
+  `(do-kb-suid-table-new-objects (,assertion (do-assertions-table)
+                                  :progress-message ,progress-message :done ,done)
+     ,@body))
+
+;; (defun new-assertions-iterator () ...) -- active declaration, no body
+
 (defun* do-assertions-table () (:inline t)
   *assertion-from-id*)
 
@@ -50,6 +73,8 @@ and permission notice:
     (setf *assertion-from-id* (new-id-index size 0))
     t))
 
+;; (defun optimize-assertion-table () ...) -- active declaration, no body
+
 (defun finalize-assertions (&optional max-assertion-id)
   (set-next-assertion-id max-assertion-id)
   (unless max-assertion-id
@@ -57,6 +82,9 @@ and permission notice:
 
 (defun clear-assertion-table ()
   (clear-id-index *assertion-from-id*))
+
+;; (defun create-assertion-dump-id-table () ...) -- active declaration, no body
+;; (defun new-dense-assertion-id-index () ...) -- active declaration, no body
 
 (defun assertion-count ()
   "[Cyc] Return the total number of assertions."
@@ -66,6 +94,12 @@ and permission notice:
 
 (defun* lookup-assertion (id) (:inline t)
   (id-index-lookup *assertion-from-id* id))
+
+;; (defun next-assertion-id () ...) -- active declaration, no body
+;; (defun new-assertion-id-threshold () ...) -- active declaration, no body
+;; (defun old-assertion-count () ...) -- active declaration, no body
+;; (defun new-assertion-count () ...) -- active declaration, no body
+;; (defun missing-old-assertion-ids () ...) -- active declaration, no body
 
 (defun set-next-assertion-id (&optional max-assertion-id)
   (let ((max -1))
@@ -95,8 +129,16 @@ and permission notice:
 (defstruct (assertion (:conc-name as-))
   id)
 
+(defconstant *dtp-assertion* 'assertion)
+
 (defparameter *print-assertions-in-cnf* nil)
 
+;; (defun print-assertion (object stream depth) ...) -- active declaration, no body
+
+;; [Clyc] Java registers SXHASH-ASSERTION-METHOD on $sxhash-method-table$ via
+;; Structures.register_method. Expressed here as a CLOS defmethod on CL's own sxhash,
+;; so callers of (sxhash assertion) dispatch correctly without the SubL method table.
+;; TODO - sbcl custom :test function can compare IDs directly, need custom hash function then as well
 (defmethod sxhash ((object assertion))
   (let ((id (as-id object)))
     (if (integerp id)
@@ -122,10 +164,12 @@ and permission notice:
   (declare (ignore robust?))
   (valid-assertion-handle? assertion))
 
+;; (defun assertion-id-p (object) ...) -- active declaration, no body
+
 (defun make-assertion-shell (&optional id)
   (unless id
     (setf id (make-assertion-id)))
-  (check-type id (satisfies fixnump))
+  (check-type id fixnum)
   (let ((assertion (get-assertion)))
     (register-assertion-id assertion id)
     assertion))
@@ -133,6 +177,8 @@ and permission notice:
 (defun* create-sample-invalid-assertion () (:inline t)
   "[Cyc] Create a sample invalid-assertion."
   (get-assertion))
+
+;; (defun partition-create-invalid-assertion () ...) -- active declaration, no body
 
 (defun free-all-assertions ()
   (do-id-index (id assertion (do-assertions-table)
@@ -143,6 +189,7 @@ and permission notice:
 
 (defun* assertion-id (assertion) (:inline t)
   "[Cyc] Return the id of this ASSERTION."
+  (declare (type assertion-p assertion))
   (as-id assertion))
 
 (defun* reset-assertion-id (assertion new-id) (:inline t)
@@ -155,14 +202,22 @@ and permission notice:
 
 (defun* find-assertion-by-id (id) (:inline t)
   "[Cyc] Return the assertion with ID, or NIL if not present."
+  (declare (type integer id))
   (lookup-assertion id))
 
+
+;;; Setup
+
+(toplevel
+  (declare-defglobal '*assertion-from-id*)
+  (register-macro-helper 'do-assertions-table 'do-assertions)
+  (register-macro-helper 'create-assertion-dump-id-table 'with-assertion-dump-id-table))
 
 
 ;;; Cyc API registrations
 
 
-(register-cyc-api-macro 'do-assertions '((var &optional (progress-message makeString("mapping Cyc assertions")) &key done) &body body)
+(register-cyc-api-macro 'do-assertions '((var &optional (progress-message "mapping Cyc assertions") &key done) &body body)
     "Iterate over all HL assertion datastructures, executing BODY within the scope of VAR.
    VAR is bound to the assertion.
    PROGRESS-MESSAGE is a progress message string.

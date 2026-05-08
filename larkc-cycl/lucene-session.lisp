@@ -76,6 +76,7 @@ and permission notice:
 ;; Java _csetf_ accessor names are LUCENE-HOST, LUCENE-PORT, LUCENE-CONNECTION,
 ;; LUCENE-SESSION-TYPE, LUCENE-INDEX, LUCENE-OVERWRITE (per $list14), so
 ;; the defstruct conc-name is "LUCENE-".
+;; print-object is missing-larkc 29219 — CL's default print-object handles this.
 
 (defstruct (lucene-session (:conc-name "LUCENE-"))
   host
@@ -86,12 +87,6 @@ and permission notice:
   overwrite)
 
 (defconstant *dtp-lucene-session* 'lucene-session)
-
-;; Elided: Structures.register_method($print_object_method_table$, $dtp-lucene-session$,
-;; #'lucene-session-print-function-trampoline). Replaced with defmethod print-object
-;; using CL native CLOS dispatch.
-(defmethod print-object ((obj lucene-session) stream)
-  (lucene-session-print-function-trampoline obj stream))
 
 
 ;;;; Functions (ordered by declare_lucene_session_file)
@@ -116,16 +111,6 @@ and permission notice:
        (pwhen (lucene-session-p ,session)
          (lucene-finalize ,session)))))
 
-;; lucene-session-print-function-trampoline (object stream) -- active declareFunction,
-;; body is handleMissingMethodError 29219.
-(defun lucene-session-print-function-trampoline (object stream)
-  ;; Likely calls (print-object object stream) with struct-specific formatting.
-  ;; Evidence: $str44$__LUCENE_SESSION_ = "#<LUCENE-SESSION ", $str45$_ = ":",
-  ;; $str46$_ = ">" suggest printing "#<LUCENE-SESSION host:port>" form. The
-  ;; actual formatting is in lucene-print (arity 3), which this trampoline
-  ;; dispatches to via the print_object_method_table.
-  (declare (ignore object stream))
-  (missing-larkc 29219))
 
 ;; (defun lucene-session-p (object) ...) -- active declareFunction, no body (provided by defstruct)
 ;; (defun lucene-host (session) ...) -- active declareFunction, no body (accessor provided by defstruct)

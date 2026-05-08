@@ -49,24 +49,21 @@ and permission notice:
 
 (defvar *ind-arg-relevant-constraints* nil)
 
-;;; Macro: with-applicable-arg-types
-;; Reconstructed from Internal Constants evidence:
-;;   $sym0$CLET = CLET
-;;   $list1 = (*AT-APPLICABLE-ARG-TYPES* (*AT-APPLICABLE-ARG-TYPES-WITH-ASSERTIONS* (NEW-DICTIONARY (QUOTE EQUAL))))
-;;   $sym2$ALLOW_ESCAPE_QUOTE_WHEN_QUOTE_PREDICATE
-;;   $sym3$RELN
-;;   $sym4$WITH_SBHL_RESOURCED_MARKING_SPACES
-;; The macro binds the two at-applicable-arg-types variables, then wraps the body
-;; in allow-escape-quote-when-quote-predicate and with-sbhl-resourced-marking-spaces.
-;; commented declareMacro
-
-;; (defmacro with-applicable-arg-types ...) -- no body, commented declareMacro
-;; Expansion would be:
-;; (clet ((*at-applicable-arg-types* nil)
-;;        (*at-applicable-arg-types-with-assertions* (new-dictionary #'equal)))
-;;   (allow-escape-quote-when-quote-predicate reln
-;;     (with-sbhl-resourced-marking-spaces
-;;       . body)))
+;; Reconstructed from Internal Constants evidence: $sym0$CLET,
+;; $list1 = CLET binding list, $sym2$ ALLOW-ESCAPE-QUOTE-WHEN-QUOTE-PREDICATE,
+;; $sym3$ RELN (the parameter), $sym4$ WITH-SBHL-RESOURCED-MARKING-SPACES.
+;; NOTE: allow-escape-quote-when-quote-predicate (active declareMacro in cycl_grammar.java)
+;; and with-sbhl-resourced-marking-spaces (commented declareMacro in sbhl_marking_vars.java)
+;; are not yet ported. The macro is safe to define because the existing mal-* functions
+;; in this file all use the inline-expanded form; no caller reaches this expansion yet.
+(defmacro with-applicable-arg-types (reln &body body)
+  "[Cyc] Bind the *at-applicable-arg-types* variables and wrap BODY in the
+allow-escape-quote-when-quote-predicate + with-sbhl-resourced-marking-spaces dance."
+  `(let ((*at-applicable-arg-types* nil)
+         (*at-applicable-arg-types-with-assertions* (new-dictionary 'equal)))
+     (allow-escape-quote-when-quote-predicate ,reln
+       (with-sbhl-resourced-marking-spaces
+         ,@body))))
 
 ;;; Functions in declare section order
 
@@ -157,8 +154,7 @@ and permission notice:
               (setf result t))))
       result)))
 
-;; (defun arg-isa-violations (reln arg argnum col) ...) -- no body, commented declareFunction
-;; Body present in Java, ported for reference:
+;; commented declareFunction, but body present in Java
 (defun arg-isa-violations (reln arg argnum col)
   "[Cyc] Returns violations for arg-isa constraint COL on ARG at ARGNUM of RELN."
   (let ((constraints (gethash col *at-applicable-arg-types-with-assertions*))
@@ -167,8 +163,7 @@ and permission notice:
       (push (arg-isa-violation reln arg argnum col constraint-details) violations))
     violations))
 
-;; (defun arg-isa-violation (reln arg argnum col constraint-details) ...) -- no body, commented declareFunction
-;; Body present in Java, ported for reference:
+;; commented declareFunction, but body present in Java
 (defun arg-isa-violation (reln arg argnum col constraint-details)
   "[Cyc] Construct a single arg-isa violation."
   (let ((mt *mt*)
@@ -177,8 +172,7 @@ and permission notice:
                     :mal-arg-wrt-arg-isa)))
     (arg-isa-violation-int reln arg argnum col constraint-details module)))
 
-;; (defun arg-isa-violation-int (reln arg argnum col constraint-details module) ...) -- no body, commented declareFunction
-;; Body present in Java, ported for reference:
+;; commented declareFunction, but body present in Java
 (defun arg-isa-violation-int (reln arg argnum col constraint-details module)
   "[Cyc] Internal function to construct an arg-isa violation structure."
   (let ((mt *mt*)
@@ -192,8 +186,7 @@ and permission notice:
         (setf data (append data (wff-violation-verbose-data))))
       (list* module arg reln argnum col mt (append data nil)))))
 
-;; (defun wff-violation-verbose-data () ...) -- no body, commented declareFunction
-;; Body present in Java, ported for reference:
+;; commented declareFunction, but body present in Java
 (defun wff-violation-verbose-data ()
   "[Cyc] Collect verbose data about the current WFF context."
   (let ((data nil))
@@ -471,8 +464,7 @@ and permission notice:
                   (setf result nil))))))
     result))
 
-;; (defun arg-genl-violations (reln arg argnum col) ...) -- no body, commented declareFunction
-;; Body present in Java, ported for reference:
+;; commented declareFunction, but body present in Java
 (defun arg-genl-violations (reln arg argnum col)
   "[Cyc] Returns violations for arg-genl constraint COL on ARG at ARGNUM of RELN."
   (let ((constraints (gethash col *at-applicable-arg-types-with-assertions*))
@@ -481,8 +473,7 @@ and permission notice:
       (push (arg-genl-violation reln arg argnum col constraint-details) violations))
     violations))
 
-;; (defun arg-genl-violation (reln arg argnum col constraint-details) ...) -- no body, commented declareFunction
-;; Body present in Java, ported for reference:
+;; commented declareFunction, but body present in Java
 (defun arg-genl-violation (reln arg argnum col constraint-details)
   "[Cyc] Construct a single arg-genl violation."
   (let ((mt *mt*)
@@ -912,6 +903,178 @@ and permission notice:
           (setf found-one? t))))
     found-one?))
 
+(defun mal-inter-arg-different? (reln ind-arg ind-argnum dep-arg dep-argnum)
+  "[Cyc] Are there any inter-arg-different constraints that ARG violates for relation RELN?"
+  (unless *at-check-inter-arg-different?*
+    (return-from mal-inter-arg-different? nil))
+  (unless (some-inter-arg-different-constraint-somewhere? reln)
+    (return-from mal-inter-arg-different? nil))
+  (let ((result nil)
+        (done? nil))
+    (let ((*at-applicable-arg-types* nil)
+          (*at-applicable-arg-types-with-assertions* (new-dictionary #'equal)))
+      (if (eq reln #$Quote)
+          (let ((*within-quote-form* t))
+            (let ((already-resourcing-p *resourcing-sbhl-marking-spaces-p*))
+              (let ((*resourced-sbhl-marking-space-limit* (determine-resource-limit already-resourcing-p 10))
+                    (*resourced-sbhl-marking-spaces* (possibly-new-marking-resource already-resourcing-p))
+                    (*resourcing-sbhl-marking-spaces-p* t))
+                (applicable-inter-arg-type-pred-collections reln ind-arg ind-argnum dep-argnum :inter-arg-different t)
+                (when *at-applicable-arg-types*
+                  (unless done?
+                    (dolist (inter-arg-different *at-applicable-arg-types*)
+                      (when done? (return))
+                      (destructuring-bind (argnum1 argnum2) inter-arg-different
+                        (when (and (eq argnum1 dep-argnum)
+                                   (eq argnum2 ind-argnum))
+                          (when (equals? dep-arg ind-arg)
+                            (when *noting-at-violations?*
+                              ;; missing-larkc 11306 likely notes inter-arg-different violations (Quote branch)
+                              (missing-larkc 11306))
+                            (setf result t)
+                            (setf done? (at-finished? result)))))))))))
+          ;; Non-Quote branch
+          (let ((already-resourcing-p *resourcing-sbhl-marking-spaces-p*))
+            (let ((*resourced-sbhl-marking-space-limit* (determine-resource-limit already-resourcing-p 10))
+                  (*resourced-sbhl-marking-spaces* (possibly-new-marking-resource already-resourcing-p))
+                  (*resourcing-sbhl-marking-spaces-p* t))
+              (applicable-inter-arg-type-pred-collections reln ind-arg ind-argnum dep-argnum :inter-arg-different t)
+              (when *at-applicable-arg-types*
+                (unless done?
+                  (dolist (inter-arg-different *at-applicable-arg-types*)
+                    (when done? (return))
+                    (destructuring-bind (argnum1 argnum2) inter-arg-different
+                      (when (and (eq argnum1 dep-argnum)
+                                 (eq argnum2 ind-argnum))
+                        (when (equals? dep-arg ind-arg)
+                          (when *noting-at-violations?*
+                            ;; missing-larkc 11307 likely notes inter-arg-different violations (non-Quote)
+                            (missing-larkc 11307))
+                          (setf result t)
+                          (setf done? (at-finished? result)))))))))))
+      result)))
+
+(defun arg-collections-internal (arg constraint-type v-arg-type mt-info)
+  "[Cyc] Compute the arg collections for ARG of CONSTRAINT-TYPE and V-ARG-TYPE; uncached."
+  (declare (ignore mt-info))
+  (case constraint-type
+    (:isa
+     (case v-arg-type
+       ;; missing-larkc 3657 likely calls isa-in-any-mt? or similar fort-isa variant
+       (:strong-fort (missing-larkc 3657))
+       (:weak-fort (weak-fort-isa-collections arg))
+       ;; missing-larkc 11258 likely handles :naut v-arg-type for :isa
+       (:naut (missing-larkc 11258))))
+    (:quoted-isa
+     (case v-arg-type
+       ;; missing-larkc 3722 likely calls quoted-isa variant for :strong-fort
+       (:strong-fort (missing-larkc 3722))
+       ;; missing-larkc 11313 likely handles :weak-fort for :quoted-isa
+       (:weak-fort (missing-larkc 11313))
+       ;; missing-larkc 11259 likely handles :naut for :quoted-isa
+       (:naut (missing-larkc 11259))))
+    (:genls
+     (case v-arg-type
+       ;; missing-larkc 4989 likely calls genls-in-any-mt? or strong-fort-genls variant
+       (:strong-fort (missing-larkc 4989))
+       (:weak-fort (weak-fort-genls-collections arg))
+       ;; missing-larkc 11257 likely handles :naut for :genls
+       (:naut (missing-larkc 11257))))))
+
+;; Globally cached: Java uses caching_state + sxhash_calc_4 with register_hl_store_cache_clear_callback.
+;; defun-cached with :clear-when :hl-store-modified reproduces the same semantics and auto-generates
+;; clear-arg-collections (matching Java's clear_arg_collections body).
+(defun-cached arg-collections (arg constraint-type v-arg-type mt-info)
+    (:test equal :capacity 1024 :initial-size 0 :clear-when :hl-store-modified)
+  (arg-collections-internal arg constraint-type v-arg-type mt-info))
+
+(defun weak-fort-isa-collections (v-term)
+  "[Cyc] Return asserted-isa collections for V-TERM if it's a fort or reifiable nart."
+  (cond
+    ((fort-p v-term) (asserted-isa v-term))
+    ;; missing-larkc 10324 likely calls find-ground-naut or similar
+    ((reifiable-nat? v-term) (asserted-isa (missing-larkc 10324)))))
+
+(defun weak-fort-genls-collections (v-term)
+  "[Cyc] Return asserted-genls collections for V-TERM if it's a fort or reifiable nart."
+  (cond
+    ((fort-p v-term) (asserted-genls v-term))
+    ;; missing-larkc 10327 likely calls find-ground-naut or similar
+    ((reifiable-nat? v-term) (asserted-genls (missing-larkc 10327)))))
+
+(defun applicable-arg-type-collections (reln argnum constraint-type)
+  "[Cyc] Gather applicable arg-type collections for RELN at ARGNUM by CONSTRAINT-TYPE."
+  (let ((constraint-pred (constraint-pred constraint-type argnum reln)))
+    (applicable-arg-type-collections-int constraint-pred reln argnum constraint-type :self)
+    (when (fort-p reln)
+      (let ((asserted-genl-preds-or-inverse? (or (asserted-genl-predicates? reln)
+                                                  (asserted-genl-inverses? reln))))
+        (when (and *at-check-genl-preds?* asserted-genl-preds-or-inverse?)
+          (dolist (reln-genl-pred (all-genl-preds reln))
+            (unless (eq reln-genl-pred reln)
+              (applicable-arg-type-collections-int constraint-pred reln-genl-pred argnum constraint-type :via-genl-pred))))
+        (when (and *at-check-genl-inverses?*
+                   asserted-genl-preds-or-inverse?
+                   (or (eql argnum 1) (eql argnum 2)))
+          (let ((inverse-constraint-pred (inverse-pred constraint-type argnum reln))
+                (inverse-argnum (inverse-argnum argnum)))
+            (dolist (inverse-reln (all-genl-inverses reln))
+              (unless (eq inverse-reln reln)
+                (applicable-arg-type-collections-int inverse-constraint-pred inverse-reln inverse-argnum constraint-type :via-genl-inverse))))))))
+  *at-applicable-arg-types*)
+
+(defun applicable-arg-type-collections-int (constraint-pred reln argnum constraint-type via)
+  "[Cyc] Internal: collect applicable arg-type collections from the KB for this (pred, reln, argnum)."
+  (unless (fort-p constraint-pred)
+    (return-from applicable-arg-type-collections-int nil))
+  (if (and (not *noting-at-violations?*)
+           (at-cache-use-possible? constraint-pred argnum))
+      (dolist (v-arg-type (cached-arg-isas-in-relevant-mts reln argnum))
+        (pushnew v-arg-type *at-applicable-arg-types*))
+      ;; Inline expansion of do-gaf-arg-index for (reln, 1, constraint-pred) -- gaf-arg assertions:
+      (let ((constraint-argnum (constraint-pred-constraint-argnum constraint-pred)))
+        (when (integerp constraint-argnum)
+          (do-gaf-arg-index (assertion reln :index 1 :predicate constraint-pred :truth :true)
+            (let ((v-arg-type (gaf-arg assertion constraint-argnum)))
+              (pushnew v-arg-type *at-applicable-arg-types*)
+              (when *noting-at-violations?*
+                (dictionary-push *at-applicable-arg-types-with-assertions*
+                                 v-arg-type (list reln via assertion))))))))
+  ;; Second pass: multi-arg constraint predicates (e.g. argsIsa, argAndRestIsa)
+  (when (consider-multiargs-at-pred?)
+    (dolist (at-pred (constraint-preds constraint-type argnum reln))
+      (when (and (not (eq at-pred constraint-pred))
+                 (or (not (eq at-pred #$argsIsa))
+                     (some-args-isa-assertion-somewhere? reln))
+                 (or (not (eq at-pred #$argAndRestIsa))
+                     (some-arg-and-rest-isa-assertion-somewhere? reln)))
+        (let ((constraint-argnum (constraint-pred-constraint-argnum at-pred)))
+          (do-gaf-arg-index (assertion reln :index 1 :predicate at-pred :truth :true)
+            (let ((v-arg-type (gaf-arg assertion constraint-argnum)))
+              (pushnew v-arg-type *at-applicable-arg-types*)
+              (when *noting-at-violations?*
+                (dictionary-push *at-applicable-arg-types-with-assertions*
+                                 v-arg-type (list reln via assertion)))))))))
+  *at-applicable-arg-types*)
+
+(defun constraint-pred (constraint-type argnum reln)
+  "[Cyc] Return the single arg-type constraint predicate for CONSTRAINT-TYPE."
+  (case constraint-type
+    (:arg-isa (arg-isa-pred argnum reln *mt*))
+    (:arg-quoted-isa (arg-quoted-isa-pred argnum reln *mt*))
+    (:arg-genls (arg-genl-pred argnum reln *mt*))
+    (:format (argn-format-pred argnum))
+    (otherwise (error "Unknown constraint-type ~s" constraint-type))))
+
+(defun constraint-preds (constraint-type argnum reln)
+  "[Cyc] Return the list of arg-type constraint predicates for CONSTRAINT-TYPE (multi-arg variants)."
+  (case constraint-type
+    (:arg-isa (arg-isa-preds argnum reln *mt*))
+    (:arg-quoted-isa (arg-quoted-isa-preds argnum reln *mt*))
+    (:arg-genls (arg-genl-preds argnum reln *mt*))
+    (:format nil)
+    (otherwise (error "Unknown constraint-type ~s" constraint-type))))
+
 (defun inverse-pred (constraint-type argnum reln)
   "[Cyc] Return the inverse constraint predicate for the given constraint-type, argnum, and reln."
   (cond
@@ -1028,8 +1191,7 @@ and permission notice:
     ((eql constraint-type :inter-arg-different)
      nil)))
 
-;; (defun note-at-violations (at-violations) ...) -- no body, commented declareFunction
-;; Body present in Java, ported for reference:
+;; commented declareFunction, but body present in Java
 (defun note-at-violations (at-violations)
   "[Cyc] Note each AT violation via at-utilities:note-at-violation."
   (dolist (at-violation at-violations)

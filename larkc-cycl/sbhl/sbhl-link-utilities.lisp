@@ -36,14 +36,14 @@ and permission notice:
 
 (in-package :clyc)
 
-;; (defun print-sbhl-direction-link (arg1 arg2)) -- commented declareFunction, no body
+;; (defun print-sbhl-direction-link (arg1 arg2) ...) -- commented declareFunction, no body
 
 (defun empty-tv-link-p (tv tv-links)
   "[Cyc] Accessor: determines if the tv-link in TV-LINKS associated with TV is empty"
   (null (get-sbhl-link-nodes tv-links tv)))
 
 (defun empty-tv-links-p (tv-links)
-  "[Cyc] Accessor: determines if all truth value fields of TV-LINKS are NIL."
+  "[Cyc] Accessor: determines if all truth value fields of TV-LINK are NIL."
   (dohash (tv links tv-links)
     (declare (ignore tv))
     (when links
@@ -83,7 +83,7 @@ and permission notice:
             (return-from empty-graph-link-p nil)))))
     t))
 
-;; (defun valid-sbhl-graph-link-p (arg1 arg2)) -- commented declareFunction, no body
-;; (defun valid-sbhl-module-p (arg1)) -- commented declareFunction, no body
-;; (defun valid-sbhl-links-p (arg1)) -- commented declareFunction, no body
-;; (defun valid-sbhl-p ()) -- commented declareFunction, no body
+;; (defun valid-sbhl-graph-link-p (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun valid-sbhl-module-p (arg1) ...) -- commented declareFunction, no body
+;; (defun valid-sbhl-links-p (arg1) ...) -- commented declareFunction, no body
+;; (defun valid-sbhl-p () ...) -- commented declareFunction, no body

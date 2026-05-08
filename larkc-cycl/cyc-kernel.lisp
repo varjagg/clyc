@@ -45,43 +45,37 @@ and permission notice:
    no effort to synchronize its external ID with
    other Cyc images.  This is intended for constants
    that will not be transmitted to other Cyc images."
-  (declare (type new-constant-name-spec-p name))
+  (declare (type (satisfies new-constant-name-spec-p) name))
   (cyc-create name (make-constant-external-id)))
 
 (defun cyc-create (name external-id)
   "[Cyc] Create a new constant with id EXTERNAL-ID.
    If NAME is anything other than :unnamed,
    the new constant will be given the name NAME."
-  (declare (type new-constant-name-spec-p name))
+  (declare (type (satisfies new-constant-name-spec-p) name)
+           (type (or null (satisfies constant-external-id-p)) external-id))
   (let ((result nil))
     (setf result (fi-create-int name external-id))
     (perform-constant-bookkeeping result)
     result))
 
 ;; (defun cyc-find-or-create (name external-id) ...) -- active declareFunction, no body
-
 ;; (defun cyc-find-or-create-new-permanent (name) ...) -- active declareFunction, no body
-
 ;; (defun cyc-rename (constant name) ...) -- active declareFunction, no body
-
 ;; (defun cyc-recreate (constant) ...) -- active declareFunction, no body
-
 ;; (defun new-constant-name-spec-p (object) ...) -- active declareFunction, no body
 
 (defun cyc-kill (fort)
   "[Cyc] Kill FORT and all its uses from the KB.  If FORT is a microtheory, all assertions
    in that microtheory are removed."
-  (declare (type fort-p fort))
+  (declare (type (satisfies fort-p) fort))
   (fi-kill-int fort))
 
 ;; (defun cyc-rewrite (source-fort target-fort) ...) -- active declareFunction, no body
-
 ;; (defun cyc-merge (kill-fort keep-fort) ...) -- active declareFunction, no body
-
 ;; (defun assert-properties-p (object) ...) -- active declareFunction, no body
 
 (defun get-assert-property (properties indicator &optional default)
-  "[Cyc] Get a property from an assert properties plist."
   (getf properties indicator default))
 
 (defun cyc-assert (sentence &optional mt properties)
@@ -92,8 +86,9 @@ and permission notice:
    assertion direction defaults to :backward.
    @return booleanp; t iff the assert succeeded.  If the assertion
    already existed, it is considered a success."
-  (declare (type possibly-sentence-p sentence)
-           (type assert-properties-p properties))
+  (declare (type (satisfies possibly-sentence-p) sentence)
+           (type (or null (satisfies possibly-mt-p)) mt)
+           (type (satisfies assert-properties-p) properties))
   (let* ((result nil)
          (strength (get-assert-property properties :strength :default))
          (direction (get-assert-property properties :direction)))
@@ -113,7 +108,8 @@ and permission notice:
 (defun cyc-unassert (sentence &optional mt)
   "[Cyc] Remove the assertions canonicalized from FORMULA in the microtheory MT.
    Return T if the operation succeeded, otherwise return NIL."
-  (declare (type possibly-sentence-p sentence))
+  (declare (type (satisfies possibly-sentence-p) sentence)
+           (type (or null (satisfies possibly-mt-p)) mt))
   (let ((result nil))
     (multiple-value-bind (right-sentence right-mt)
         (unwrap-if-ist sentence mt)
@@ -121,47 +117,26 @@ and permission notice:
     result))
 
 ;; (defun cyc-edit (old-sentence new-sentence &optional old-mt new-mt properties) ...) -- active declareFunction, no body
-
 ;; (defun cyc-add-argument (sentence cycl-supports &optional mt properties verify-supports) ...) -- active declareFunction, no body
-
 ;; (defun cyc-remove-argument (sentence cycl-supports &optional mt) ...) -- active declareFunction, no body
-
 ;; (defun cyc-remove-all-arguments (sentence &optional mt) ...) -- active declareFunction, no body
-
 ;; (defun legacy-query-properties-p (object) ...) -- active declareFunction, no body
-
 ;; (defun query-results-p (object) ...) -- active declareFunction, no body
-
 ;; (defun cyc-query (sentence &optional mt properties) ...) -- active declareFunction, no body
-
 ;; (defun query-success-result-p (object) ...) -- active declareFunction, no body
-
 ;; (defun open-query-result-p (object) ...) -- active declareFunction, no body
-
 ;; (defun open-query-success-result-p (object) ...) -- active declareFunction, no body
-
 ;; (defun closed-query-bindings-p (object) ...) -- active declareFunction, no body
-
 ;; (defun closed-query-justified-bindings-p (object) ...) -- active declareFunction, no body
-
 ;; (defun closed-query-success-token () ...) -- active declareFunction, no body
-
 ;; (defun closed-query-success-token-p (object) ...) -- active declareFunction, no body
-
 ;; (defun closed-query-success-result-p (object) ...) -- active declareFunction, no body
-
 ;; (defun closed-query-justified-success-result-p (object) ...) -- active declareFunction, no body
-
 ;; (defun query-id-p (object) ...) -- active declareFunction, no body
-
 ;; (defun cyc-continue-query (&optional query-id properties) ...) -- active declareFunction, no body
-
 ;; (defun cyc-tms-reconsider-sentence (sentence &optional mt) ...) -- active declareFunction, no body
-
 ;; (defun cyc-tms-reconsider-term (term &optional mt) ...) -- active declareFunction, no body
-
 ;; (defun cyc-tms-reconsider-mt (mt) ...) -- active declareFunction, no body
-
 ;; (defun cyc-rename-variables (sentence rename-variable-list &optional mt) ...) -- active declareFunction, no body
 
 ;;; Init section

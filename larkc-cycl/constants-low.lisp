@@ -184,12 +184,12 @@ and permission notice:
   constant)
 
 (defun reset-constant-guid (constant new-guid)
-  "[Cyc] Primitively change teh GUID of CONSTANT to NEW-GUID."
+  "[Cyc] Primitively change the GUID of CONSTANT to NEW-GUID."
   (register-constant-guid (constant-suid constant) new-guid constant)
   constant)
 
 (defun load-install-constant-ids (constant dump-id guid)
-  "[Cyc] Install GUID for COSNTANT with DUMP-ID in a KB load."
+  "[Cyc] Install GUID for CONSTANT with DUMP-ID in a KB load."
   (let ((name (constant-name-internal constant))
         (suid dump-id))
     (install-constant-suid constant suid)

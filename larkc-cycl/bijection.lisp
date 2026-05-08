@@ -39,10 +39,10 @@ and permission notice:
 
 ;;;; NOTE: This is a PARTIAL port. The bijection file is listed in readme.md
 ;;;; under "File Exists But the Implementation is missing-larkc" — almost all
-;;;; function bodies were stripped by LarKC. Only the defstruct, constants,
-;;;; variables, the print-function-trampoline body, two reconstructable macros,
-;;;; and comment stubs for every declared function are ported here. Functional
-;;;; bijection operations (add/lookup/remove/etc.) are NOT reimplemented.
+;;;; function bodies are missing-larkc. Only the defstruct, constants,
+;;;; variables, two reconstructable macros, and comment stubs for every
+;;;; declared function are ported here. Functional bijection operations
+;;;; (add/lookup/remove/etc.) are NOT reimplemented.
 
 
 ;;;; Variables
@@ -64,10 +64,6 @@ and permission notice:
   test)
 
 (defconstant *dtp-bijection* 'bijection)
-
-;; bijection-print-function-trampoline (object stream) — active declareFunction, body present
-(defun bijection-print-function-trampoline (object stream)
-  (default-struct-print-function object stream 0))
 
 ;; bijection-p is provided by defstruct
 ;; bijection-size is provided by defstruct
@@ -168,8 +164,9 @@ and permission notice:
 ;;;; Setup
 
 (toplevel
-  ;; Structures.register_method for print-object-method-table and def_csetf
-  ;; calls are elided — CL defstruct provides print-object and setf accessors.
+  ;; Structures.register_method for print-object-method-table is expressed as the
+  ;; defmethod print-object on bijection above. def_csetf calls are elided —
+  ;; CL setf handles defstruct accessors natively.
   (register-macro-helper 'do-bijection-style 'do-bijection)
   (register-macro-helper 'do-bijection-database 'do-bijection)
   (register-macro-helper 'do-bijection-inverse-database 'do-bijection))

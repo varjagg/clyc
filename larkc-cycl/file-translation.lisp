@@ -38,6 +38,7 @@ and permission notice:
 
 (defparameter *current-ts-file* nil)
 
+;; print-object is missing-larkc 29304 — CL's default print-object handles this.
 (defstruct (trans-subl-file (:conc-name "TSF-"))
   module-name
   filename
@@ -58,10 +59,6 @@ and permission notice:
 (defconstant *dtp-trans-subl-file* 'trans-subl-file)
 
 ;; (defun current-ts-file () ...) -- active declareFunction, no body
-
-(defun trans-subl-file-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for trans-subl-file."
-  (missing-larkc 29304))
 
 ;; trans-subl-file-p - active declareFunction, provided by defstruct (1 0)
 ;; tsf-module-name - active declareFunction, provided by defstruct (1 0)

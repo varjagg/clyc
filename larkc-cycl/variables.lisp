@@ -46,17 +46,15 @@ and permission notice:
 (defstruct (variable (:conc-name "VAR-"))
   id)
 
-(defun print-variable (object stream depth)
+;; (defun print-variable (object stream depth) ...) -- active declareFunction; body inlined into defmethod print-object
+
+(defmethod print-object ((object variable) stream)
   "[Cyc] Print HL variable OBJECT to STREAM."
-  (declare (ignore depth))
   (let* ((id (var-id object))
          (name (nth id *variable-names*)))
     (if name
         (princ name stream)
         (format stream "~Cvar~d" *hl-variable-prefix-char* id))))
-
-(defmethod print-object ((obj variable) stream)
-  (print-variable obj stream 0))
 
 (defmethod sxhash ((object variable))
   (or (var-id object)

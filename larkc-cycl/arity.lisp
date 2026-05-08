@@ -40,12 +40,16 @@ and permission notice:
 (deflexical *kb-arity-table-equality-test* #'eq
   "[Cyc] The equality test used for the KB arity tables.")
 
-(deflexical *kb-arity-table* nil)
+(defglobal *kb-arity-table* nil)
+
+;; (defun initialize-arity-table () ...) -- commented declaration, no body
 
 (defun* arity-lookup (relation) (:inline t)
+  (declare (type fort-p relation))
   (gethash relation *kb-arity-table*))
 
 (defun* set-arity (relation arity) (:inline t)
+  (declare (type fort-p relation))
   (setf (gethash relation *kb-arity-table*) arity))
 
 (defun* rem-arity (relation) (:inline t)
@@ -53,16 +57,25 @@ and permission notice:
   relation)
 
 (defun arity (relation)
+  "[Cyc] Return the arity for relation constant RELATION."
   (cond
     ((fort-p relation) (arity-lookup relation))
     ((reifiable-nat? relation #'cyc-var? *anect-mt*) (missing-larkc 10320))
     ((kappa-predicate-p relation) (missing-larkc 30572))
     ((lambda-function-p relation) (missing-larkc 30574))))
 
+;; (defun arity-robust (relation) ...) -- commented declaration, no body
+;; (defun initialize-all-arities () ...) -- commented declaration, no body
+;; (defun initialize-arities () ...) -- commented declaration, no body
+;; (defun initialize-arity-from-assertion (assertion) ...) -- commented declaration, no body
+;; (defun initialize-arity-for-relation (relation) ...) -- commented declaration, no body
+;; (defun initialize-arity-for-relation-guts (relation arity) ...) -- commented declaration, no body
+
 (defun* possibly-simplify-arity (arity) (:inline t)
   arity)
 
 (defun maybe-add-arity-for-relation (relation arity)
+  (declare (type integer arity))
   (setf arity (possibly-simplify-arity arity))
   (let ((arity-in-table (arity relation)))
     (when (and arity-in-table
@@ -87,10 +100,16 @@ and permission notice:
       (set-arity relation other-arity))
     relation))
 
-(deflexical *kb-arity-min-table* nil)
+(defglobal *kb-arity-min-table* nil)
+
+;; (defun initialize-arity-min-table () ...) -- commented declaration, no body
 
 (defun* arity-min-lookup (relation) (:inline t)
+  (declare (type fort-p relation))
   (gethash relation *kb-arity-min-table*))
+
+;; (defun set-arity-min (relation arity-min) ...) -- commented declaration, no body
+;; (defun rem-arity-min (relation) ...) -- commented declaration, no body
 
 (defun arity-min (relation)
   "[Cyc] Return the arity-min for RELATION."
@@ -106,10 +125,24 @@ and permission notice:
     ((reifiable-nat? relation #'cyc-var? *anect-mt*)
      (missing-larkc 10321))))
 
-(deflexical *kb-arity-max-table* nil)
+;; (defun initialize-min-arities () ...) -- commented declaration, no body
+;; (defun initialize-arity-min-from-assertion (assertion) ...) -- commented declaration, no body
+;; (defun initialize-arity-min-for-relation (relation) ...) -- commented declaration, no body
+;; (defun initialize-arity-min-for-relation-guts (relation arity-min) ...) -- commented declaration, no body
+;; (defun maybe-add-arity-min-for-relation (relation arity-min) ...) -- commented declaration, no body
+;; (defun maybe-remove-arity-min-for-relation (relation) ...) -- commented declaration, no body
+;; (defun min-arity (relation) ...) -- commented declaration, no body
+
+(defglobal *kb-arity-max-table* nil)
+
+;; (defun initialize-arity-max-table () ...) -- commented declaration, no body
 
 (defun* arity-max-lookup (relation) (:inline t)
+  (declare (type fort-p relation))
   (gethash relation *kb-arity-max-table*))
+
+;; (defun set-arity-max (relation arity-max) ...) -- commented declaration, no body
+;; (defun rem-arity-max (relation) ...) -- commented declaration, no body
 
 (defun arity-max (relation)
   "[Cyc] Return the arityMax for RELATION."
@@ -121,9 +154,23 @@ and permission notice:
     ((reifiable-nat? relation #'cyc-var? *anect-mt*)
      (missing-larkc 10322))))
 
+;; (defun initialize-max-arities () ...) -- commented declaration, no body
+;; (defun initialize-arity-max-from-assertion (assertion) ...) -- commented declaration, no body
+
 (defun initialize-arity-max-for-relation (relation)
   (and (fpred-value-in-any-mt relation #$arityMax)
        (missing-larkc 12068)))
+
+;; (defun initialize-arity-max-for-relation-guts (relation arity-max) ...) -- commented declaration, no body
+;; (defun maybe-add-arity-max-for-relation (relation arity-max) ...) -- commented declaration, no body
+;; (defun maybe-remove-arity-max-for-relation (relation) ...) -- commented declaration, no body
+;; (defun max-arity (relation) ...) -- commented declaration, no body
+;; (defun arity-admits? (relation arity) ...) -- commented declaration, no body
+;; (defun any-arity-admits? (relation arity) ...) -- commented declaration, no body
+;; (defun arity-admits>= (relation arity) ...) -- commented declaration, no body
+;; (defun arity-admits> (relation arity) ...) -- commented declaration, no body
+;; (defun arity-admits<= (relation arity) ...) -- commented declaration, no body
+;; (defun arity-admits< (relation arity) ...) -- commented declaration, no body
 
 (defun* binary? (relation) (:inline t)
   (eql (arity relation) 2))
@@ -134,11 +181,18 @@ and permission notice:
     (2 1)
     (otherwise arg)))
 
+;; (defun logical-operator-arity (operator) ...) -- commented declaration, no body
+
 (defun variable-arity? (relation)
   (isa-variable-arity-relation? relation *anect-mt*))
 
+;; (defun relation-arity-constraint-sentences (relation) ...) -- commented declaration, no body
+
 (defun* arity-cache-unbuilt? () (:inline t)
   (not *kb-arity-table*))
+
+;; (defun rebuild-arity-cache () ...) -- commented declaration, no body
+;; (defun dump-arity-cache-to-stream (stream) ...) -- commented declaration, no body
 
 (defun load-arity-cache-from-stream (stream)
   (setf *kb-arity-table* (cfasl-input stream))
@@ -146,6 +200,13 @@ and permission notice:
   (setf *kb-arity-max-table* (cfasl-input stream))
   (cfasl-input stream)
   nil)
+
+
+;;; Setup phase
+
+(declare-defglobal '*kb-arity-table*)
+(declare-defglobal '*kb-arity-min-table*)
+(declare-defglobal '*kb-arity-max-table*)
 
 
 ;;; Cyc API registrations

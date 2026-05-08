@@ -40,26 +40,18 @@ and permission notice:
 ;; - sbhl-directed-link: for predicates with :predicate/:inverse directions
 ;; - sbhl-undirected-link: for predicates with a single :link direction
 
-(defstruct (sbhl-directed-link (:print-function print-sbhl-directed-link))
+;; print-object is missing-larkc 2047 — CL's default print-object handles this.
+(defstruct sbhl-directed-link
   "[Cyc] A link node for directed SBHL graphs, with predicate and inverse slots."
   predicate-links
   inverse-links)
 
-(defun print-sbhl-directed-link (object stream depth)
-  "[Cyc] Print function for sbhl-directed-link. Original print-link was missing-larkc 2047."
-  (declare (ignore depth))
-  (print-unreadable-object (object stream :type t :identity t)))
-
-(defstruct (sbhl-undirected-link (:print-function print-sbhl-undirected-link))
+;; print-object is missing-larkc 2048 — CL's default print-object handles this.
+(defstruct sbhl-undirected-link
   "[Cyc] A link node for undirected SBHL graphs, with a single links slot."
   links)
 
-(defun print-sbhl-undirected-link (object stream depth)
-  "[Cyc] Print function for sbhl-undirected-link. Original print-link was missing-larkc 2048."
-  (declare (ignore depth))
-  (print-unreadable-object (object stream :type t :identity t)))
-
-;; (defun print-link (arg1 arg2 arg3)) -- commented declareFunction, no body
+;; (defun print-link (arg1 arg2 arg3) ...) -- commented declareFunction, no body
 
 (defun create-sbhl-directed-link (direction mt-links)
   "[Cyc] Constructor: returns sbhl-directed-link-p with MT-LINKS in the DIRECTION field"
@@ -85,7 +77,7 @@ and permission notice:
   (or (sbhl-directed-link-p d-link)
       (sbhl-undirected-link-p d-link)))
 
-;; (defun any-sbhl-links-p (arg1 arg2)) -- commented declareFunction, no body
+;; (defun any-sbhl-links-p (arg1 arg2) ...) -- commented declareFunction, no body
 
 (defun any-sbhl-predicate-links-p (node pred)
   "[Cyc] Accessor: whether NODE has any forward sbhl links in PRED / *sbhl-module*"
@@ -166,9 +158,9 @@ and permission notice:
   "[Cyc] Accessor: whether OBJECT is a dictionary (hash-table in our port)."
   (hash-table-p object))
 
-;; (defun sbhl-wf-mt-links-p (arg1)) -- commented declareFunction, no body
-;; (defun get-sbhl-graph-mt-links (arg1 arg2 arg3)) -- commented declareFunction, no body
-;; (defun get-sbhl-graph-link-mts (arg1 arg2 arg3)) -- commented declareFunction, no body
+;; (defun sbhl-wf-mt-links-p (arg1) ...) -- commented declareFunction, no body
+;; (defun get-sbhl-graph-mt-links (arg1 arg2 arg3) ...) -- commented declareFunction, no body
+;; (defun get-sbhl-graph-link-mts (arg1 arg2 arg3) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-tv-links (mt-links mt)
   "[Cyc] Accessor: the tv-links structure after hashing on MT within MT-LINKS"
@@ -184,8 +176,8 @@ and permission notice:
       (remhash mt mt-links))
   nil)
 
-;; (defun remove-sbhl-mt-link-from-graph (arg1 arg2 arg3 arg4)) -- commented declareFunction, no body
-;; (defun remove-sbhl-mt-link-from-relevant-directions (arg1 arg2 arg3)) -- commented declareFunction, no body
+;; (defun remove-sbhl-mt-link-from-graph (arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
+;; (defun remove-sbhl-mt-link-from-relevant-directions (arg1 arg2 arg3) ...) -- commented declareFunction, no body
 
 (defun remove-sbhl-mt-link (mt-links mt)
   "[Cyc] Modifier: removes data from the MT slot of MT-LINKS."
@@ -206,8 +198,8 @@ and permission notice:
   "[Cyc] Accessor: whether OBJECT is a dictionary (hash-table in our port)."
   (hash-table-p object))
 
-;; (defun sbhl-wf-tv-links-p (arg1)) -- commented declareFunction, no body
-;; (defun get-sbhl-graph-tv-links (arg1 arg2 arg3 arg4)) -- commented declareFunction, no body
+;; (defun sbhl-wf-tv-links-p (arg1) ...) -- commented declareFunction, no body
+;; (defun get-sbhl-graph-tv-links (arg1 arg2 arg3 arg4) ...) -- commented declareFunction, no body
 
 (defun get-sbhl-link-nodes (tv-links truth)
   "[Cyc] Accessor: the list within the value at TRUTH in TV-LINKS"
@@ -218,8 +210,8 @@ and permission notice:
   (when (hash-table-p tv-links)
     (member? node (get-sbhl-link-nodes tv-links truth))))
 
-;; (defun any-sbhl-true-link-nodes-p (arg1)) -- commented declareFunction, no body
-;; (defun set-sbhl-tv-links (arg1 arg2 arg3)) -- commented declareFunction, no body
+;; (defun any-sbhl-true-link-nodes-p (arg1) ...) -- commented declareFunction, no body
+;; (defun set-sbhl-tv-links (arg1 arg2 arg3) ...) -- commented declareFunction, no body
 
 (defun push-onto-sbhl-tv-links (tv-links truth node)
   "[Cyc] Modifier: pushes NODE onto head of value at TRUTH in TV-LINKS."

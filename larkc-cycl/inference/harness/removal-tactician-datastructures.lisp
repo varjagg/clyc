@@ -48,8 +48,6 @@ and permission notice:
 
 (defconstant *dtp-removal-strategy-data* 'removal-strategy-data)
 
-;; (defun removal-strategy-data-print-function-trampoline (object stream) ...) -- active declareFunction, no body
-
 (defun removal-strategy-data-p (object)
   (typep object 'removal-strategy-data))
 

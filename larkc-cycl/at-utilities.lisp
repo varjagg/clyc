@@ -38,10 +38,12 @@ and permission notice:
 
 ;;; Variables from init section
 
-(defglobal *generic-arg-store* nil)
+(defglobal *generic-arg-store* nil
+  "[Cyc] Association list of number -> generic-arg mappings.")
 (defglobal *some-inter-arg-isa-assertion-somewhere-cache* nil)
 (defglobal *some-inter-arg-format-assertion-somewhere-cache* nil)
-(defparameter *mts-cutoff-for-mts-accommodating-formula-wrt-types* 40)
+(defparameter *mts-cutoff-for-mts-accommodating-formula-wrt-types* 40
+  "[Cyc] max number of mts that will be considered while trying to suggest mts in which non-wf formula might be wf")
 (defparameter *max-floor-mts-of-nat-exceptions* nil)
 (deflexical *cached-max-floor-mts-of-nat-caching-state* nil)
 (defparameter *max-floor-mts-of-nat-recursion?* nil)
@@ -51,7 +53,6 @@ and permission notice:
 ;; (defun arg-n-predicate (n) ...) -- 1 required, 0 optional, no body, commented declareFunction
 
 (defun arg-type-mt (relation args argnum mt)
-  "[Cyc]"
   (if (and (= argnum 2)
            (mt? (first args))
            (mt-designating-relation? relation))
@@ -67,7 +68,6 @@ and permission notice:
 ;; (defun generic-arg? (arg) ...) -- 1 required, 0 optional, no body, commented declareFunction
 
 (defun inter-arg-isa-pred (ind-arg dep-arg)
-  "[Cyc]"
   (cond
     ((eql ind-arg 1)
      (cond
@@ -119,18 +119,15 @@ and permission notice:
 ;; (defun inter-arg-genl-inverse (ind-arg dep-arg) ...) -- 2 required, 0 optional, no body, commented declareFunction
 
 (defun implication-op? (symbol)
-  "[Cyc]"
   (member? symbol *implication-operators* #'eq))
 
 (defun logical-op? (symbol)
-  "[Cyc]"
   (or (isa-logical-connective? symbol *anect-mt*)
       (isa-quantifier? symbol *anect-mt*)))
 
 ;; (defun truth-function? (symbol) ...) -- 1 required, 0 optional, no body, commented declareFunction
 
 (defun initialize-all-arg-type-predicate-caches ()
-  "[Cyc]"
   (let ((count 0))
     (noting-progress ("Initializing all arg type predicate caches...")
       (incf count (initialize-some-inter-arg-isa-assertion-somewhere-cache))
@@ -138,7 +135,6 @@ and permission notice:
     count))
 
 (defun clear-all-arg-type-predicate-caches ()
-  "[Cyc]"
   (clear-some-inter-arg-isa-assertion-somewhere-cache)
   (clear-some-inter-arg-format-assertion-somewhere-cache)
   nil)
@@ -149,13 +145,13 @@ and permission notice:
 ;; (defun arg-genl-binary-pred? (pred &optional mt) ...) -- 1 required, 1 optional, no body, commented declareFunction
 ;; (defun arg-genl-ternary-pred? (pred &optional mt) ...) -- 1 required, 1 optional, no body, commented declareFunction
 ;; (defun arg-genl-predicate? (pred &optional mt) ...) -- 1 required, 1 optional, no body, commented declareFunction
-;; commented declareFunction, but body present in Java -- ported for reference
+;; commented declareFunction, but body present in Java
 (defun formula-denoting-function? (object &optional mt)
   "[Cyc] Is OBJECT a formula-denoting functional expression?"
   (when (relation-expression? object)
     (formula-functor? (nat-functor object) mt)))
 
-;; commented declareFunction, but body present in Java -- ported for reference
+;; commented declareFunction, but body present in Java
 (defun formula-functor? (functor &optional mt)
   "[Cyc] Does FUNCTOR return a formula?"
   (cond
@@ -191,11 +187,9 @@ and permission notice:
 ;; (defun gather-via-map-pred-index (arg) ...) -- 1 required, 0 optional, no body, commented declareFunction
 
 (defun inter-arg-isa-cache-initialized? ()
-  "[Cyc]"
   (set-p *some-inter-arg-isa-assertion-somewhere-cache*))
 
 (defun some-inter-arg-isa-assertion-somewhere-cache-add-int (reln)
-  "[Cyc]"
   (set-add reln *some-inter-arg-isa-assertion-somewhere-cache*))
 
 ;; (defun some-inter-arg-isa-assertion-somewhere-cache-remove-int (reln) ...) -- 1 required, 0 optional, no body, commented declareFunction
@@ -204,14 +198,12 @@ and permission notice:
 ;; (defun some-inter-arg-isa-assertion-somewhere-cache-maybe-remove (reln) ...) -- 1 required, 0 optional, no body, commented declareFunction
 
 (defun clear-some-inter-arg-isa-assertion-somewhere-cache ()
-  "[Cyc]"
   (if (set-p *some-inter-arg-isa-assertion-somewhere-cache*)
       (clear-set *some-inter-arg-isa-assertion-somewhere-cache*)
       (setf *some-inter-arg-isa-assertion-somewhere-cache* (new-set #'eq)))
   nil)
 
 (defun initialize-some-inter-arg-isa-assertion-somewhere-cache ()
-  "[Cyc]"
   (clear-some-inter-arg-isa-assertion-somewhere-cache)
   (with-all-mts
     (let ((list-var *arg-positions*))
@@ -254,11 +246,9 @@ and permission notice:
   (set-size *some-inter-arg-isa-assertion-somewhere-cache*))
 
 (defun some-inter-arg-isa-assertion-somewhere? (reln)
-  "[Cyc]"
   (set-member? reln *some-inter-arg-isa-assertion-somewhere-cache*))
 
 (defun some-inter-arg-isa-constraint-somewhere? (reln)
-  "[Cyc]"
   (let ((found-one? nil))
     (if (predicate? reln)
         (unless found-one?
@@ -410,7 +400,6 @@ and permission notice:
     found-one?))
 
 (defun inter-arg-format-cache-initialized? ()
-  "[Cyc]"
   (set-p *some-inter-arg-format-assertion-somewhere-cache*))
 
 ;; (defun some-inter-arg-format-assertion-somewhere-cache-add-int (reln) ...) -- 1 required, 0 optional, no body, commented declareFunction
@@ -420,14 +409,12 @@ and permission notice:
 ;; (defun some-inter-arg-format-assertion-somewhere-cache-maybe-remove (reln) ...) -- 1 required, 0 optional, no body, commented declareFunction
 
 (defun clear-some-inter-arg-format-assertion-somewhere-cache ()
-  "[Cyc]"
   (if (set-p *some-inter-arg-format-assertion-somewhere-cache*)
       (clear-set *some-inter-arg-format-assertion-somewhere-cache*)
       (setf *some-inter-arg-format-assertion-somewhere-cache* (new-set #'eq)))
   nil)
 
 (defun initialize-some-inter-arg-format-assertion-somewhere-cache ()
-  "[Cyc]"
   (clear-some-inter-arg-format-assertion-somewhere-cache)
   (with-all-mts
     (let ((list-var *arg-positions*))
@@ -473,11 +460,9 @@ and permission notice:
   (set-size *some-inter-arg-format-assertion-somewhere-cache*))
 
 (defun some-inter-arg-format-assertion-somewhere? (reln)
-  "[Cyc]"
   (set-member? reln *some-inter-arg-format-assertion-somewhere-cache*))
 
 (defun some-inter-arg-format-constraint-somewhere? (reln)
-  "[Cyc]"
   (let ((found-one? nil))
     (if (predicate? reln)
         (unless found-one?
@@ -672,7 +657,6 @@ and permission notice:
 ;; (defun gather-at-data (assertion type &optional arg1 arg2) ...) -- 2 required, 2 optional, no body, commented declareFunction
 
 (defun gather-at-data-assertion (assertion &optional (type *at-constraint-type*) (v-term *at-arg*))
-  "[Cyc]"
   (unless *within-at-suggestion?*
     (gather-at-assertion assertion type v-term)
     (when (integerp *mapping-gather-arg*)
@@ -686,7 +670,6 @@ and permission notice:
 ;; (defun gather-at-constraint (constraint &optional type v-term) ...) -- 1 required, 2 optional, no body, commented declareFunction
 
 (defun gather-at-assertion (constraint &optional (type :isa) (v-term *at-arg*))
-  "[Cyc]"
   (when (and *gather-at-assertions?*
              (or (not *at-profile-term*)
                  (equal v-term *at-profile-term*)))
@@ -702,7 +685,6 @@ and permission notice:
   nil)
 
 (defun at-finished? (&optional (at-violations? *at-result*))
-  "[Cyc]"
   (and at-violations?
        (not *accumulating-at-violations?*)
        (not *gather-at-constraints?*)))
@@ -713,21 +695,18 @@ and permission notice:
 ;; (defun at-mal-arg-msg (type) ...) -- 1 required, 0 optional, no body, commented declareFunction
 ;; (defun predicate-isa-violation-data (violation &optional mt) ...) -- 1 required, 1 optional, no body, commented declareFunction
 ;; (defun meta-predicate-violation-data (violation &optional mt) ...) -- 1 required, 1 optional, no body, commented declareFunction
-;; commented declareFunction, but body present in Java -- ported for reference
+;; commented declareFunction, but body present in Java
 (defun semantic-violations ()
-  "[Cyc]"
   (nreverse (concatenate 'list *arity-violations* *at-violations* *semantic-violations*)))
 
-;; commented declareFunction, but body present in Java -- ported for reference
+;; commented declareFunction, but body present in Java
 (defun note-at-violation? ()
-  "[Cyc]"
   (and *noting-at-violations?*
        (or (not *at-violations*)
            *accumulating-at-violations?*)))
 
-;; commented declareFunction, but body present in Java -- ported for reference
+;; commented declareFunction, but body present in Java
 (defun note-at-violation (note)
-  "[Cyc]"
   (when (wff-debug?)
     (print note))
   (when (note-at-violation?)
@@ -737,9 +716,8 @@ and permission notice:
         (push note *at-violations*))))
   *at-violations*)
 
-;; commented declareFunction, but body present in Java -- ported for reference
+;; commented declareFunction, but body present in Java
 (defun recursive-violation? (note)
-  "[Cyc]"
   (let ((pcase-var (first note)))
     (cond
       ((eql pcase-var :mal-arg-wrt-col-defn)
@@ -749,7 +727,6 @@ and permission notice:
       (t nil))))
 
 (defun reset-at-violations (&optional do-it?)
-  "[Cyc]"
   (cond
     (do-it?
      (setf *at-violations* nil))
@@ -759,7 +736,6 @@ and permission notice:
   *at-violations*)
 
 (defun reset-arity-violations (&optional do-it?)
-  "[Cyc]"
   (cond
     (do-it?
      (setf *arity-violations* nil))
@@ -769,14 +745,12 @@ and permission notice:
   nil)
 
 (defun reset-semantic-violations (&optional do-it?)
-  "[Cyc]"
   (setf *semantic-violations* nil)
   (reset-at-violations do-it?)
   (reset-arity-violations do-it?)
   nil)
 
 (defun reset-at-state ()
-  "[Cyc]"
   (reset-arity-violations t)
   (reset-at-violations t)
   nil)
@@ -793,9 +767,8 @@ and permission notice:
 ;; (defun strip-mt-literals (formula &optional mt) ...) -- 1 required, 1 optional, no body, commented declareFunction
 ;; (defun sef-violation-fix (violation) ...) -- 1 required, 0 optional, no body, commented declareFunction
 ;; (defun predicate-violation-fix (violation) ...) -- 1 required, 0 optional, no body, commented declareFunction
-;; commented declareFunction, but body present in Java -- ported for reference
+;; commented declareFunction, but body present in Java
 (defun violation-type (violation)
-  "[Cyc]"
   (when (consp violation)
     (first violation)))
 ;; (defun mts-accommodating-formula-wrt-types (formula) ...) -- 1 required, 0 optional, no body, commented declareFunction

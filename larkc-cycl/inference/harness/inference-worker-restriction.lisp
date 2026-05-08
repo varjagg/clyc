@@ -47,9 +47,6 @@ and permission notice:
 
 (defconstant *dtp-restriction-link-data* 'restriction-link-data)
 
-(defun restriction-link-data-print-function-trampoline (object stream)
-  (default-struct-print-function object stream 0))
-
 (defun restriction-link-data-p (object)
   (typep object 'restriction-link-data))
 
@@ -64,10 +61,6 @@ and permission notice:
   listeners)
 
 (defconstant *dtp-restriction-listening-link-data* 'restriction-listening-link-data)
-
-;; restriction-listening-link-data-print-function-trampoline is not referenced
-;; in any body; the struct uses default-struct-print-function via the trampoline
-;; registered in setup.
 
 (defun restriction-listening-link-data-p (object)
   (typep object 'restriction-listening-link-data))

@@ -43,6 +43,7 @@ and permission notice:
 ;; template-topic-source-types, template-topic-source-mt, template-topic-query-mt,
 ;; template-topic-definitional-mt, make-template-topic, and (setf ...) for all slots.
 ;; Also covers all _csetf-template-topic-* functions.
+;; print-object is missing-larkc 5848 — CL's default print-object handles this.
 
 (defstruct (template-topic (:conc-name "TEMPLATE-TOPIC-"))
   supertopic
@@ -73,6 +74,7 @@ and permission notice:
 ;; arg-position-details-unknown-replacement, make-arg-position-details,
 ;; and (setf ...) for all slots.
 ;; Also covers all _csetf-arg-position-details-* functions.
+;; print-object is missing-larkc 5845 — CL's default print-object handles this.
 
 (defstruct (arg-position-details (:conc-name "ARG-POSITION-DETAILS-"))
   argument-position
@@ -100,6 +102,7 @@ and permission notice:
 ;; formula-template-follow-ups, formula-template-gloss, formula-template-refspec,
 ;; make-formula-template, and (setf ...) for all slots.
 ;; Also covers all _csetf-formula-template-* functions.
+;; print-object is missing-larkc 5847 — CL's default print-object handles this.
 
 (defstruct (formula-template (:conc-name "FORMULA-TEMPLATE-"))
   topic
@@ -174,12 +177,6 @@ to finding bindings, substituting, and then looking for matching assertions?")
 
 ;;; Declare section — following declare_formula_templates_file order
 
-;; template-topic-print-function-trampoline — active declareFunction, missing-larkc 5848
-(defun template-topic-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for print method."
-  (declare (ignore object stream))
-  (missing-larkc 5848))
-
 ;; template-topic-p — provided by defstruct
 ;; template-topic-supertopic — provided by defstruct
 ;; template-topic-topic — provided by defstruct
@@ -207,12 +204,6 @@ to finding bindings, substituting, and then looking for matching assertions?")
 ;; _csetf-template-topic-definitional-mt — provided by defstruct (setf template-topic-definitional-mt)
 ;; make-template-topic — provided by defstruct
 
-;; arg-position-details-print-function-trampoline — active declareFunction, missing-larkc 5845
-(defun arg-position-details-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for print method."
-  (declare (ignore object stream))
-  (missing-larkc 5845))
-
 ;; arg-position-details-p — provided by defstruct
 ;; arg-position-details-argument-position — provided by defstruct
 ;; arg-position-details-ordering — provided by defstruct
@@ -235,12 +226,6 @@ to finding bindings, substituting, and then looking for matching assertions?")
 ;; _csetf-arg-position-details-requires-validation — provided by defstruct (setf ...)
 ;; _csetf-arg-position-details-unknown-replacement — provided by defstruct (setf ...)
 ;; make-arg-position-details — provided by defstruct
-
-;; formula-template-print-function-trampoline — active declareFunction, missing-larkc 5847
-(defun formula-template-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for print method."
-  (declare (ignore object stream))
-  (missing-larkc 5847))
 
 ;; formula-template-p — provided by defstruct
 ;; formula-template-topic — provided by defstruct

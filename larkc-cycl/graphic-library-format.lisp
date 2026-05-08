@@ -38,10 +38,10 @@ and permission notice:
 (in-package :clyc)
 
 ;; GLF-GRAPH defstruct — 13 slots, accessor conc-name "GLFGRPH-" per $list4.
-;; register-method install of print-object trampoline is elided; CL CLOS handles
-;; dispatch via print-object below. Equality.identity call in setup is elided
-;; (no-op DTP registration). All accessors + _csetf setters + MAKE-GLF-GRAPH
-;; + GLF-GRAPH-P are provided natively by defstruct.
+;; print-object is missing-larkc 6536 — CL's default print-object handles this.
+;; Equality.identity call in setup is elided (no-op DTP registration). All
+;; accessors + _csetf setters + MAKE-GLF-GRAPH + GLF-GRAPH-P are provided
+;; natively by defstruct.
 (defstruct (glf-graph (:conc-name "GLFGRPH-")
                       (:predicate glf-graph-p)
                       (:constructor make-glf-graph (&key id types ais nodes
@@ -67,13 +67,6 @@ and permission notice:
   rendering-info)
 
 (defconstant *dtp-glf-graph* 'glf-graph)
-
-(defun glf-graph-print-function-trampoline (object stream)
-  ;; Likely calls GLFGRPH-PRINT on the struct with depth 0. Evidence: $sym6$GLFGRPH_PRINT
-  ;; is the struct's print-function symbol, the trampoline pattern in other files
-  ;; invokes the struct print function.
-  (declare (ignore object stream))
-  (missing-larkc 6536))
 
 ;; (defun glfgrph-has-node-types? (glf-graph) ...) -- commented declareFunction, no body
 ;; (defun glfgrph-has-arc-types? (glf-graph) ...) -- commented declareFunction, no body
@@ -103,6 +96,7 @@ and permission notice:
 ;; (defun load-one-glf-arc-from-kb (glf-graph arc mt) ...) -- commented declareFunction, no body
 
 ;; GLF-NODE defstruct — 4 slots, accessor conc-name "GLFNODE-" per $list114.
+;; print-object is missing-larkc 6543 — CL's default print-object handles this.
 (defstruct (glf-node (:conc-name "GLFNODE-")
                      (:predicate glf-node-p)
                      (:constructor make-glf-node (&key id types parent semantics)))
@@ -113,16 +107,11 @@ and permission notice:
 
 (defconstant *dtp-glf-node* 'glf-node)
 
-(defun glf-node-print-function-trampoline (object stream)
-  ;; Likely calls GLFNODE-PRINT on the struct with depth 0. Evidence: $sym116$GLFNODE_PRINT
-  ;; is the struct's print-function symbol.
-  (declare (ignore object stream))
-  (missing-larkc 6543))
-
 ;; (defun glfnode-print (object stream depth) ...) -- commented declareFunction, no body
 ;; (defun create-glf-node-from-kb (glf-graph node mt) ...) -- commented declareFunction, no body
 
 ;; GLF-ARC defstruct — 6 slots, accessor conc-name "GLFARC-" per $list138.
+;; print-object is missing-larkc 6492 — CL's default print-object handles this.
 (defstruct (glf-arc (:conc-name "GLFARC-")
                     (:predicate glf-arc-p)
                     (:constructor make-glf-arc (&key id types parent from to semantics)))
@@ -135,16 +124,11 @@ and permission notice:
 
 (defconstant *dtp-glf-arc* 'glf-arc)
 
-(defun glf-arc-print-function-trampoline (object stream)
-  ;; Likely calls GLFARC-PRINT on the struct with depth 0. Evidence: $sym140$GLFARC_PRINT
-  ;; is the struct's print-function symbol.
-  (declare (ignore object stream))
-  (missing-larkc 6492))
-
 ;; (defun glfarc-print (object stream depth) ...) -- commented declareFunction, no body
 ;; (defun create-glf-arc-from-kb (glf-graph arc mt) ...) -- commented declareFunction, no body
 
 ;; GLF-RENDERING defstruct — 1 slot, accessor conc-name "GLFRNDR-" per $list171.
+;; print-object is missing-larkc 6550 — CL's default print-object handles this.
 (defstruct (glf-rendering (:conc-name "GLFRNDR-")
                           (:predicate glf-rendering-p)
                           (:constructor make-glf-rendering (&key label)))
@@ -152,25 +136,5 @@ and permission notice:
 
 (defconstant *dtp-glf-rendering* 'glf-rendering)
 
-(defun glf-rendering-print-function-trampoline (object stream)
-  ;; Likely calls GLFRNDR-PRINT on the struct with depth 0. Evidence: $sym173$GLFRNDR_PRINT
-  ;; is the struct's print-function symbol.
-  (declare (ignore object stream))
-  (missing-larkc 6550))
-
 ;; (defun glfrndr-print (object stream depth) ...) -- commented declareFunction, no body
 ;; (defun create-glf-rendering-for-component-from-kb (graph component mt) ...) -- commented declareFunction, no body
-
-;; CLOS print-object methods replace Structures.register_method installs of the
-;; trampolines onto print_high.$print_object_method_table$ per project policy.
-(defmethod print-object ((object glf-graph) stream)
-  (glf-graph-print-function-trampoline object stream))
-
-(defmethod print-object ((object glf-node) stream)
-  (glf-node-print-function-trampoline object stream))
-
-(defmethod print-object ((object glf-arc) stream)
-  (glf-arc-print-function-trampoline object stream))
-
-(defmethod print-object ((object glf-rendering) stream)
-  (glf-rendering-print-function-trampoline object stream))

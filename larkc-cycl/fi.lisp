@@ -85,7 +85,8 @@ and permission notice:
 (defparameter *within-fi-operation?* nil)
 (defparameter *current-fi-op* nil)
 (defparameter *merge-fort-assertion-map* nil)
-(defparameter *assume-assert-sentence-is-wf?* nil)
+(defparameter *assume-assert-sentence-is-wf?* nil
+  "[Cyc] To be used only by cyc-assert-wff")
 (defparameter *generate-precise-fi-wff-errors?* t
   "[Cyc] Whether to generate precise WFF errors when FI operations fail.
 These precise explanations will explain why the operation failed.
@@ -105,7 +106,6 @@ NIL means that the current second is to be used.")
 ;;; Functions (ordered per declare section)
 
 (defun reset-fi-error-state ()
-  "[Cyc] Reset the FI error state."
   (reset-fi-error)
   (reset-fi-warning)
   nil)
@@ -115,18 +115,15 @@ NIL means that the current second is to be used.")
 ;; $sym1$CLET, $list2 = ((*fi-error* nil) (*fi-warning* nil))
 ;; Expansion: (let ((*fi-error* nil) (*fi-warning* nil)) . body)
 (defmacro with-clean-fi-error-state (&body body)
-  "[Cyc] Execute BODY in a clean FI error state."
   `(let ((*fi-error* nil)
           (*fi-warning* nil))
      ,@body))
 
 (defun reset-fi-warning ()
-  "[Cyc] Reset the FI warning."
   (setf *fi-warning* nil)
   nil)
 
 (defun signal-fi-warning (fi-warning)
-  "[Cyc] Signal FI-WARNING."
   (setf *fi-warning* fi-warning)
   nil)
 
@@ -134,22 +131,19 @@ NIL means that the current second is to be used.")
 ;; (defun fi-get-warning-int () ...) -- no body, commented declareFunction
 
 (defun reset-fi-error ()
-  "[Cyc] Reset the FI error."
   (setf *fi-error* nil)
   nil)
 
 (defun signal-fi-error (fi-error)
-  "[Cyc] Signal FI-ERROR."
   (setf *fi-error* fi-error)
   nil)
 
 (defun fi-error-signaled? ()
-  "[Cyc] Return T if an FI error has been signaled."
   (and *fi-error* t))
 
-;; (defun fi-get-error-int () ...) -- no body, commented declareFunction
-;; body present in Java but declareFunction is commented — ported for reference:
-;; Returns *fi-error*, the current FI error value.
+;; commented declareFunction, but body present in Java -- ported for reference
+(defun fi-get-error-int ()
+  *fi-error*)
 
 ;; (defun fi-error-string (error) ...) -- no body, commented declareFunction
 ;; (defun fi-get-error-string-int () ...) -- no body, commented declareFunction
@@ -159,7 +153,6 @@ NIL means that the current second is to be used.")
 ;; $list9 = ((*within-fi-operation?* t))
 ;; Expansion: (let ((*within-fi-operation?* t)) . body)
 (defmacro within-fi-operation (&body body)
-  "[Cyc] Execute BODY within the context of an FI operation."
   `(let ((*within-fi-operation?* t))
      ,@body))
 
@@ -173,7 +166,6 @@ NIL means that the current second is to be used.")
 ;; (defun fi-find (name) ...) -- no body, commented declareFunction
 
 (defun fi-find-int (name)
-  "[Cyc] Return the constant identified by the string NAME."
   (reset-fi-error-state)
   (unless (stringp name)
     (signal-fi-error (list :arg-error "Expected a string, got ~S" name))
@@ -192,8 +184,6 @@ NIL means that the current second is to be used.")
 ;; (defun fi-create (name &optional external-id) ...) -- no body, commented declareFunction
 
 (defun fi-create-int (name &optional external-id)
-  "[Cyc] Create a new constant with NAME.
-If EXTERNAL-ID is non-null it is used, otherwise a unique identifier is generated."
   (reset-fi-error-state)
   (unless (eq name :unnamed)
     (unless (stringp name)
@@ -288,7 +278,6 @@ If EXTERNAL-ID is non-null it is used, otherwise a unique identifier is generate
 ;; (defun fi-kill (fort) ...) -- no body, commented declareFunction
 
 (defun fi-kill-int (fort)
-  "[Cyc] Kill FORT and all its uses from the KB."
   (reset-fi-error-state)
   (setf fort (fi-convert-to-fort fort))
   (when (fi-error-signaled?)
@@ -314,7 +303,6 @@ If EXTERNAL-ID is non-null it is used, otherwise a unique identifier is generate
 ;; (defun fi-rename (constant name) ...) -- no body, commented declareFunction
 
 (defun fi-rename-int (constant name)
-  "[Cyc] Change name of CONSTANT to NAME. Return the constant if no error, otherwise return NIL."
   (reset-fi-error-state)
   (unless (constant-p constant)
     (signal-fi-error (list :arg-error "Expected a constant, got ~S" constant))
@@ -363,9 +351,6 @@ If EXTERNAL-ID is non-null it is used, otherwise a unique identifier is generate
 ;; (defun fi-assert (formula mt &optional strength direction) ...) -- no body, commented declareFunction
 
 (defun fi-assert-int (formula mt &optional (strength :default) direction)
-  "[Cyc] Assert the FORMULA in the specified MT.  STRENGTH is :default or :monotonic.
-DIRECTION is :forward or :backward.  GAF assertion direction defaults to :forward, and rule
-assertion direction defaults to :backward. Return T if there was no error."
   (reset-fi-error-state)
   (unless (el-formula-p formula)
     (signal-fi-error (list :arg-error "Expected a cons, got ~S" formula))
@@ -429,7 +414,6 @@ assertion direction defaults to :backward. Return T if there was no error."
     ans))
 
 (defun perform-assert-post-processing (assertions-found-or-created deductions-found-or-created)
-  "[Cyc] Perform post-processing after assertion, including handling skolem functions."
   (declare (ignore deductions-found-or-created))
   (let ((skolem-functions nil))
     (dolist (ass assertions-found-or-created)
@@ -452,7 +436,6 @@ assertion direction defaults to :backward. Return T if there was no error."
 ;; (defun fi-perform-assert-post-processing-for-skolem (assertions-found-or-created deductions-found-or-created) ...) -- no body, commented declareFunction
 
 (defun fi-cnf-default-direction (cnf)
-  "[Cyc] Return the default direction for asserting CNF."
   (declare (type cnf-p cnf))
   (when (pos-atomic-clause-p cnf)
     (let ((asent (atomic-clause-asent cnf)))
@@ -483,7 +466,6 @@ assertion direction defaults to :backward. Return T if there was no error."
       (list :formula-not-well-formed "Formula ~%  ~S ~%was not well formed" formula)))
 
 (defun fi-assert-update-asserted-argument (assertion hl-tv direction)
-  "[Cyc] Update the asserted argument for ASSERTION with HL-TV and DIRECTION."
   (let ((current-direction (assertion-direction assertion))
         (existing-asserted-argument (get-asserted-argument assertion)))
     (push assertion *fi-last-assertions-asserted*)
@@ -500,7 +482,6 @@ assertion direction defaults to :backward. Return T if there was no error."
   assertion)
 
 (defun hl-assert-update-asserted-argument (assertion hl-tv direction)
-  "[Cyc] Delegate to fi-assert-update-asserted-argument."
   (fi-assert-update-asserted-argument assertion hl-tv direction))
 
 ;; (defun fi-reassert (old-formula new-formula old-mt new-mt) ...) -- no body, commented declareFunction
@@ -510,8 +491,6 @@ assertion direction defaults to :backward. Return T if there was no error."
 ;; (defun fi-unassert (sentence mt) ...) -- no body, commented declareFunction
 
 (defun fi-unassert-int (sentence mt)
-  "[Cyc] Remove the assertions canonicalized from SENTENCE in the microtheory MT.
-Return T if the operation succeeded, otherwise return NIL."
   (reset-fi-error-state)
   (unless (el-formula-p sentence)
     (signal-fi-error (list :arg-error "Expected a cons, got ~S" sentence))
@@ -556,14 +535,13 @@ Return T if the operation succeeded, otherwise return NIL."
     ans))
 
 (defun canonicalize-fi-unassert-sentence (sentence mt)
-  "[Cyc] Canonicalize SENTENCE in MT for unassertion."
   (canonicalize-fi-remove-sentence sentence mt t))
 
 ;; (defun canonicalize-fi-blast-sentence (sentence mt) ...) -- no body, commented declareFunction
 
 (defun canonicalize-fi-remove-sentence (sentence mt check-for-asserted-argument?)
-  "[Cyc] Canonicalize SENTENCE in MT for removal.
-Returns 3 values: canon-versions, mt, deduced-argument?."
+  "[Cyc] @return 0 canon-versions
+@return 1 mt"
   (let ((el-sentence (transform-tl-terms-to-hl sentence)))
     (multiple-value-bind (new-el-sentence new-mt)
         (unwrap-if-ist el-sentence mt)
@@ -603,7 +581,6 @@ Returns 3 values: canon-versions, mt, deduced-argument?."
       (values canon-versions mt deduced-argument?))))
 
 (defun canonicalize-unassert-hlmt (mt)
-  "[Cyc] Canonicalize MT for unassertion."
   (setf mt (tlmt-to-hlmt mt))
   (setf mt (nart-substitute mt))
   mt)
@@ -648,7 +625,6 @@ Returns 3 values: canon-versions, mt, deduced-argument?."
 ;; (defun fi-timestamp-constant (cyclist time &optional why second) ...) -- no body, commented declareFunction
 
 (defun fi-timestamp-constant-int (cyclist time &optional why second)
-  "[Cyc] Timestamp the last created constant with CYCLIST, TIME, and optionally WHY and SECOND."
   (setf cyclist (transform-tl-terms-to-hl cyclist))
   (when why
     (setf why (transform-tl-terms-to-hl why)))
@@ -676,7 +652,6 @@ Returns 3 values: canon-versions, mt, deduced-argument?."
     ans))
 
 (defun constant-timestamped? (constant)
-  "[Cyc] Return T if CONSTANT has been timestamped."
   (declare (type constant-p constant))
   (or (fpred-value-in-any-mt constant #$myCreator)
       (fpred-value-in-any-mt constant #$myCreationTime)
@@ -685,7 +660,6 @@ Returns 3 values: canon-versions, mt, deduced-argument?."
       nil))
 
 (defun timestamp-constant (constant cyclist time &optional why second)
-  "[Cyc] Timestamp CONSTANT with CYCLIST, TIME, WHY, and SECOND."
   (let ((v-properties (list :strength :monotonic :direction :backward)))
     (cyc-assert-wff (list #$myCreator constant cyclist) #$BookkeepingMt v-properties)
     (cyc-assert-wff (list #$myCreationTime constant time) #$BookkeepingMt v-properties)
@@ -700,7 +674,6 @@ Returns 3 values: canon-versions, mt, deduced-argument?."
 ;; (defun fi-timestamp-assertion (cyclist time &optional why second) ...) -- no body, commented declareFunction
 
 (defun fi-timestamp-assertion-int (cyclist time &optional why second)
-  "[Cyc] Timestamp the last asserted assertions with CYCLIST, TIME, WHY, and SECOND."
   (setf cyclist (transform-tl-terms-to-hl cyclist))
   (when why
     (setf why (transform-tl-terms-to-hl why)))
@@ -743,25 +716,21 @@ Returns 3 values: canon-versions, mt, deduced-argument?."
 ;; (defun fi-local-eval-int (form) ...) -- no body, commented declareFunction
 
 (defun ke-purpose ()
-  "[Cyc] Return the current KE purpose."
   *ke-purpose*)
 
 ;; (defun set-ke-purpose (purpose) ...) -- no body, commented declareFunction
 
 (defun the-date ()
-  "[Cyc] Return the current date for asserting formulas."
   (if (integerp *the-date*)
       *the-date*
       (get-universal-date)))
 
 (defun the-second ()
-  "[Cyc] Return the current second for asserting formulas."
   (if (integerp *the-second*)
       *the-second*
       (get-universal-second)))
 
 (defun fi-convert-to-assert-hlmt (el-term)
-  "[Cyc] Convert EL-TERM to a valid HLMT for assertion."
   (let ((v-hlmt (canonicalize-assert-mt el-term)))
     (unless (hlmt-p v-hlmt)
       (signal-fi-error (list :arg-error "Expected a microtheory, got ~S" el-term))
@@ -771,7 +740,6 @@ Returns 3 values: canon-versions, mt, deduced-argument?."
 ;; (defun fi-convert-to-ask-hlmt (el-term) ...) -- no body, commented declareFunction
 
 (defun fi-convert-to-fort (el-term)
-  "[Cyc] Convert EL-TERM to a FORT."
   (let ((fort (fi-canonicalize-el-term el-term)))
     (unless (fort-p fort)
       (signal-fi-error (list :arg-error "Expected a term, got ~S" el-term))
@@ -779,7 +747,6 @@ Returns 3 values: canon-versions, mt, deduced-argument?."
     fort))
 
 (defun fi-canonicalize-el-term (el-term)
-  "[Cyc] Canonicalize EL-TERM to a FORT or CHLMT."
   (setf el-term (transform-tl-terms-to-hl el-term))
   (cond
     ((fort-or-chlmt-p el-term) el-term)
@@ -790,7 +757,6 @@ Returns 3 values: canon-versions, mt, deduced-argument?."
     (t nil)))
 
 (defun fi-canonicalize (canon-info &optional canon-gaf (strength :default))
-  "[Cyc] Canonicalize CANON-INFO for assertion."
   (let* ((cnf (first canon-info))
          (v-variables (mapcar #'car (second canon-info)))
          (hl-tv nil))
@@ -838,7 +804,6 @@ If SUBSTITUTE-VARS? is non-nil, then the original variable names are substituted
     formula))
 
 (defun assertion-hl-formula (assertion &optional (substitute-vars? t))
-  "[Cyc] Return the HL formula for ASSERTION."
   (declare (type assertion-p assertion))
   (let ((formula nil))
     (let ((*generate-readable-fi-results* nil))
@@ -850,7 +815,6 @@ If SUBSTITUTE-VARS? is non-nil, then the original variable names are substituted
 ;; (defun assertion-cnf-with-el-vars (assertion) ...) -- no body, commented declareFunction
 
 (defun perform-fi-substitutions (object &optional symbol-variables)
-  "[Cyc] Perform FI substitutions on OBJECT, replacing HL variables with EL variable symbols."
   (dolist (symbol symbol-variables)
     (let ((variable (find-variable-by-id (position symbol symbol-variables))))
       (setf object (nsubst symbol variable object))))
@@ -861,7 +825,6 @@ If SUBSTITUTE-VARS? is non-nil, then the original variable names are substituted
   object)
 
 (defun assertion-expand (object)
-  "[Cyc] Expand any assertion objects in OBJECT to their FI formulas."
   (when (tree-find-if #'assertion-p object)
     (setf object (transform object #'assertion-p #'assertion-fi-formula)))
   object)

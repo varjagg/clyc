@@ -51,8 +51,9 @@ and permission notice:
 
 
 ;;;; GUARDIAN-REQUEST struct — 6 slots
+;; print-object is missing-larkc 29594 — CL's default print-object handles this.
 
-(defstruct (guardian-request (:print-function print-guardian-request))
+(defstruct guardian-request
   id
   checker-fn
   parameter
@@ -61,12 +62,6 @@ and permission notice:
   process)
 
 (defconstant *dtp-guardian-request* 'guardian-request)
-
-;; guardian-request-print-function-trampoline (object stream) — active declareFunction
-(defun guardian-request-print-function-trampoline (object stream)
-  (declare (ignore object stream))
-  ;; Likely dispatches to the struct's print-function; body was stripped by LarKC.
-  (missing-larkc 29594))
 
 ;; guardian-request-p is provided by defstruct
 ;; guardian-request-id is provided by defstruct

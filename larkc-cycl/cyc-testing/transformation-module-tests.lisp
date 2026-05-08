@@ -58,14 +58,6 @@ and permission notice:
 
 (defconstant *dtp-transformation-module-test* 'transformation-module-test)
 
-(defmethod print-object ((object transformation-module-test) stream)
-  (transformation-module-test-print-function-trampoline object stream))
-
-(defun transformation-module-test-print-function-trampoline (object stream)
-  ;; [Cyc] body preserved in Java — delegates to the default struct print function.
-  (default-struct-print-function object stream 0)
-  nil)
-
 ;; (defun transformation-module-test-p (object) ...) -- active declareFunction, no body. UnaryFunction: missing-larkc 32553
 ;; (defun tmt-hl-module (tmt) ...) -- active declareFunction, no body (struct accessor)
 ;; (defun tmt-id (tmt) ...) -- active declareFunction, no body (struct accessor)

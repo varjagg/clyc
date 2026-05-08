@@ -40,7 +40,7 @@ and permission notice:
   `(let ,(mapcar (lambda (v) `(,v (make-temp-var ',v))) vars)
      ,@body))
 
-;; make-temp-var body stripped from LarKC. Reconstructed: compile-time expansions of
+;; make-temp-var body is missing-larkc. Reconstructed: compile-time expansions of
 ;; with-temp-vars appear as makeUninternedSymbol(name) across the codebase, confirming
 ;; this creates an uninterned symbol from the input name. $str3="TEMP" purpose unknown.
 (defun make-temp-var (name)

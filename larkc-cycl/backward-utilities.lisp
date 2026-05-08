@@ -48,19 +48,16 @@ and permission notice:
 ;;; Functions (ordered per declare section)
 
 (defun rule-relevant-to-proof (assertion)
-  "[Cyc] Returns whether ASSERTION is relevant to the current proof."
   (or (not *proof-checking-enabled*)
       (member assertion *proof-checker-rules*)))
 
 (defun relevant-directions ()
-  "[Cyc] Returns the list of relevant assertion directions for the current inference context."
   (if (and (within-forward-inference?)
            (not *within-assertion-forward-propagation?*))
       *directions-for-forward-inference*
       *directions-for-backward-inference*))
 
 (defun direction-is-relevant (assertion)
-  "[Cyc] Returns whether the direction of ASSERTION is relevant in the current inference context."
   (declare (type assertion assertion))
   (let ((direction (assertion-direction assertion)))
     (if (and (within-forward-inference?)
@@ -103,47 +100,34 @@ SUPPORT, or #$Thing if the arg-type code yields no type constraints."
       (nreverse additional-pos-lits))))
 
 ;; (defun constraint-sentences-for-transformation-variable (variable support-cnf) ...) -- active declareFunction, no body
-
 ;; (defun inference-backchain-impossible (asent sense mt) ...) -- active declareFunction, no body
-
 ;; (defun transformation-backchain-for-predicate? (predicate) ...) -- active declareFunction, no body
 
 (defun inference-canonicalize-hl-support-asent (asent)
-  "[Cyc] Canonicalizes an HL support asent by sorting commutative args if the predicate is commutative."
   (let ((predicate (atomic-sentence-predicate asent)))
     (if (not (inference-commutative-relation? predicate))
         asent
         (inference-make-commutative-asent predicate (atomic-sentence-args asent)))))
 
 (defun inference-make-commutative-asent (predicate args)
-  "[Cyc] Creates a canonical commutative asent from PREDICATE and ARGS."
   (declare (type list args))
   (setf args (inference-canonicalize-commutative-args args))
   (cons predicate (append args nil)))
 
 (defun inference-canonicalize-commutative-args (args)
-  "[Cyc] Canonicalizes commutative ARGS by sorting them."
   (declare (type list args))
   (sort-terms args t nil nil))
 
 (defun inference-canonicalize-hl-support-literal (asent)
-  "[Cyc] Canonicalizes an HL support literal. Obsolete; use inference-canonicalize-hl-support-asent."
   (inference-canonicalize-hl-support-asent asent))
 
 ;; (defun inference-make-commutative-literal (predicate args) ...) -- active declareFunction, no body
-
 ;; (defun inference-term-free-variables (term) ...) -- active declareFunction, no body
-
 ;; (defun inference-literal-free-variables (literal) ...) -- active declareFunction, no body
-
 ;; (defun inference-clause-free-variables (clause) ...) -- active declareFunction, no body
-
 ;; (defun temp-term-free-variables (term &optional var-filter) ...) -- active declareFunction, no body
-
 ;; (defun inference-closed-term? (term) ...) -- active declareFunction, no body
-
 ;; (defun inference-closed-literal? (literal) ...) -- active declareFunction, no body
-
 ;; (defun inference-closed-clause? (clause) ...) -- active declareFunction, no body
 
 ;;; Setup phase

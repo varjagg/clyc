@@ -294,7 +294,11 @@ See, e.g. bug 18429.
   (declare-defglobal '*term-to-isg-w/start-table*)
   (register-kb-function 'cyc-next-integer-in-sequence-starting-at)
   (register-kb-function 'cyc-concatenate-strings)
-  ;; define-test-case-table-int is elided (macro-helper to nonexistent macro)
+  ;; [Clyc] Java setup calls (define_test_case_table_int CYC-CONCATENATE-STRINGS
+  ;; (:test nil :owner nil :classes nil :kb :full :working? t) <5 input/expected tuples>)
+  ;; but new-generic-test-case-table's check-types invoke the missing-larkc stubs
+  ;; test-case-name-p and cyc-test-kb-p, so the call cannot run at load time.
+  ;; Restore once those predicates have bodies.
   (register-kb-function 'cyc-term-similarity-metric)
   (register-kb-function 'cyc-kb-orthogonal)
   (register-kb-function 'cyc-content-of-file)

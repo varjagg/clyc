@@ -37,7 +37,8 @@ and permission notice:
 (in-package :clyc)
 
 ;; TVA-TACTIC defstruct
-(defstruct (tva-tactic (:print-function print-tva-tactic))
+;; print-object is missing-larkc 10214 — CL's default print-object handles this.
+(defstruct tva-tactic
   type
   tva-pred
   index-pred
@@ -50,10 +51,6 @@ and permission notice:
   parent-pred-inverse?)
 
 (defconstant *dtp-tva-tactic* 'tva-tactic)
-
-(defun tva-tactic-print-function-trampoline (object stream)
-  "[Cyc] Trampoline for printing tva-tactic objects."
-  (missing-larkc 10214))
 
 ;; (defun tva-tactic-p (object) ...) -- no body, commented declareFunction
 ;; (defun tva-type (tactic) ...) -- no body, commented declareFunction, struct accessor

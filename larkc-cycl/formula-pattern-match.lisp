@@ -50,7 +50,6 @@ and permission notice:
   (pattern-matches-formula-internal pattern formula))
 
 (defun pattern-matches-formula-internal (pattern formula)
-  "[Cyc] Active declareFunction, body present."
   (let ((*pattern-matches-tree-atomic-methods* *pattern-matches-formula-atomic-methods*)
         (*pattern-matches-tree-methods* *pattern-matches-formula-methods*))
     (multiple-value-bind (match-success match-bindings)
@@ -58,49 +57,24 @@ and permission notice:
       (values match-success match-bindings))))
 
 (defun pattern-matches-formula-without-bindings-internal (pattern formula)
-  "[Cyc] Active declareFunction, body present."
   (let ((*pattern-matches-tree-atomic-methods* *pattern-matches-formula-atomic-methods*)
         (*pattern-matches-tree-methods* *pattern-matches-formula-methods*))
     (pattern-matches-tree-without-bindings pattern formula)))
 
-;; pattern-matches-formula-isa-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-isa-method (pattern formula) ...) -- active declareFunction, no body
-
-;; call-pattern-matches-formula-isa-method (formula collection mt) -- active declareFunction, no body
 ;; (defun call-pattern-matches-formula-isa-method (formula collection mt) ...) -- active declareFunction, no body
-
-;; pattern-matches-formula-isa-memoized-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-isa-memoized-method (pattern formula) ...) -- active declareFunction, no body
-
-;; memoized-call-pattern-matches-formula-isa-method-internal (formula collection mt &optional mt2) -- active declareFunction, no body
 ;; (defun memoized-call-pattern-matches-formula-isa-method-internal (formula collection mt &optional mt2) ...) -- active declareFunction, no body
-
-;; memoized-call-pattern-matches-formula-isa-method (formula collection mt &optional mt2) -- active declareFunction, no body
 ;; (defun memoized-call-pattern-matches-formula-isa-method (formula collection mt &optional mt2) ...) -- active declareFunction, no body
-
-;; pattern-matches-formula-not-isa-disjoint-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-not-isa-disjoint-method (pattern formula) ...) -- active declareFunction, no body
-
-;; call-pattern-matches-formula-not-isa-disjoint-method (formula collection mt) -- active declareFunction, no body
 ;; (defun call-pattern-matches-formula-not-isa-disjoint-method (formula collection mt) ...) -- active declareFunction, no body
-
-;; pattern-matches-formula-not-isa-disjoint-memoized-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-not-isa-disjoint-memoized-method (pattern formula) ...) -- active declareFunction, no body
-
-;; memoized-call-pattern-matches-formula-not-isa-disjoint-method-internal (formula collection mt &optional mt2) -- active declareFunction, no body
 ;; (defun memoized-call-pattern-matches-formula-not-isa-disjoint-method-internal (formula collection mt &optional mt2) ...) -- active declareFunction, no body
-
-;; memoized-call-pattern-matches-formula-not-isa-disjoint-method (formula collection mt &optional mt2) -- active declareFunction, no body
 ;; (defun memoized-call-pattern-matches-formula-not-isa-disjoint-method (formula collection mt &optional mt2) ...) -- active declareFunction, no body
-
-;; pattern-matches-formula-genls-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-genls-method (pattern formula) ...) -- active declareFunction, no body
-
-;; pattern-matches-formula-spec-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-spec-method (pattern formula) ...) -- active declareFunction, no body
 
 (defun pattern-matches-formula-nat-method (pattern formula)
-  "[Cyc] Active declareFunction, body present."
   (destructuring-bind (pattern-operator subpattern) pattern
     (declare (ignore pattern-operator))
     (if (nart-p formula)
@@ -110,34 +84,20 @@ and permission notice:
         (pattern-matches-tree-internal subpattern (missing-larkc 10378))
         (pattern-matches-tree-internal subpattern formula))))
 
-;; pattern-matches-formula-unify-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-unify-method (pattern formula) ...) -- active declareFunction, no body
-
-;; pattern-matches-formula-genl-pred-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-genl-pred-method (pattern formula) ...) -- active declareFunction, no body
-
-;; pattern-matches-formula-genl-inverse-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-genl-inverse-method (pattern formula) ...) -- active declareFunction, no body
-
-;; pattern-matches-formula-spec-pred-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-spec-pred-method (pattern formula) ...) -- active declareFunction, no body
-
-;; pattern-matches-formula-spec-inverse-method (pattern formula) -- active declareFunction, no body
 ;; (defun pattern-matches-formula-spec-inverse-method (pattern formula) ...) -- active declareFunction, no body
 
 (defun pattern-transform-formula (pattern formula &optional (v-bindings nil))
   "[Cyc] Use PATTERN to transform FORMULA, assuming BINDINGS."
   (pattern-transform-formula-internal pattern formula v-bindings))
 
-(defun formula-transform-pattern (formula pattern &optional (v-bindings nil))
-  "[Cyc] Active declareFunction, no body.
-Likely the reverse argument order of pattern-transform-formula, similar to
-formula-matches-pattern vs pattern-matches-formula."
-  (pattern-transform-formula-internal pattern formula v-bindings))
+;; (defun formula-transform-pattern (formula pattern &optional v-bindings) ...) -- active declareFunction, no body
 
 (defun pattern-transform-formula-internal (pattern formula v-bindings)
-  "[Cyc] Active declareFunction, body present."
-  (let ((*pattern-transform-match-method* #'pattern-matches-formula))
+  (let ((*pattern-transform-match-method* 'pattern-matches-formula))
     (multiple-value-bind (sub-transform sub-bindings)
         (pattern-transform-tree pattern formula v-bindings)
       (values sub-transform sub-bindings))))
@@ -163,8 +123,7 @@ formula-matches-pattern vs pattern-matches-formula."
     (:collection-fort collection-p)
     (:predicate-fort predicate-p)
     (:functor-fort functor-p)
-    (:mt-fort microtheory-p))
-  "[Cyc] Atomic methods for formula pattern matching.")
+    (:mt-fort microtheory-p)))
 
 (deflexical *pattern-matches-formula-methods*
   '((:isa pattern-matches-formula-isa-method)
@@ -178,8 +137,7 @@ formula-matches-pattern vs pattern-matches-formula."
     (:genl-pred pattern-matches-formula-genl-pred-method)
     (:genl-inverse pattern-matches-formula-genl-inverse-method)
     (:spec-pred pattern-matches-formula-spec-pred-method)
-    (:spec-inverse pattern-matches-formula-spec-inverse-method))
-  "[Cyc] Methods for formula pattern matching.")
+    (:spec-inverse pattern-matches-formula-spec-inverse-method)))
 
 ;;; Setup phase
 

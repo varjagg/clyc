@@ -36,11 +36,11 @@ and permission notice:
 
 (in-package :clyc)
 
-;; relation -> argnum -> col -> mts
-;;         |         |      |
-;;        hash     list   alist
 (defglobal *arg-type-cache* (make-hash-table :size 1024)
-  "[Cyc] Cache mapping relations to their arg-type constraints.")
+  "[Cyc]
+  relation -> argnum -> col -> mts
+           |         |      |
+           hash      list   alist")
 
 (deflexical *arg-type-cache-preds* (list #$arg1Isa #$arg2Isa #$arg3Isa
                                          #$arg4Isa #$arg5Isa #$arg6Isa)
@@ -195,9 +195,9 @@ and permission notice:
 
 (defun cyc-update-arg-type-cache (gaf)
   "[Cyc] Update the arg-type cache for the relation in GAF."
-  (check-type gaf #'gaf-assertion?)
+  (declare (type (satisfies gaf-assertion?) gaf))
   (let ((arg-isa-pred (gaf-predicate gaf)))
-    (check-type arg-isa-pred #'arg-type-cached-pred-p)
+    (declare (type (satisfies arg-type-cached-pred-p) arg-isa-pred))
     (let ((relation (gaf-arg1 gaf)))
       (when (fort-p relation)
         (at-cache-initialize-relation relation)

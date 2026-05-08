@@ -56,15 +56,7 @@ and permission notice:
 
 (defconstant *dtp-removal-module-test* 'removal-module-test)
 
-(defmethod print-object ((object removal-module-test) stream)
-  (removal-module-test-print-function-trampoline object stream))
-
 ;; Declare phase (following declare_removal_module_tests_file order)
-
-;; Active declareFunction with body — delegates to the default struct print function.
-(defun removal-module-test-print-function-trampoline (object stream)
-  (default-struct-print-function object stream 0)
-  nil)
 
 ;; removal-module-test-p — provided by defstruct
 ;; rmt-hl-module, rmt-id, rmt-sentence, rmt-mt, rmt-properties, rmt-comment,

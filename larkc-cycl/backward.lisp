@@ -97,15 +97,12 @@ T means always perform early removals first.")
 ;;; Functions — ordered per declare section
 
 ;; (defun inference-expand-new-children () ...) -- active declareFunction, no body
-
 ;; (defun add-to-inference-expand-new-children (child) ...) -- active declareFunction, no body
 
 (defun inference-expand-hl-module ()
-  "[Cyc] Returns the current HL module being used during inference expansion."
   *inference-expand-hl-module*)
 
 (defun inference-expand-sense ()
-  "[Cyc] Returns the current sense being used during inference expansion."
   *inference-expand-sense*)
 
 (defun transformation-add-node (rule-assertion rule-pivot-asent rule-pivot-sense v-bindings &optional more-supports)
@@ -143,7 +140,6 @@ modules pass these in."
                 (pos-lits cnf)))))
 
 (defun removal-add-node (support &optional v-bindings more-supports)
-  "[Cyc] Adds a removal node with the given support, bindings, and additional supports."
   (when (null v-bindings)
     (setf v-bindings (unification-success-token)))
   (when (null *removal-add-node-method*)
@@ -153,7 +149,6 @@ modules pass these in."
                             (cons support more-supports)))
 
 (defun removal-add-node-funcall (function v-bindings supports)
-  "[Cyc] Dispatches to the appropriate removal add-node handler based on FUNCTION."
   (cond
     ((eql function 'handle-removal-add-node-for-output-generate)
      (handle-removal-add-node-for-output-generate v-bindings supports))
@@ -165,7 +160,6 @@ modules pass these in."
      (funcall *removal-add-node-method* v-bindings supports))))
 
 (defun removal-ask-query-property-p (object)
-  "[Cyc] Returns whether OBJECT is a valid removal-ask query property."
   (member-eq? object *removal-ask-query-properties*))
 
 (defun removal-ask (asent &optional mt (truth :true) query-properties)
@@ -192,29 +186,18 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
     (values answers halt-reason metrics)))
 
 ;; (defun el-removal-ask (asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun removal-ask-bindings (asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun el-removal-ask-bindings (asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun removal-ask-justifications (asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun el-removal-ask-justifications (asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun removal-ask-template (template asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun el-removal-ask-template (template asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun el-removal-ask-variable (variable asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun removal-ask-variable (variable asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun removal-ask-hl-variable (variable asent &optional mt (truth :true) query-properties) ...) -- active declareFunction, no body
-
 ;; (defun removal-ask-answer-count () ...) -- active declareFunction, no body
 
 (defun removal-ask-add-node (v-bindings supports)
-  "[Cyc] Adds a removal-ask answer, tracking bindings and justifications."
   (when (and *removal-ask-disallows-indeterminate-terms?*
              ;; missing-larkc 35566 likely checks if bindings contain indeterminate terms
              ;; (variables that couldn't be fully resolved), returning T if so
@@ -242,7 +225,6 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
   nil)
 
 (defun removal-ask-int (asent truth &optional query-properties)
-  "[Cyc] Internal implementation of removal-ask."
   (let ((sense (truth-sense truth))
         (allowed-modules-spec (getf query-properties :allowed-modules :all)))
     (let ((allowed-tactic-specs (removal-ask-tactic-specs asent sense allowed-modules-spec)))
@@ -251,11 +233,9 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
           (values nil :exhaust-total nil)))))
 
 (defun removal-ask-tactic-specs (asent sense allowed-modules-spec)
-  "[Cyc] Returns the tactic specs for a removal ask of ASENT with SENSE."
   (literal-removal-options asent sense allowed-modules-spec))
 
 (defun removal-ask-expand (asent sense tactic-specs query-properties)
-  "[Cyc] Expands tactic specs for a removal ask, collecting answers."
   (let ((answers nil)
         (halt-reason nil)
         (metric-values nil))
@@ -305,31 +285,24 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
     (values (nreverse answers) halt-reason metric-values)))
 
 ;; (defun removal-ask-compute-metric-values (metrics) ...) -- active declareFunction, no body
-
 ;; (defun note-removal-ask-done (halt-reason) ...) -- active declareFunction, no body
 
 (defun inference-hl-module-cost-too-expensive (hl-module cost)
-  "[Cyc] Returns whether the cost of HL-MODULE exceeds the removal cost cutoff."
   (case (hl-module-type hl-module)
     (:removal (and *removal-cost-cutoff*
                    (> cost *removal-cost-cutoff*)))
     (otherwise nil)))
 
 ;; (defun closed-conjunctive-cycl-sentence-p (sentence) ...) -- active declareFunction, no body
-
 ;; (defun cycl-literal-or-conjunction-of-cycl-literals-p (sentence) ...) -- active declareFunction, no body
-
 ;; (defun closed-conjunctive-removal-ask (sentence &optional mt query-properties) ...) -- active declareFunction, no body
-
 ;; (defun removal-ask-literal (asent sense query-properties) ...) -- active declareFunction, no body
 
 (defun inference-semantically-valid-dnf (dnf &optional mt)
-  "[Cyc] Returns whether DNF is semantically valid, checking term-of-unit and closed asents."
   (and (semantically-valid-term-of-unit-asents dnf mt)
        (semantically-valid-closed-asents? dnf mt)))
 
 (defun semantically-valid-closed-asents? (dnf &optional mt)
-  "[Cyc] Returns whether the closed asents in DNF are semantically valid."
   (case *forward-inference-pruning-mode*
     (:none t)
     (:legacy (and (semantically-valid-asserted-sentence-asents dnf mt)
@@ -348,7 +321,6 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
 ;; (defun semantically-valid-closed-asents?-int (dnf mt pruning-mode) ...) -- active declareFunction, no body
 
 (defun semantically-valid-asserted-sentence-asents (dnf &optional mt)
-  "[Cyc] Returns whether assertedSentence asents in DNF are semantically valid."
   (let ((invalid? nil))
     (when *forward-asserted-sentence-pruning-enabled?*
       (let ((pos-lits (pos-lits dnf)))
@@ -365,11 +337,9 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
     (not invalid?)))
 
 (defun forward-complete-extent-asserted-pruning-enabled? ()
-  "[Cyc] Returns whether forward complete-extent-asserted pruning is enabled."
   (balancing-tactician-enabled?))
 
 (defun semantically-valid-complete-extent-asserted-asents (dnf &optional mt)
-  "[Cyc] Returns whether complete-extent-asserted asents in DNF are semantically valid."
   (let ((invalid? nil))
     (when (forward-complete-extent-asserted-pruning-enabled?)
       (let ((pos-lits (pos-lits dnf))
@@ -390,12 +360,10 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
     (not invalid?)))
 
 (defun semantically-invalid-asserted-sentence-asent (asent)
-  "[Cyc] Returns whether an assertedSentence asent is semantically invalid."
   (let ((sentence (atomic-sentence-arg1 asent)))
     (non-asserted-asent? sentence)))
 
 (defun non-asserted-asent? (sentence)
-  "[Cyc] Returns whether SENTENCE is a non-asserted asent."
   (when (el-formula-p sentence)
     (when (forward-complete-extent-asserted-pruning-enabled?)
       ;; missing-larkc 31656 likely checks whether the sentence's predicate has
@@ -410,7 +378,6 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
 ;; (defun non-asserted-asent-via-somewhere-cache? (sentence) ...) -- active declareFunction, no body
 
 (defun non-asserted-asent-via-gaf-lookup? (sentence)
-  "[Cyc] Returns whether SENTENCE is a non-asserted asent based on GAF lookup."
   (when (forward-complete-extent-asserted-pruning-enabled?)
     ;; missing-larkc 12703 likely looks up the sentence in the somewhere cache,
     ;; returning NIL if the predicate is not somewhere-cached (meaning we can't
@@ -424,7 +391,6 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
   nil)
 
 (defun semantically-valid-isa-asents (dnf &optional mt)
-  "[Cyc] Returns whether the #$isa asents in DNF are semantically valid."
   (let ((pos-lits (pos-lits dnf)))
     (when (find #$isa pos-lits :test #'eql :key #'atomic-sentence-predicate)
       (dolist (asent pos-lits)
@@ -438,7 +404,6 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
   t)
 
 (defun semantically-valid-genls-asents (dnf &optional mt)
-  "[Cyc] Returns whether the #$genls asents in DNF are semantically valid."
   (let ((pos-lits (pos-lits dnf)))
     (when (find #$genls pos-lits :test #'eql :key #'atomic-sentence-predicate)
       (dolist (asent pos-lits)
@@ -452,12 +417,10 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
   t)
 
 (defun semantically-valid-term-of-unit-asents (dnf &optional mt)
-  "[Cyc] Returns whether the #$termOfUnit asents in DNF are semantically valid."
   (declare (ignore mt))
   (syntactically-valid-term-of-unit-asents dnf))
 
 (defun syntactically-valid-term-of-unit-asents (dnf)
-  "[Cyc] Returns whether the #$termOfUnit asents in DNF are syntactically valid."
   (dolist (asent (pos-lits dnf))
     (when (atomic-sentence-with-pred-p asent #$termOfUnit)
       ;; missing-larkc 31666 likely validates the term-of-unit asent syntactically,
@@ -468,17 +431,11 @@ TRUTH indicates the truth of asent, either :TRUE or :FALSE.
   t)
 
 ;; (defun valid-term-of-unit-arg1 (asent) ...) -- active declareFunction, no body
-
 ;; (defun valid-term-of-unit-arg2 (asent) ...) -- active declareFunction, no body
-
 ;; (defun valid-term-of-unit-args (arg1 arg2) ...) -- active declareFunction, no body
-
 ;; (defun valid-term-of-unit-inter-args (arg1 arg2) ...) -- active declareFunction, no body
-
 ;; (defun syntactically-valid-term-of-unit-asent (asent) ...) -- active declareFunction, no body
-
 ;; (defun literal-set-sense (literal-set) ...) -- active declareFunction, no body
-
 ;; (defun literal-set-without (literal-set literal) ...) -- active declareFunction, no body
 
 ;;; Setup

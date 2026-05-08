@@ -73,11 +73,6 @@ or a new sbhl-stack."
 ;; (defun find-sbhl-iterator-shell ()) -- commented declareFunction, no body
 ;; (defun release-sbhl-iterator (iterator)) -- commented declareFunction, no body
 
-;; Present in java, but useless
-;; (defun sbhl-iterator-print-function-trampoline (object stream)
-;;   (declare (ignore object stream))
-;;   (missing-larkc 1992))
-
 ;; (defun sbhl-iterator-p (object)) -- commented declareFunction, provided by defstruct
 ;; (defun sbhl-it-state (iterator)) -- commented declareFunction, provided by defstruct
 ;; (defun sbhl-it-done (iterator)) -- commented declareFunction, provided by defstruct

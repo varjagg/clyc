@@ -132,7 +132,7 @@ Otherwise, disable all servers with DESIGNATOR as their type."
 
 (defun deregister-tcp-server-type (type)
   (bt:with-lock-held (*tcp-server-lock*)
-    (deletef type *tcp-server-type-table* :key #'first))
+    (deletef *tcp-server-type-table* type :key #'first))
   type)
 
 (defun tcp-server-type-handler (type)

@@ -60,9 +60,6 @@ and permission notice:
 
 (defconstant *dtp-secure-id-database* 'secure-id-database)
 
-(defun secure-id-database-print-function-trampoline (object stream)
-  (default-struct-print-function object stream 0))
-
 ;; (defun secure-id-database-p (object) ...) -- active declareFunction, no body
 ;;   UnaryFunction override calls missing-larkc 32137
 ;; (defun translator-security-level-p (object) ...) -- active declareFunction, no body

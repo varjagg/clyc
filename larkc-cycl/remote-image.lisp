@@ -37,17 +37,17 @@ and permission notice:
 (in-package :clyc)
 
 ;;; REMOTE-IMAGE defstruct
+;;; print-object is missing-larkc 29985 — CL's default print-object handles this.
 
-(defstruct (remote-image (:conc-name "RMT-IMG-")
-                         (:print-function print-remote-image))
+(defstruct (remote-image (:conc-name "RMT-IMG-"))
   machine
   port
   protocol)
 
 ;;; REMOTE-IMAGE-CONNECTION defstruct
+;;; print-object is missing-larkc 29986 — CL's default print-object handles this.
 
-(defstruct (remote-image-connection (:conc-name "RMT-IMG-CONN-")
-                                    (:print-function print-remote-image-connection))
+(defstruct (remote-image-connection (:conc-name "RMT-IMG-CONN-"))
   image
   channel)
 
@@ -61,11 +61,6 @@ and permission notice:
 ;;; Functions (ordered by declare_remote_image_file)
 
 ;; (defun api-channel-remote-eval (channel form &optional timeout) ...) -- active declareFunction, no body
-
-(defun remote-image-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for REMOTE-IMAGE."
-  (declare (ignore object stream))
-  (missing-larkc 29985))
 
 (defun remote-image-p (object)
   "[Cyc] Return T if OBJECT is a REMOTE-IMAGE struct."
@@ -88,11 +83,6 @@ and permission notice:
 ;; (defun remote-image-port (image) ...) -- active declareFunction, no body
 
 ;; (defun remote-image-protocol (image) ...) -- active declareFunction, no body
-
-(defun remote-image-connection-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for REMOTE-IMAGE-CONNECTION."
-  (declare (ignore object stream))
-  (missing-larkc 29986))
 
 (defun remote-image-connection-p (object)
   "[Cyc] Return T if OBJECT is a REMOTE-IMAGE-CONNECTION struct."

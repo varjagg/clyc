@@ -41,28 +41,28 @@ and permission notice:
   (gethash node space))
 
 (defun sbhl-marked-with (node &optional (space *sbhl-space*))
-  "[Cyc] Accessor: returns NODE's current marking state (usually boolean)."
+  "[Cyc] Accessor: returns NODE's current marking state (usually boolean). @see get-sbhl-marking-state."
   (get-sbhl-marking-state node space))
 
-;; (defun sbhl-marked-node-p (arg1 &optional arg2)) -- commented declareFunction, no body
+;; (defun sbhl-marked-node-p (arg1 &optional arg2) ...) -- commented declareFunction, no body
 
 (defun sbhl-marked-p (marking)
-  "[Cyc] Accessor: whether MARKING has a non-NIL marking state."
+  "[Cyc] Accessor: @return booleanp; whether MARKING has a non-NIL marking state."
   (and marking t))
 
-;; (defun sbhl-unmarked-p (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-marking-contains-searcher? (arg1 arg2)) -- commented declareFunction, no body
-;; (defun sbhl-marking-contains-all-searchers? (arg1 arg2)) -- commented declareFunction, no body
-;; (defun sbhl-temporal-increment ()) -- commented declareFunction, no body
-;; (defun sbhl-temporal-tag-increment (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-nodes-marking-non-negative-p (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-current-marking-exceeds-pending-marking-or-marking-threshold-p (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-nodes-mark-exceeds-temporal-threshold-p (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-temporality-path-termination-for-searching-marked-nodes-p (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-current-temporal-node-not-yet-considered-p ()) -- commented declareFunction, no body
+;; (defun sbhl-unmarked-p (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-marking-contains-searcher? (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-marking-contains-all-searchers? (arg1 arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-temporal-increment () ...) -- commented declareFunction, no body
+;; (defun sbhl-temporal-tag-increment (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-nodes-marking-non-negative-p (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-current-marking-exceeds-pending-marking-or-marking-threshold-p (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-nodes-mark-exceeds-temporal-threshold-p (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-temporality-path-termination-for-searching-marked-nodes-p (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-current-temporal-node-not-yet-considered-p () ...) -- commented declareFunction, no body
 
 (defun sbhl-predicate-path-termination-p (marking)
-  "[Cyc] Accessor: whether MARKING indicates path termination for predicate search"
+  "[Cyc] Accessor: @return booleanp; whether MARKING indicates path termination for predicate search"
   (if (genl-inverse-mode-p)
       (or (genl-inverse-marking-p marking)
           (genl-preds-and-genl-inverse-marking-p marking))
@@ -75,30 +75,30 @@ and permission notice:
   nil)
 
 (defun set-sbhl-marking-state-to-marked (node &optional (space *sbhl-space*))
-  "[Cyc] Modifier: sets the hash slot for NODE in *sbhl-space* / SPACE to T."
+  "[Cyc] Modifier: sets the hash slot for NODE in *sbhl-space* / SPACE to t. @see set-sbhl-marking-state"
   (set-sbhl-marking-state node t space)
   nil)
 
 (defun set-sbhl-marking-state-to-unmarked (node &optional (space *sbhl-space*))
-  "[Cyc] Modifier: sets the hash slot for NODE in *sbhl-space* to NIL."
+  "[Cyc] Modifier: sets the hash slot for NODE in *sbhl-space* to nil @see set-sbhl-marking-state"
   (set-sbhl-marking-state node nil space)
   nil)
 
-;; (defun sbhl-mark-node (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun adjoin-to-sbhl-marking-state (arg1 arg2 &optional arg3)) -- commented declareFunction, no body
-;; (defun prepend-to-sbhl-marking-state (arg1 arg2 &optional arg3)) -- commented declareFunction, no body
-;; (defun remove-from-sbhl-marking-state (arg1 arg2 &optional arg3)) -- commented declareFunction, no body
-;; (defun increment-sbhl-marking-state (arg1 arg2 &optional arg3)) -- commented declareFunction, no body
-;; (defun increment-sbhl-marking-state-by-zero (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun increment-sbhl-marking-state-by-minus-one (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun increment-sbhl-marking-state-by-one (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun increment-sbhl-marking-state-by-two (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun set-sbhl-marking-state-to-zero (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun set-sbhl-marking-state-to-depth (arg1 arg2 &optional arg3)) -- commented declareFunction, no body
-;; (defun sbhl-node-marking-greater-than-depth-p (arg1 arg2 &optional arg3)) -- commented declareFunction, no body
+;; (defun sbhl-mark-node (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun adjoin-to-sbhl-marking-state (arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
+;; (defun prepend-to-sbhl-marking-state (arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
+;; (defun remove-from-sbhl-marking-state (arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
+;; (defun increment-sbhl-marking-state (arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
+;; (defun increment-sbhl-marking-state-by-zero (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun increment-sbhl-marking-state-by-minus-one (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun increment-sbhl-marking-state-by-one (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun increment-sbhl-marking-state-by-two (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun set-sbhl-marking-state-to-zero (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun set-sbhl-marking-state-to-depth (arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
+;; (defun sbhl-node-marking-greater-than-depth-p (arg1 arg2 &optional arg3) ...) -- commented declareFunction, no body
 
 (defun sbhl-predicate-marking-fn (node &optional (space *sbhl-space*))
-  "[Cyc] Modifier: adds either #$genlPreds or #$genlInverse to NODE's marking, depending on genl-inverse-mode-p"
+  "[Cyc] Modifier: adds either #$genlPreds or #$genlInverse to NODE's marking, depending on @see genl-inverse-mode-p"
   (if (genl-inverse-mode-p)
       (genl-inverse-marking-fn node space)
       (genl-preds-marking-fn node space))
@@ -124,15 +124,15 @@ and permission notice:
        (set-sbhl-marking-state node *sbhl-genl-preds-and-genl-inverse-marking* space))))
   nil)
 
-;; (defun sbhl-predicate-unmarking-fn (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun genl-preds-unmarking-fn (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun genl-inverse-unmarking-fn (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-mark-node-in-precompute-space (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-node-marked-precompute-goal-p (arg1)) -- commented declareFunction, no body
-;; (defun set-sbhl-boolean-precompute-goal-conditions (arg1)) -- commented declareFunction, no body
+;; (defun sbhl-predicate-unmarking-fn (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun genl-preds-unmarking-fn (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun genl-inverse-unmarking-fn (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-node-in-precompute-space (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-node-marked-precompute-goal-p (arg1) ...) -- commented declareFunction, no body
+;; (defun set-sbhl-boolean-precompute-goal-conditions (arg1) ...) -- commented declareFunction, no body
 
 (defun sbhl-search-path-termination-p (node &optional (space *sbhl-space*))
-  "[Cyc] Accessor: applies *sbhl-module* defined path termination determining fn. Relies on current context of SPACE / *sbhl-space*."
+  "[Cyc] Accessor: applies *sbhl-module* defined path termination determining fn, @see get-sbhl-path-terminating-mark?-fn. Relies on current context of SPACE / *sbhl-space*. @see sbhl-marked-p"
   (when (sbhl-check-for-goal-marking-p)
     ;; TODO - missing-larkc 2084 (goal marking check) and 2088 (goal marking action)
     (when (missing-larkc 2084)
@@ -141,7 +141,7 @@ and permission notice:
   (sbhl-path-terminating-mark-p node space))
 
 (defun sbhl-path-terminating-mark-p (node &optional (space *sbhl-space*))
-  "[Cyc] Accessor: applies *sbhl-module* defined path termination determining fn. Relies on current context of SPACE / *sbhl-space*."
+  "[Cyc] Accessor: applies *sbhl-module* defined path termination determining fn, @see get-sbhl-path-terminating-mark?-fn. Relies on current context of SPACE / *sbhl-space*. @see sbhl-marked-p"
   (let ((path-terminating-mark?-fn (get-sbhl-path-terminating-mark?-fn (get-sbhl-module))))
     (case path-terminating-mark?-fn
       (sbhl-marked-p
@@ -154,18 +154,18 @@ and permission notice:
       (otherwise
        (funcall path-terminating-mark?-fn node)))))
 
-;; (defun sbhl-path-termination-marking-p (arg1)) -- commented declareFunction, no body
+;; (defun sbhl-path-termination-marking-p (arg1) ...) -- commented declareFunction, no body
 
 (defun sbhl-marked-in-terminating-space-p (node)
-  "[Cyc] Accessor: applies *sbhl-module* defined path-termination-function to NODE's marking within terminating space."
+  "[Cyc] Accessor: applies *sbhl-module* defined path-termination-function to NODE's marking within terminating space, @see get-sbhl-termingating-marking-space."
   (sbhl-search-path-termination-p node *sbhl-terminating-marking-space*))
 
 (defun sbhl-marked-in-target-space-p (node)
-  "[Cyc] Accessor: applies *sbhl-module* defined path-termination-function to NODE's marking within target space."
+  "[Cyc] Accessor: applies *sbhl-module* defined path-termination-function to NODE's marking within target space, @see *sbhl-target-space*"
   (sbhl-search-path-termination-p node *sbhl-target-space*))
 
 (defun sbhl-mark-node-marked (node &optional (space *sbhl-space*))
-  "[Cyc] Modifier: applies *sbhl-module* defined marking fn. Relies on current context of *sbhl-space*."
+  "[Cyc] Modifier: applies *sbhl-module* defined marking fn, @see get-sbhl-marking-fn. Relies on current context of *sbhl-space*, and gets search node from SEARCH-STATE as necessary (@see set-sbhl-marking-state-to-marked)."
   (let ((marking-fn (get-sbhl-marking-fn (get-sbhl-module))))
     ;; TODO - isn't this equivalent to funcall?
     (case marking-fn
@@ -186,7 +186,7 @@ and permission notice:
   nil)
 
 (defun sbhl-mark-node-unmarked (node &optional (space *sbhl-space*))
-  "[Cyc] Modifier: applies *sbhl-module* defined unmarking fn. Relies on current context of *sbhl-space*."
+  "[Cyc] Modifier: applies *sbhl-module* defined unmarking fn, @see get-sbhl-unmarking-fn. Relies on current context of *sbhl-space*, and gets search node from SEARCH-STATE as necessary (@see set-sbhl-marking-state-to-unmarked)."
   (let ((unmarking-fn (get-sbhl-unmarking-fn (get-sbhl-module))))
     ;; TODO - isn't this equivalent to funcall?
     (case unmarking-fn
@@ -200,35 +200,35 @@ and permission notice:
        (funcall unmarking-fn node))))
   nil)
 
-;; (defun sbhl-mark-in-target-space (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-mark-in-target-gather-space (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-apply-mark-in-space (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-apply-unmark-in-space (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-generational-search-path-termination-p (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-marking-generation (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-generational-mark-node-marked (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-generational-predicate-marking-fn (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun genl-preds-generational-marking-fn (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun genl-inverse-generational-marking-fn (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-any-nodes-marked? (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-all-nodes-marked? (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-any-nodes-unmarked? (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-all-nodes-unmarked? (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun all-unsearched? (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-all-marked-nodes (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-all-unmarked-nodes (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-marked-nodes (&optional arg1)) -- commented declareFunction, no body
-;; (defun sbhl-mark-all-nodes-marked (arg1 &optional arg2)) -- commented declareFunction, no body
-;; (defun sbhl-mark-all-nodes-unmarked (arg1 &optional arg2)) -- commented declareFunction, no body
+;; (defun sbhl-mark-in-target-space (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-in-target-gather-space (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-apply-mark-in-space (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-apply-unmark-in-space (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-generational-search-path-termination-p (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-marking-generation (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-generational-mark-node-marked (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-generational-predicate-marking-fn (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun genl-preds-generational-marking-fn (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun genl-inverse-generational-marking-fn (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-any-nodes-marked? (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-all-nodes-marked? (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-any-nodes-unmarked? (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-all-nodes-unmarked? (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun all-unsearched? (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-all-marked-nodes (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-all-unmarked-nodes (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-marked-nodes (&optional arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-all-nodes-marked (arg1 &optional arg2) ...) -- commented declareFunction, no body
+;; (defun sbhl-mark-all-nodes-unmarked (arg1 &optional arg2) ...) -- commented declareFunction, no body
 
 (defun sbhl-mark-nodes-in-target-space (nodes)
-  "[Cyc] Modifier: marks each of NODES in *sbhl-target-space*"
+  "[Cyc] Modifier: marks each of NODES in @see *sbhl-target-space*"
   (dolist (node nodes)
     (sbhl-mark-node-marked node *sbhl-target-space*))
   nil)
 
 (defun sbhl-mark-nodes-in-target-space-gp (nodes)
-  "[Cyc] Modifier: marks each of NODES in *sbhl-target-space* with genl-inverse mode flipping"
+  "[Cyc] Modifier: marks each of NODES in @see *sbhl-target-space*"
   (let ((*genl-inverse-mode-p* (if (flip-genl-inverse-mode?)
                                    (not *genl-inverse-mode-p*)
                                    *genl-inverse-mode-p*)))
@@ -236,14 +236,14 @@ and permission notice:
       (sbhl-mark-node-marked node *sbhl-target-space*)))
   nil)
 
-;; (defun sbhl-space-p (arg1)) -- commented declareFunction, no body
-;; (defun list-of-sbhl-space-p (arg1)) -- commented declareFunction, no body
+;; (defun sbhl-space-p (arg1) ...) -- commented declareFunction, no body
+;; (defun list-of-sbhl-space-p (arg1) ...) -- commented declareFunction, no body
 
 (defun clear-sbhl-space (&optional (space *sbhl-space*))
   "[Cyc] Modifier: clears space"
   (clrhash space)
   nil)
 
-;; (defun empty-sbhl-space-p (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-marked-cardinality (arg1)) -- commented declareFunction, no body
-;; (defun sbhl-space-keys (arg1)) -- commented declareFunction, no body
+;; (defun empty-sbhl-space-p (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-marked-cardinality (arg1) ...) -- commented declareFunction, no body
+;; (defun sbhl-space-keys (arg1) ...) -- commented declareFunction, no body

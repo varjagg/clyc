@@ -4,7 +4,9 @@
 ;;;
 ;;; Generated 05/13/2002 10:07:16 from CycL 1.2360
 
-;; TODO - a lot of this is baked with the Cyc "Thesaurus Manager" application.
+;; TODO - a lot of this is baked with the Cyc "Thesaurus Manager" application,
+;;        but that's probably just the abritrary working parameter set that
+;;        LarkC started with.
 
 
 (in-package :CYC)

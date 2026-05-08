@@ -233,7 +233,7 @@ and permission notice:
         (list "test_status" *max-test-status-len*)
         (list "test_type" *max-test-type-len*)))
 
-;; Active declareFunction entries — all bodies are LarKC-stripped except initialize-ctest above.
+;; Active declareFunction entries — all bodies are missing-larkc except initialize-ctest above.
 ;; (defun kct-valid-execution-type (execution-type) ...) -- active declareFunction, no body
 ;; (defun kct-valid-execution-mode (execution-mode) ...) -- active declareFunction, no body
 ;; (defun kct-valid-collection-type (collection-type) ...) -- active declareFunction, no body

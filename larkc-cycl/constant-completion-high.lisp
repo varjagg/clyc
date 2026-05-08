@@ -57,7 +57,7 @@ and permission notice:
   "[Cyc] Return T iff CHAR is a character which is not allowed in a valid constant name."
   (not (valid-constant-name-char-p char)))
 
-;; Active declareFunction in Java, but body stripped from LarKC.
+;; Active declareFunction in Java, but body is missing-larkc.
 ;; Called by constant-handles:make-constant-shell (checkType) and
 ;; constants-interface:kb-create-constant (checkType), so must exist.
 ;; Reconstructed from orphan constants $kw17$UNNAMED and $sym18$STRINGP,

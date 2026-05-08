@@ -234,8 +234,6 @@ and permission notice:
 
 (defconstant *dtp-kbq-runstate* 'kbq-runstate)
 
-;; (defun kbq-runstate-print-function-trampoline (object stream) ...) -- active declareFunction, no body
-
 ;; (defun new-kbq-runstate (query-spec test-runstate) ...) -- commented declareFunction, no body
 ;; (defun destroy-kbq-runstate (runstate) ...) -- commented declareFunction, no body
 ;; (defun kbq-runstate-query-spec (runstate) ...) -- commented declareFunction, no body
@@ -268,7 +266,6 @@ and permission notice:
 
 (defconstant *dtp-kct-runstate* 'kct-runstate)
 
-;; (defun kct-runstate-print-function-trampoline (object stream) ...) -- active declareFunction, no body
 ;; (defun kct-runstate-p (object) ...) -- commented declareFunction, body was missing-larkc 3279
 
 ;; (defun new-kct-runstate (test-spec &optional test-set-runstate) ...) -- commented declareFunction, no body
@@ -310,7 +307,6 @@ and permission notice:
 
 (defconstant *dtp-kct-set-runstate* 'kct-set-runstate)
 
-;; (defun kct-set-runstate-print-function-trampoline (object stream) ...) -- active declareFunction, no body
 ;; (defun kct-set-runstate-p (object) ...) -- commented declareFunction, body was missing-larkc 3294
 
 ;; (defun new-kct-set-runstate (test-set) ...) -- commented declareFunction, no body
@@ -757,13 +753,6 @@ and permission notice:
 ;; (defun kbq-benchmark-run (tests overriding-query-properties overriding-metrics &optional extra1 extra2 extra3) ...) -- commented declareFunction, no body
 ;; (defun kbq-benchmark-report (filename &optional extra) ...) -- commented declareFunction, no body
 ;; (defun kbq-benchmark-report-for-test (filename test &optional extra) ...) -- commented declareFunction, no body
-
-
-;;; Print trampolines — stubs for stripped LarKC bodies
-
-;; (defun kbq-runstate-print-function-trampoline (object stream) ...) -- active declareFunction, no body
-;; (defun kct-runstate-print-function-trampoline (object stream) ...) -- active declareFunction, no body
-;; (defun kct-set-runstate-print-function-trampoline (object stream) ...) -- active declareFunction, no body
 
 
 ;;; Setup toplevel

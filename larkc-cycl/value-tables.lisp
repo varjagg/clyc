@@ -40,6 +40,7 @@ and permission notice:
 ;; managing query-driven tabular data and variable-to-variable mappings.
 
 ;;; value-table-column struct
+;;; print-object is missing-larkc 4824 — CL's default print-object handles this.
 
 (defstruct (value-table-column
             (:conc-name "VALUE-TABLE-COLUMN-")
@@ -49,11 +50,6 @@ and permission notice:
   values)
 
 (defconstant *dtp-value-table-column* 'value-table-column)
-
-(defun value-table-column-print-function-trampoline (object stream)
-  ;; Likely calls print-value-table-column -- evidence: registered as print method in setup
-  (declare (ignore object stream))
-  (missing-larkc 4824))
 
 ;; (defun value-table-column-p (object) ...) -- commented declareFunction, no body
 ;; Accessors value-table-column-query, value-table-column-label, value-table-column-values
@@ -67,6 +63,7 @@ and permission notice:
 ;; (defun get-vtbl-query-result-sets (column term mt) ...) -- commented declareFunction, no body
 
 ;;; value-table struct
+;;; print-object is missing-larkc 4823 — CL's default print-object handles this.
 
 (defstruct (value-table
             (:conc-name "VALUE-TABLE-")
@@ -78,11 +75,6 @@ and permission notice:
   assignments)
 
 (defconstant *dtp-value-table* 'value-table)
-
-(defun value-table-print-function-trampoline (object stream)
-  ;; Likely calls print-value-table -- evidence: registered as print method in setup
-  (declare (ignore object stream))
-  (missing-larkc 4823))
 
 ;; (defun value-table-p (object) ...) -- commented declareFunction, no body
 ;; Accessors value-table-id, value-table-label, value-table-input-columns,
@@ -98,6 +90,7 @@ and permission notice:
 ;; (defun load-value-table-assignments-from-kb (table mt) ...) -- commented declareFunction, no body
 
 ;;; variable-mapping-table struct
+;;; print-object is missing-larkc 4825 — CL's default print-object handles this.
 
 (defstruct (variable-mapping-table
             (:conc-name "VARIABLE-MAPPING-TABLE-")
@@ -111,11 +104,6 @@ and permission notice:
   assignments)
 
 (defconstant *dtp-variable-mapping-table* 'variable-mapping-table)
-
-(defun variable-mapping-table-print-function-trampoline (object stream)
-  ;; Likely calls print-varmap-table -- evidence: registered as print method in setup
-  (declare (ignore object stream))
-  (missing-larkc 4825))
 
 ;; (defun variable-mapping-table-p (object) ...) -- commented declareFunction, no body
 ;; Accessors variable-mapping-table-id, variable-mapping-table-source-query,

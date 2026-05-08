@@ -63,23 +63,21 @@ and permission notice:
 ;; (defun all-not-negation-inverses (pred &optional mt tv) ...) -- commented declareFunction (1 2)
 
 (defun max-all-negation-predicates (pred &optional mt tv)
-  "[Cyc] most-general negation predicates of PRED"
+  "[Cyc] most-general negation predicates of <pred>"
   (sbhl-implied-max-disjoins (get-sbhl-module #$negationPreds) pred mt tv))
 
 ;; (defun negation-preds (pred &optional mt) ...) -- commented declareFunction (1 1)
 
 (defun max-negation-preds (pred &optional mt)
-  "[Cyc] Active declareFunction, no body in Java -- delegates to max-all-negation-predicates"
   (max-all-negation-predicates pred mt))
 
 ;; (defun max-negation-predicates (pred &optional mt) ...) -- commented declareFunction (1 1)
 
 (defun max-all-negation-inverses (pred &optional mt tv)
-  "[Cyc] most-general negation inverses of PRED"
+  "[Cyc] most-general negation inverses of <pred>"
   (sbhl-implied-max-disjoins (get-sbhl-module #$negationInverse) pred mt tv))
 
 (defun max-negation-inverses (pred &optional mt)
-  "[Cyc] Active declareFunction, no body in Java -- delegates to max-all-negation-inverses"
   (max-all-negation-inverses pred mt))
 
 ;; (defun min-all-not-negation-predicates (pred &optional mt tv) ...) -- commented declareFunction (1 2)
@@ -127,24 +125,24 @@ and permission notice:
 ;; (defun negation-predicate-after-adding (source assertion) ...) -- commented declareFunction (2 0)
 
 (defun negation-inverse-after-adding (source assertion)
-  "[Cyc] Modifier. Adds sbhl links with sbhl-after-adding."
+  "[Cyc] Modifier. Adds sbhl links with @see sbhl-after-adding."
   (sbhl-after-adding source assertion (get-sbhl-module #$negationInverse))
   nil)
 
 (defun add-negation-inverse (source assertion)
-  "[Cyc] Modifier. Adds sbhl links with negation-inverse-after-adding."
+  "[Cyc] Modifier. Adds sbhl links with @see negation-inverse-after-adding."
   (negation-inverse-after-adding source assertion)
   nil)
 
 ;; (defun negation-predicate-after-removing (source assertion) ...) -- commented declareFunction (2 0)
 
 (defun negation-inverse-after-removing (source assertion)
-  "[Cyc] Modifier. Removes sbhl links with sbhl-after-removing."
+  "[Cyc] Modifier. Removes sbhl links with @see sbhl-after-removing."
   (sbhl-after-removing source assertion (get-sbhl-module #$negationInverse))
   nil)
 
 (defun remove-negation-inverse (source assertion)
-  "[Cyc] Modifier. Removes sbhl links with sbhl-after-removing."
+  "[Cyc] Modifier. Removes sbhl links with @see sbhl-after-removing."
   (negation-inverse-after-removing source assertion)
   nil)
 

@@ -64,16 +64,20 @@ and permission notice:
   "[Cyc] Create a new hash table for defn function history."
   (make-hash-table :size *defn-fn-history-default-size*))
 
+;; [Clyc] Java declareFunction is active but has no method body (missing-larkc).
+;; Body hand-reconstructed so the with-new-defn-space macro expansion works at runtime —
+;; otherwise every invocation would error on the missing-larkc function. Non-quoted and
+;; quoted variants share implementation in the surviving Cyc pattern.
 (defun make-quoted-defn-fn-history-table ()
-  "[Cyc] Create a new hash table for quoted defn function history."
   (make-defn-fn-history-table))
 
 (defun make-defn-col-history-table ()
   "[Cyc] Create a new hash table for defn collection history."
   (make-hash-table :size *defn-col-history-default-size*))
 
+;; [Clyc] Same situation as make-quoted-defn-fn-history-table above —
+;; Java has an active declareFunction with no body. Hand-reconstructed.
 (defun make-quoted-defn-col-history-table ()
-  "[Cyc] Create a new hash table for quoted defn collection history."
   (make-defn-col-history-table))
 
 (defun* possibly-make-defn-fn-history-table ()

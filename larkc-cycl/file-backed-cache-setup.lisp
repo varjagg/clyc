@@ -56,10 +56,6 @@ and permission notice:
 
 (defconstant *dtp-file-backed-cache-registration* 'file-backed-cache-registration)
 
-(defun file-backed-cache-registration-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for file-backed-cache-registration."
-  (default-struct-print-function object stream 0))
-
 ;; file-backed-cache-registration-p - commented, no body (1 0)
 ;; fbcr-generation-function - commented, no body (1 0)
 ;; fbcr-initialization-function - commented, no body (1 0)

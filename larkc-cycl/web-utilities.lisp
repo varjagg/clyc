@@ -175,9 +175,9 @@ basic syntax errors are detected.")
 
 
 ;; XML-TOKEN-ITERATOR-STATE structure
+;; print-object is missing-larkc 31471 — CL's default print-object handles this.
 
-(defstruct (xml-token-iterator-state (:conc-name "XML-IT-STATE-")
-                                      (:print-function print-xml-token-iterator-state))
+(defstruct (xml-token-iterator-state (:conc-name "XML-IT-STATE-"))
   in-stream
   scratch-stream
   token-output-stream
@@ -324,11 +324,6 @@ basic syntax errors are detected.")
 ;; (defun xml-tokenize (stream &optional validate? resolve-entity-references? resolve-namespaces?) ...) -- active declareFunction, no body
 
 ;; (defun new-xml-token-iterator (stream &optional validate? resolve-entity-references? resolve-namespaces?) ...) -- active declareFunction, no body
-
-(defun xml-token-iterator-state-print-function-trampoline (object stream)
-  "[Cyc] Print function trampoline for XML-TOKEN-ITERATOR-STATE."
-  (missing-larkc 31471)
-  nil)
 
 (defun xml-token-iterator-state-p (object)
   "[Cyc] Return T if OBJECT is an XML-TOKEN-ITERATOR-STATE."
@@ -695,12 +690,17 @@ basic syntax errors are detected.")
 
 ;; Setup phase
 
-;; define-test-case-table-int is elided (macro-helper to nonexistent macro)
+;; [Clyc] Java setup invokes (define_test_case_table_int ...) here, but
+;; new-generic-test-case-table's check-types call missing-larkc stubs
+;; test-case-name-p and cyc-test-kb-p, so the call cannot run at load time.
+;; Restore once those predicates have bodies.
 (note-funcall-helper-function 'print-xml-token-iterator-state)
 (note-funcall-helper-function 'iterate-xml-token-done)
 (note-funcall-helper-function 'iterate-xml-token-next)
 (register-external-symbol 'xml-tokenized-http-request)
 (note-memoized-function 'parse-xml-token-int)
 (note-globally-cached-function 'byte-order-mark)
-;; define-test-case-table-int calls for xml-tokens-to-sexpr, parse-html-token,
-;; parse-xml-token are elided (macro-helper to nonexistent macro)
+;; [Clyc] Java setup also invokes (define_test_case_table_int ...) for
+;; xml-tokens-to-sexpr, parse-html-token, and parse-xml-token, but the
+;; new-generic-test-case-table check-types depend on missing-larkc stubs
+;; (test-case-name-p, cyc-test-kb-p) so they cannot run at load time.

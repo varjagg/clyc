@@ -50,18 +50,30 @@ and permission notice:
     "[Cyc] Based on arete experiments, only 16% of all assertions are needed for normal inference.")
 
 (defun setup-assertion-content-table (size exact?)
-  (setf *assertion-content-manager* (new-kb-object-manager "assertion" size *assertion-lru-size-percentage* #'load-assertion-def-from-cache exact?)))
+  (setf *assertion-content-manager* (new-kb-object-manager "assertion" size *assertion-lru-size-percentage* #'load-assertion-def-from-cache exact?))
+  t)
+
+;; (defun optimize-assertion-content-table (size) ...) -- active declaration, no body
 
 (defun clear-assertion-content-table ()
   (clear-kb-object-content-table *assertion-content-manager*))
+
+;; (defun maintain-assertion-usage-counts () ...) -- active declaration, no body
+;; (defun dont-maintain-assertion-usage-counts () ...) -- active declaration, no body
+;; (defun assertion-usage-counts-enabled-p () ...) -- active declaration, no body
 
 (defun* cached-assertion-count () (:inline t)
   "[Cyc] Return the number of assertions whose content is cached in memory."
   (cached-kb-object-count *assertion-content-manager*))
 
+;; (defun assertion-content-completely-cached? () ...) -- active declaration, no body
+;; (defun assertion-content-cached-p (id) ...) -- active declaration, no body
+
 (defun* lookup-assertion-content (id) (:inline t)
   (arete-note-assertion-touched (find-assertion-by-id id))
   (lookup-kb-object-content *assertion-content-manager* id))
+
+;; (defun get-file-backed-assertion-id-threshold () ...) -- active declaration, no body
 
 (defun* register-assertion-content (id assertion-content) (:inline t)
   "[Cyc] Note that ID will be used as the id for ASSERTION-CONTENT."
@@ -74,6 +86,11 @@ and permission notice:
 (defun* mark-assertion-content-as-muted (id) (:inline t)
   (mark-kb-object-content-as-muted *assertion-content-manager* id))
 
+;; (defun meter-assertion-content-swap-time () ...) -- active declaration, no body
+;; (defun dont-meter-assertion-content-swap-time () ...) -- active declaration, no body
+;; (defun clear-assertion-content-swap-time () ...) -- active declaration, no body
+;; (defun current-assertion-content-swap-time () ...) -- active declaration, no body
+
 (defun* swap-out-all-pristine-assertions () (:inline t)
   (swap-out-all-pristine-kb-objects-int *assertion-content-manager*))
 
@@ -81,3 +98,12 @@ and permission notice:
   (initialize-kb-object-hl-store-cache *assertion-content-manager*
                                        "assertion"
                                        "assertion-index"))
+
+;; (defun verify-assertion-content-table-int (assertion &optional stream) ...) -- active declaration, no body
+
+
+;;; Setup
+
+(toplevel
+  (declare-defglobal '*arete-assertions-touched*)
+  (declare-defglobal '*assertion-content-manager*))

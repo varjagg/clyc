@@ -682,6 +682,9 @@ Assumes that the EL variable namespace is bound."
 ;; Setup section
 
 (toplevel
-  ;; define-test-case-table-int is elided (macro-helper to nonexistent macro)
-  ;; Original: (define-test-case-table simplify-ist-sentence (:test nil :owner nil :classes nil :kb :tiny :working? t) ...)
+  ;; [Clyc] Java setup invokes (define_test_case_table_int simplify-ist-sentence
+  ;; (:test nil :owner nil :classes nil :kb :tiny :working? t) ...), but
+  ;; new-generic-test-case-table's check-types call missing-larkc stubs
+  ;; test-case-name-p and cyc-test-kb-p, so the call cannot run at load time.
+  ;; Restore once those predicates have bodies.
   )

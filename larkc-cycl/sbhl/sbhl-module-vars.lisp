@@ -53,11 +53,6 @@ and permission notice:
   var-bindings
   misc-properties)
 
-;; [Clyc] Replaces Java register_method on $print_object_method_table$
-;; and the sbhl-module-print-function-trampoline mechanism.
-;; Print format from $str45 "#<SBHL-MODULE: " and $str46 ">".
-(defmethod print-object ((obj sbhl-module) stream)
-  (format stream "#<SBHL-MODULE: ~A>" (sbhl-mod-link-pred obj)))
 
 ;; (defun sbhl-mod-var-bindings (object) ...) -- commented declareFunction, no body
 

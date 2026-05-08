@@ -50,16 +50,34 @@ and permission notice:
 
 
 
-;; The original code had an empty-list marker (symbol, replaced to NIL in results), and a 'tombstone' marker for unused entries (NIL, replaced to the default in results).  The older model does more comparison than necessary, and has to do conversion on insertion.
-;; I think SubL might have had to do this if it cannot control the default value of arrays and they might have always been NIL.
+;; [Clyc] The original code had an empty-list marker (symbol, replaced to NIL in
+;; results), and a 'tombstone' marker for unused entries (NIL, replaced to the
+;; default in results). The older model does more comparison than necessary, and
+;; has to do conversion on insertion. SubL might have needed this if it cannot
+;; control the default value of arrays (always NIL).
 ;; Tombstones are only used in the array, not in the hashtable.
-;; Rewrote into using only tombstone marker, keeping NIL as an empty list untouched.
+;; Rewritten to use only the tombstone marker, keeping NIL as an empty list value
+;; untouched. *id-index-empty-list* is therefore vestigial — it always returns
+;; NIL — but the function and global are kept for any caller that still references
+;; them.
 (defconstant +id-index-tombstone+ :%tombstone)
 
 (defun* id-index-tombstone () (:inline t)
   +id-index-tombstone+)
 
+;; [Clyc] Vestigial empty-list marker mechanism. Java had a global symbol used
+;; as a placeholder for "intentional NIL value" (since NIL was reserved as the
+;; default-on-lookup tombstone). The Clyc rewrite uses NIL directly, so the
+;; marker is never inserted or compared. The function still exists for any
+;; caller that may reference it; it returns NIL to be consistent with the new
+;; treatment.
+(deflexical *id-index-empty-list* nil)
 
+(defun* id-index-empty-list () (:inline t)
+  *id-index-empty-list*)
+
+
+;; print-object is missing-larkc 10317 — CL's default print-object handles this.
 (defstruct (id-index (:conc-name "IDIX-"))
   lock
   ;; Total number of objects being held (old+new)
@@ -192,6 +210,10 @@ If the insert fills up the old objects vector, grow the vector."
   (id-index-enter id-index id object)
   (id-index-possibly-autoextend id-index id))
 
+(defun id-index-enter-unlocked-autoextend (id-index id object)
+  (id-index-enter-unlocked id-index id object)
+  (id-index-possibly-autoextend id-index id))
+
 (defun id-index-possibly-autoextend (id-index id)
   "[Cyc] If ID was the last id in oldspace, grow the vector."
   (let ((threshold (id-index-new-id-threshold id-index)))
@@ -233,7 +255,19 @@ If the insert fills up the old objects vector, grow the vector."
 (defun* id-index-new-objects-empty-p (id-index) (:inline t)
   (zerop (id-index-new-object-count id-index)))
 
-;; TODO - the tombstone variable is very annoying, with its :skip option. I think the "hide tombstone" default value should be the tombstone symbol itself, since there's now 2 separate special values to check for (:%tombstone and :skip) all in the same value space, and the predicates for checking them are very poorly named.
+;; [Clyc] do-id-index is a commented declareMacro in Java with no expansion
+;; available. This is a reconstruction based on usage patterns observed in
+;; constant-handles set-next-constant-suid and other callers. It walks the
+;; old-objects vector first (skipping tombstones) then the new-objects hash
+;; table. The :tombstone keyword controls whether tombstones are visited (the
+;; default :skip suppresses them); the :ordered keyword forces sequential
+;; iteration of the new-objects table by id; :progress-message enables
+;; noting-percent-progress reporting.
+;; TODO - the tombstone variable is very annoying, with its :skip option. The
+;; "hide tombstone" default value should be the tombstone symbol itself, since
+;; there's now 2 separate special values to check for (:%tombstone and :skip)
+;; in the same value space, and the predicates for checking them are very
+;; poorly named.
 (defmacro do-id-index ((id object id-index &key (tombstone :skip tombstone-p)
                            ordered progress-message done)
                        &body body)
@@ -282,6 +316,8 @@ If the insert fills up the old objects vector, grow the vector."
 
 (defconstant *cfasl-wide-opcode-id-index* 128)
 
+;; (defun cfasl-output-object-id-index-method (object stream) ...) -- active declareFunction, no body
+
 (defun optimize-id-index (id-index &optional size)
   "[Cyc] Optimize ID-INDEX by merging the new objects into the old objects."
   (with-idix-lock id-index
@@ -316,4 +352,49 @@ If the insert fills up the old objects vector, grow the vector."
       (unless (id-index-tombstone-p object)
         (push object values)))
     (nreverse values)))
+
+
+;;; Commented declareFunctions and declareMacros from id-index.java — stubs only.
+
+;; (defun print-id-index (id-index stream depth) ...) -- commented declareFunction, no body
+;; (defmacro with-id-index-locked (id-index &body body) ...) -- commented declareMacro, no body
+;; (defun convert-id-index-key-test (test) ...) -- commented declareFunction, no body
+;; (defun new-id-index-iterator (id-index) ...) -- commented declareFunction, no body
+;; (defun new-id-index-values-iterator (id-index) ...) -- commented declareFunction, no body
+;; (defun new-id-index-old-objects-iterator (id-index) ...) -- commented declareFunction, no body
+;; (defun iterate-id-index-old-objects-necessary (id-index) ...) -- commented declareFunction, no body
+;; (defun new-id-index-old-objects-values-iterator (id-index) ...) -- commented declareFunction, no body
+;; (defun new-id-index-new-objects-iterator (id-index) ...) -- commented declareFunction, no body
+;; (defun new-id-index-new-objects-values-iterator (id-index) ...) -- commented declareFunction, no body
+;; (defmacro old-do-id-index ((id object id-index &key tombstone progress-message) &body body) ...) -- commented declareMacro, no body
+;; (defmacro do-id-index-old-objects ((id object id-index &key tombstone progress-message) &body body) ...) -- commented declareMacro, no body
+;; (defmacro do-id-index-new-objects ((id object id-index &key tombstone progress-message) &body body) ...) -- commented declareMacro, no body
+;; (defun id-index-new-object-ids (id-index) ...) -- commented declareFunction, no body
+;; (defmacro new-do-id-index ((id object id-index &key tombstone progress-message) &body body) ...) -- commented declareMacro, no body
+;; (defun do-id-index-next-id (id-index state ordered? tombstone) ...) -- commented declareFunction, no body
+;; (defun do-id-index-next-state (id-index state ordered? tombstone) ...) -- commented declareFunction, no body
+;; (defun do-id-index-state-object (id-index state ordered? tombstone) ...) -- commented declareFunction, no body
+;; (defun do-id-index-object-valid? (object tombstone) ...) -- commented declareFunction, no body
+;; (defun cfasl-wide-output-id-index (id-index stream) ...) -- commented declareFunction, no body
+;; (defun cfasl-output-id-index-internal (id-index stream) ...) -- commented declareFunction, no body
+;; (defun cfasl-input-id-index (stream) ...) -- commented declareFunction, no body
+;; (defun test-id-index-cfasl-serialization (id-index &optional verbose? trace?) ...) -- commented declareFunction, no body
+;; (defun id-index-optimized-p (id-index) ...) -- commented declareFunction, no body
+;; (defun id-index-compact-p (id-index) ...) -- commented declareFunction, no body
+;; (defun compact-id-index (id-index &optional size) ...) -- commented declareFunction, no body
+;; (defun new-indirect-compact-id-index (id-index) ...) -- commented declareFunction, no body
+;; (defun id-index-ids (id-index) ...) -- commented declareFunction, no body
+;; (defun clone-id-index (id-index) ...) -- commented declareFunction, no body
+;; (defun copy-id-index (id-index &optional shallow?) ...) -- commented declareFunction, no body
+;; (defun id-index-missing-ids (id-index &optional from to) ...) -- commented declareFunction, no body
+;; (defun test-id-index-missing-ids (id-index from to) ...) -- commented declareFunction, no body
+;; (defun build-reverse-index-for-id-index (id-index reverse-key-fn &optional reverse-index) ...) -- commented declareFunction, no body
+;; (defun new-id-index-from-reverse-index (reverse-index) ...) -- commented declareFunction, no body
+;; (defun find-max-index-id-in-reverse-index (reverse-index) ...) -- commented declareFunction, no body
+;; (defun test-new-index-from-reverse-index (reverse-key-fn id-index &optional verbose? trace?) ...) -- commented declareFunction, no body
+;; (defun new-id-index-for-testing-purposes (size object-fn &optional shuffle?) ...) -- commented declareFunction, no body
+;; (defun test-do-id-index-with-tombstones (id-index ordered? tombstone) ...) -- commented declareFunction, no body
+;; (defun new-id-index-for-testing-purposes-with-random-holes (size object-fn hole-fraction &optional shuffle?) ...) -- commented declareFunction, no body
+;; (defun populate-reverse-index-for-id-index (id-index reverse-key-fn) ...) -- commented declareFunction, no body
+;; (defun to-hex-string (n) ...) -- commented declareFunction, no body
 
