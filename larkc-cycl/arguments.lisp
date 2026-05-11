@@ -177,7 +177,11 @@ Hardcodes the type hierarchy:
   (asserted-argument-token-from-tv tv))
 
 (defun* create-asserted-argument-spec (strength-spec) (:inline t)
-  (declare (type el-strength-spec-p strength-spec))
+  ;; TODO - original Java had checkType against EL-STRENGTH-SPEC-P, but that
+  ;; predicate is LarKC-stripped (declareFunction with no body in
+  ;; enumeration_types.java). Restore the type check once el-strength-spec-p
+  ;; is available. Inlined into a top-level defglobal init in
+  ;; hl-storage-modules.lisp, so an unknown-type declaration breaks load.
   (list :asserted-argument strength-spec))
 
 (defun* asserted-argument-spec-strength-spec (asserted-argument-spec) (:inline t)
