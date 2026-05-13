@@ -129,6 +129,9 @@ and permission notice:
 (defstruct (assertion (:conc-name as-))
   id)
 
+(deftype assertion-p ()
+  'assertion)
+
 (defconstant *dtp-assertion* 'assertion)
 
 (defparameter *print-assertions-in-cnf* nil)

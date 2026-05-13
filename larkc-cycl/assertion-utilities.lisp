@@ -121,14 +121,20 @@ and permission notice:
   (or (null direction-spec)
       (assertion-has-direction assertion direction-spec)))
 
-;; (defun assertion-matches-truth-and-direction? (assertion truth-spec direction-spec)) -- commented declareFunction, no body (3 0)
+(defun assertion-matches-truth-and-direction? (assertion truth-spec direction-spec)
+  "[Cyc] Return T iff ASSERTION matches both TRUTH-SPEC and DIRECTION-SPEC."
+  (and (assertion-matches-truth? assertion truth-spec)
+       (assertion-matches-direction? assertion direction-spec)
+       t))
 
 (defun assertion-matches-type-truth-and-direction? (assertion type-spec truth-spec direction-spec)
   "[Cyc] Return T iff ASSERTION matches all of TYPE-SPEC, TRUTH-SPEC, and DIRECTION-SPEC."
   (and (assertion-matches-type? assertion type-spec)
-       (assertion-matches-truth? assertion truth-spec)
-       (assertion-matches-direction? assertion direction-spec)
-       t))
+       (assertion-matches-truth-and-direction? assertion truth-spec direction-spec)))
+
+(defun assertion-matches-type-truth-and-direction (assertion type-spec truth-spec direction-spec)
+  "[Cyc] Callback-compatible alias for ASSERTION-MATCHES-TYPE-TRUTH-AND-DIRECTION?."
+  (assertion-matches-type-truth-and-direction? assertion type-spec truth-spec direction-spec))
 
 (defun gaf-has-term-in-argnum? (assertion v-term argnum)
   "[Cyc] Return T iff GAF ASSERTION has V-TERM in argument position ARGNUM."

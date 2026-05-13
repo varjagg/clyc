@@ -48,6 +48,7 @@ and permission notice:
 (defglobal *hl-lock* (bt:make-lock "HL Store Lock")
   "[Cyc] Controls modification of the HL store")
 (defparameter *bootstrapping-kb?* nil)
+(defparameter *suspend-type-checking?* nil)
 (deflexical *keyword-package* (find-package "KEYWORD"))
 (deflexical *sublisp-package* (find-package "SUBLISP")) ;; TODO - clyc? subl?
 (deflexical *cyc-package* (find-package "CLYC"))

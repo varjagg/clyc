@@ -44,6 +44,9 @@ and permission notice:
 
 (defconstant *valid-directions* '(:backward :forward :code))
 
+(deftype direction-p ()
+  '(member :backward :forward :code))
+
 (declaim (inline valid-directions))
 (defun valid-directions ()
   *valid-directions*)
@@ -60,6 +63,13 @@ and permission notice:
   (nth fixnum *valid-directions*))
 
 (defconstant *valid-assertion-types* '(:gaf :rule))
+(deftype assertion-type-p ()
+  '(member :gaf :rule))
+
+(defun assertion-type-p (object)
+  "[Cyc] Return T iff OBJECT is a valid assertion type."
+  (member-eq? object *valid-assertion-types*))
+
 (defconstant *valid-el-strengths* '(:default :monotonic))
 
 (defun el-strength-p (object)
@@ -72,8 +82,15 @@ and permission notice:
   (not (position-< strength1 strength2 *valid-el-strengths*)))
 
 (defconstant *valid-truths* '(:true :unknown :false))
+(deftype truth-p ()
+  '(member :true :unknown :false))
+
 (defun valid-truths ()
   *valid-truths*)
+
+(defun truth-p (object)
+  "[Cyc] Return T iff OBJECT is a valid CycL truth."
+  (member-eq? object *valid-truths*))
 
 (defun truth-sense (truth)
   (case truth
@@ -102,8 +119,15 @@ and permission notice:
     (otherwise (error "~s is not a SENSE-P" sense))))
 
 (defconstant *valid-hl-truth-values* '(:true-mon :true-def :unknown :false-def :false-mon))
+(deftype tv-p ()
+  '(member :true-mon :true-def :unknown :false-def :false-mon))
+
 (defun valid-hl-truth-values ()
   *valid-hl-truth-values*)
+
+(defun tv-p (object)
+  "[Cyc] Return T iff OBJECT is a valid HL truth value."
+  (member-eq? object *valid-hl-truth-values*))
 
 (defun encode-tv (tv)
   (position tv *valid-hl-truth-values*))

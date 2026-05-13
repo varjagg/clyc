@@ -566,6 +566,12 @@ It is certainly not guaranteed that OBJECT is a CycL sentence just because this 
 Passing this test should guarantee that applying the sentence accessors will not trigger an error."
   (el-formula-p object))
 
+(defun possibly-cycl-sentence-p (object)
+  (possibly-sentence-p object))
+
+(deftype possibly-cycl-sentence-p ()
+  '(satisfies possibly-cycl-sentence-p))
+
 (defun possibly-atomic-sentence-p (object)
   "[Cyc] A quick test for whether OBJECT could possibly be an atomic CycL sentence.
 It is certainly not guaranteed that OBJECT is an atomic CycL sentence just because this function returns T."
@@ -1307,6 +1313,17 @@ Returns NIL if LITERAL is negative or is not an EL formula."
 (defun hl-relation-expression? (object)
   "[Cyc] Returns T iff OBJECT is a nart."
   (nart-p object))
+
+(defun el-relation-expression? (object)
+  "[Cyc] Returns T iff OBJECT is an EL relation expression."
+  (and (el-formula-p object)
+       (relation-syntax? object)
+       (let ((operator (formula-arg0 object)))
+         (or (predicate-spec? operator)
+             (logical-op? operator)))))
+
+(defun el-relation-expression-p (object)
+  (el-relation-expression? object))
 
 (defun relation-expression? (object)
   "[Cyc] Returns T iff OBJECT is either a nat or an EL formula with a predicate, variable, or logical operator as its arg0."

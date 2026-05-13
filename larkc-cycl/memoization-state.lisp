@@ -317,6 +317,12 @@ and permission notice:
   name
   should-clone)
 
+(defun memoization-state-get-current-process-internal (memoization-state)
+  (memoization-state-current-process memoization-state))
+
+(defun memoization-state-set-current-process-internal (memoization-state process)
+  (setf (memoization-state-current-process memoization-state) process))
+
 (defun create-memoization-state (&optional name lock should-clone (test #'eql))
   "[Cyc] Return a new memoization state suitable for WITH-MEMOIZATION-STATE"
   (declare ((or null string) name)

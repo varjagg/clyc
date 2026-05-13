@@ -95,6 +95,9 @@ and permission notice:
   (or (fort-p object)
       (closed-hlmt-p object)))
 
+(deftype fort-or-chlmt-p ()
+  '(satisfies fort-or-chlmt-p))
+
 (defun* chlmt-p (object) (:inline t)
   "[Cyc] Shorthand for closed-hlmt-p."
   (closed-hlmt-p object))
@@ -111,9 +114,16 @@ NOTE: Returns true iff OBJECT actually is an HLMT."
       (hlmt-p-time object)
       (hlmt-p-no-time object)))
 
+(deftype hlmt-p ()
+  '(satisfies hlmt-p))
+
 (defun hlmt-p-no-time (object)
   (or (valid-fort? object)
       (mt-union-naut-p object)))
+
+(defun hlmt-p-time (object)
+  (or (hlmt-p-no-time object)
+      (hlmt-naut-p object)))
 
 (defun possibly-hlmt-naut-p (object)
   (when (possibly-naut-p object)

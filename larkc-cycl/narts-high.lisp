@@ -50,8 +50,7 @@ No substitutions for sub-NARTs are performed."
            (or (not (reifiable-functor? (nat-functor nart-hl-formula)))
                (not (fully-bound-p nart-hl-formula))))
       nil
-      ;; missing-larkc 871 -- likely the nart-hl-formula-table lookup
-      (missing-larkc 871)))
+      (nart-from-hl-formula nart-hl-formula)))
 
 (defun naut-p (object)
   "[Cyc] Return T iff OBJECT is a datastructure implementing a non-atomic unreified term (NAUT).

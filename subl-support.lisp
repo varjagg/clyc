@@ -224,10 +224,10 @@
            `((declare (ignore ,@params))))
        ,@body)))
 
-(declaim (inline check-type))
-(defun check-type (obj type-symbol)
+(defmacro check-type (obj type-symbol)
   "This is configured to be ignored in the LarKC version."
-  (declare (ignorable obj type-symbol)))
+  (declare (ignore obj type-symbol))
+  nil)
 
 (defun enforce-type (obj predicate)
   "The predicate is a symbol which names a unary function, as well as can be printed."
@@ -312,6 +312,45 @@ either a function object or a symbol naming a bound function."
              (,val (cdr ,cell)))
          ,@body))))
 
+(defmacro do-dictionary ((key value dictionary &optional done) &body body)
+  (alexandria:with-gensyms (dict cell)
+    `(let ((,dict ,dictionary))
+       (block nil
+         (cond
+           ((hash-table-p ,dict)
+            (maphash (lambda (,key ,value)
+                       (declare (ignorable ,key ,value))
+                       (when ,done
+                         (return ,done))
+                       ,@body
+                       (when ,done
+                         (return ,done)))
+                     ,dict))
+           ((listp ,dict)
+            (dolist (,cell ,dict)
+              (let ((,key (car ,cell))
+                    (,value (cdr ,cell)))
+                (declare (ignorable ,key ,value))
+                (when ,done
+                  (return ,done))
+                ,@body
+                (when ,done
+                  (return ,done))))))))))
+
+(defmacro do-list ((var list &key done) &body body)
+  `(block nil
+     (dolist (,var ,list)
+       (declare (ignorable ,var))
+       (when ,done
+         (return ,done))
+       ,@body
+       (when ,done
+         (return ,done)))))
+
+(defmacro dosome ((var list &optional done) &body body)
+  `(do-list (,var ,list :done ,done)
+     ,@body))
+
 (defmacro dohash ((key val hashtable) &body body)
   `(block nil
      (maphash (lambda (,key ,val)
@@ -385,10 +424,35 @@ either a function object or a symbol naming a bound function."
 (defun read-32bit-be (stream)
   "Reads a 4-byte, unsigned, big-endian binary number from the stream."
   ;; TODO - might be faster if we read a single 4-byte sequence, then assemble from that.
-  (logior (ash 24 (read-byte stream))
-          (ash 16 (read-byte stream))
-          (ash 8 (read-byte stream))
+  (logior (ash (read-byte stream) 24)
+          (ash (read-byte stream) 16)
+          (ash (read-byte stream) 8)
           (read-byte stream)))
+
+(defun open-binary (filename direction &rest open-args)
+  "Open FILENAME as an unsigned-byte stream, using SubL-style argument order."
+  (apply #'open filename
+         :direction direction
+         :element-type '(unsigned-byte 8)
+         open-args))
+
+(defun open-text (filename direction &rest open-args)
+  "Open FILENAME as a character stream, using SubL-style argument order."
+  (apply #'open filename
+         :direction direction
+         open-args))
+
+(defun directory-p (path)
+  "Return true when PATH names an existing directory."
+  (and (ignore-errors (uiop:directory-exists-p path))
+       t))
+
+(declaim (inline get-file-position))
+(defun get-file-position (stream)
+  (file-position stream))
+
+(defun current-process ()
+  (bt:current-thread))
 
 (declaim (inline set-file-position))
 (defun set-file-position (stream index)
@@ -443,14 +507,14 @@ either a function object or a symbol naming a bound function."
   lock)
 
 (defun new-rw-lock (name)
-  (%make-rw-lock :lock (bt:make-lock name)))
+  (%make-rw-lock :lock (bt:make-recursive-lock name)))
 
 (defmacro with-rw-read-lock ((rw-lock) &body body)
-  `(bt:with-lock-held ((rw-lock-lock ,rw-lock))
+  `(bt:with-recursive-lock-held ((rw-lock-lock ,rw-lock))
      ,@body))
 
 (defmacro with-rw-write-lock ((rw-lock) &body body)
-  `(bt:with-lock-held ((rw-lock-lock ,rw-lock))
+  `(bt:with-recursive-lock-held ((rw-lock-lock ,rw-lock))
      ,@body))
 
 ;;; SubL process-wait — condition-variable based replacement for SubL's

@@ -52,6 +52,11 @@ and permission notice:
   "[Cyc] Determine whether the object is a cache strategy or not."
   (cache-strategy-object-p object))
 
+(defun* cache-strategy-or-symbol-p (object) (:inline t)
+  "[Cyc] Determine whether OBJECT is a cache strategy or a symbolic cache policy."
+  (or (symbolp object)
+      (cache-strategy-p object)))
+
 (defun* cache-strategy-note-cache-miss (strategy) (:inline t)
   "[Cyc] If metrics are being kept, then note the cache miss.
 Otherwise, the operation is a NO-OP."
@@ -137,6 +142,10 @@ Otherwise the operation is a NO-OP."
 
 (defgeneric cache-strategy-object-p (object)
   (:documentation "[Cyc] By default, nothing is a cache strategy object."))
+
+(defmethod cache-strategy-object-p (object)
+  (declare (ignore object))
+  nil)
 
 
 

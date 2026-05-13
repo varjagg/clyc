@@ -102,6 +102,12 @@ and permission notice:
         *default-resourced-sbhl-space-limit*
         length)))
 
+(defun determine-resource-limit (already-resourcing-p requested-limit)
+  (if already-resourcing-p
+      (or *resourced-sbhl-marking-space-limit*
+          requested-limit)
+      requested-limit))
+
 (defun get-sbhl-resourced-marking-space ()
   "[Cyc] Gets an available resourced SBHL-MARKING-SPACE, if one exists. If not, it creates one."
   (let ((result (first *resourced-sbhl-marking-spaces*)))

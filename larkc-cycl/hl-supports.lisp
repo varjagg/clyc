@@ -65,6 +65,9 @@ and permission notice:
   "[Cyc] Return T iff OBJECT is an HL support module."
   (member-eq? object *hl-support-modules*))
 
+(deftype hl-support-module-p ()
+  '(satisfies hl-support-module-p))
+
 (defun setup-hl-support-module (name plist)
   "[Cyc] Declare NAME as a new HL support module"
   (declare (type keyword name))

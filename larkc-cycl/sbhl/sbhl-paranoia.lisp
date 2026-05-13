@@ -53,13 +53,13 @@ and permission notice:
 (defparameter *sbhl-trace-level* 1
     "[Cyc] Controls extent of tracing, warnings, etc., for the sbhl modules [0 .. 5].")
 
-(defun sbhl-error (level format-str &rest args)
-  "[Cyc] If *SBHL-TRACE_LEVEL* si greater than or equal to LEVEL, signal a cerror with FORMAT-STR. If *SBHL-TRACE_LEVEL* is within 2 of LEVEL, warn with FORMAT-STR."
-  (cond
-    ((>= *sbhl-trace-level* level)
-     (apply #'cerror "Continue anyway" args))
-    ((>= (+ 2 *sbhl-trace-level*) level)
-     (apply #'warn format-str args))))
+	(defun sbhl-error (level format-str &rest args)
+	  "[Cyc] If *SBHL-TRACE_LEVEL* si greater than or equal to LEVEL, signal a cerror with FORMAT-STR. If *SBHL-TRACE_LEVEL* is within 2 of LEVEL, warn with FORMAT-STR."
+	  (cond
+	    ((>= *sbhl-trace-level* level)
+	     (apply #'cerror "Continue anyway" format-str args))
+	    ((>= (+ 2 *sbhl-trace-level*) level)
+	     (apply #'warn format-str args))))
 
 (defun sbhl-cerror (level continue-str format-str &rest args)
   "[Cyc] If *SBHL-TRACE-LEVEL* is greater than or equal to LEVEL, signal a cerror with CONTINUE-STR and FORMAT-STR. If *SBHL-TRACE-LEVEL* is within 2 of LEVEL, warn with FORMAT-STR."

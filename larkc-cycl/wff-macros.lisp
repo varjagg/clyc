@@ -38,7 +38,8 @@ and permission notice:
 
 ;; Reconstructed macro. Evidence: $sym0$CLET, $list1 = ((*WITHIN-WFF?* T)).
 (defmacro within-wff (&body body)
-  `(let ((*within-wff?* t))
+  `(let ((*within-wff?* t)
+         (*within-wff-p* t))
      ,@body))
 
 (defun* within-wff? () (:inline t)

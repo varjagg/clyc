@@ -127,8 +127,12 @@ and permission notice:
   "[Cyc] Variable to keep track if we are inside a quote form.")
 (defparameter *new-canonicalizer?* nil
   "[Cyc] Whether to use the code for the new canonicalizer.")
+(defparameter *new-canonicalizer-p* nil
+  "[Cyc] Compatibility spelling for *NEW-CANONICALIZER?*.")
 (defparameter *within-canonicalizer?* nil
   "[Cyc] Transient state variable; is T during the execution of canonicalizing functions.")
+(defparameter *within-canonicalizer-p* nil
+  "[Cyc] Compatibility spelling for *WITHIN-CANONICALIZER?*.")
 (defparameter *form-of-clausal-form* nil
   "[Cyc] Canonicalizer state variable [:cnf :dnf].")
 (defparameter *must-enforce-semantics?* nil)
@@ -186,6 +190,8 @@ You can set this to T or NIL if you want to control its behavior.")
 You can set this to T or NIL if you want to control its behavior.")
 (defparameter *recanonicalizing-candidate-nat?* nil
   "[Cyc] Dynamic variable set while recanonicalizing a nat for robust nart lookup.")
+(defparameter *recanonicalizing-candidate-nat-p* nil
+  "[Cyc] Compatibility spelling for *RECANONICALIZING-CANDIDATE-NAT?*.")
 (defparameter *el-var-blist* nil 
   "[Cyc] Stores the variable rename mappings formed while standardizing variables during uncanonicalization.")
 (defparameter *gathering-quantified-fn-terms?* nil
@@ -259,6 +265,8 @@ You can set this to T or NIL if you want to control its behavior.")
   "[Cyc] Whether the uncanonicalizer should rephrase sentences in terms of #$was, #$willBe, etc.")
 (defparameter *recanonicalizing?* nil
   "[Cyc] Is an existing assertion being recanonicalized?")
+(defparameter *recanonicalizingp* nil
+  "[Cyc] Compatibility spelling for *RECANONICALIZING?*.")
 (defparameter *recanonicalizing-candidate-assertion-stack* nil
   "[Cyc] Used for recursion detection")
 (defparameter *noting-ill-formed-meta-args?* nil
@@ -299,6 +307,7 @@ You can set this to T or NIL if you want to control its behavior.")
 If NIL, we assume that the caller will assert the definitional assertions of the newly-created skolems.
 If T, the czer will assert #$termDependsOn assertions in lieu of having actual definitional assertions.
 This is for use in testing code that calls canonicalize-assert directly.")
+(defparameter *clothe-naked-skolems-p* nil)
 (defparameter *preds-of-computed-skolem-gafs* (list #$isa
                                                     #$arity
                                                     #$arityMin
@@ -363,4 +372,3 @@ This is for use in testing code that calls canonicalize-assert directly.")
 
 (defun valid-tense-czer-mode-p (mode)
   (member-eq? mode *valid-tense-czer-modes*))
-

@@ -70,3 +70,34 @@ and permission notice:
                                        "nart-hl-formula-index"))
 
 (defglobal *nart-hl-formula-table* nil)
+
+(defun ensure-nart-hl-formula-table ()
+  (unless (hash-table-p *nart-hl-formula-table*)
+    (setf *nart-hl-formula-table* (make-hash-table :test #'equal)))
+  *nart-hl-formula-table*)
+
+(defun lookup-nart-hl-formula (id)
+  (lookup-kb-object-content *nart-hl-formula-manager* id))
+
+(defun register-nart-hl-formula (id formula)
+  "[Cyc] Note that ID will be used as the id for FORMULA."
+  (register-kb-object-content *nart-hl-formula-manager* id formula)
+  (alexandria:when-let ((nart (find-nart-by-id id)))
+    (setf (gethash formula (ensure-nart-hl-formula-table)) nart))
+  formula)
+
+(defun nart-hl-formula (nart)
+  "[Cyc] Return the HL formula for NART."
+  (lookup-nart-hl-formula (n-id nart)))
+
+(defun nart-from-hl-formula (formula)
+  (gethash formula (ensure-nart-hl-formula-table)))
+
+(defun load-nart-hl-formula (dump-id stream)
+  (register-nart-hl-formula dump-id (cfasl-input stream)))
+
+(defun load-nart-hl-formula-from-cache (dump-id stream)
+  (let ((formula nil))
+    (let ((*within-cfasl-externalization* nil))
+      (setf formula (load-nart-hl-formula dump-id stream)))
+    formula))

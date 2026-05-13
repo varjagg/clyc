@@ -93,7 +93,7 @@ and permission notice:
                                 (*sbhl-nodes-previous-marking* nil)
                                 (*genl-inverse-mode-p* nil))
                             (with-rw-read-lock (*sbhl-rw-lock*)
-                              (let ((*sbhl-search-behavior*
+                              (let* ((*sbhl-search-behavior*
                                       (determine-sbhl-search-behavior
                                        (get-sbhl-search-module)
                                        (get-sbhl-search-direction)

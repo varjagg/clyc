@@ -41,7 +41,9 @@ and permission notice:
   "[Cyc] Returns T iff SENTENCE is an EL sentence, but not an EL formula.
 currently (11/9/99) the only such animals are #$True, #$False, and EL variables."
   (and (not (el-formula-p sentence))
-       (missing-larkc 6562)))
+       (or (eq sentence #$True)
+           (eq sentence #$False)
+           (el-var? sentence))))
 
 (defun el-literal-p (object)
   "[Cyc] Like CYCL-LITERAL-P except it only permits EL constructs."

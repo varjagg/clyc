@@ -85,7 +85,7 @@ Returns SET."
   (clrhash set))
 
 (defun* new-set-iterator (set) (:inline t)
-  (new-hash-table-iterator set))
+  (new-list-iterator (hash-table-keys set)))
 
 (declare-cfasl-opcode *cfasl-opcode-set* 60 'cfasl-input-set)
 
@@ -122,6 +122,5 @@ Returns SET."
                         (return nil)))
                   ,@body)
                 ,set))))
-
 
 

@@ -218,11 +218,11 @@ Return 1: Whether quiescence terminated early due to running out of keys."
                             (setf ,done? (,fn-quiesce-one-step state)))))
                     (values ,result ,done?))))
          
-         (defun ,fn-next (state)
-           (,with state
-                  (multiple-value-bind (final-index-spec done?) (,fn-quiesce state)
-                    ,next-form
-                    (values final-index-spec done?))))))))
+	         (defun ,fn-next (state)
+	           (,with state
+	                  (multiple-value-bind (final-index-spec done?) (,fn-quiesce state)
+	                    ,next-form
+	                    (values final-index-spec state done?))))))))
 
 
 
@@ -1669,7 +1669,7 @@ If FINAL-INDEX-SPEC is complex, then get the list from the other side. This list
   (destructuring-bind (term . keys) final-index-spec
     (when-let ((final-index (get-subindex term keys)))
       (check-type final-index #'final-index-p)
-      (let* ((raw-iterator (new-set-iterator final-index))
+      (let* ((raw-iterator (new-list-iterator (hash-table-keys final-index)))
              (filtered-iterator (new-filter-iterator-without-values
                                  raw-iterator
                                  #'assertion-matches-type-truth-and-direction

@@ -47,6 +47,9 @@ and permission notice:
       (null object)
       (el-formula-p object)))
 
+(deftype el-fort-p ()
+  '(satisfies el-fort-p))
+
 (defun kb-assertion? (object)
   (assertion-p object))
 

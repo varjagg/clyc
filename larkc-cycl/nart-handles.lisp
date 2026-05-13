@@ -74,18 +74,17 @@ and permission notice:
   "[Cyc] Return the internal ID where new NARTs started."
   (id-index-new-id-threshold *nart-from-id*))
 
-;; The inner loop seems to have an unconditional missing-larkc, and doesn't seem to be called anyway.  However, it shouldn't be hard to complete, as we have the intent message and funcname.
-'(defun set-next-nart-id (&optional max-nart-id)
-  ;; TODO - this is a macroexpansion that optionally skips over tombstones.  There's do-narts, do-old-narts, and do-new-narts declared, whose expansion this likely is.
-  (let* ((max (or max-nart-id -1))
-         (idx (do-narts-table))
-         (mess "Determining maximum NART ID")
-         (total (id-index-count idx))
-         (sofar 0))
-    (noting-percent-progress (mess)
-      (unless (id-index-objects-empty-p idx :skip)
-        (dovector (id nart (id-index-old-objects idx))
-          ())))))
+(defun set-next-nart-id (&optional max-nart-id)
+  (let ((max -1))
+    (if max-nart-id
+        (setf max max-nart-id)
+        (do-id-index (id nart (do-narts-table)
+                         :progress-message "Determining maximum NART ID")
+          (ignore id)
+          (setf max (max max (n-id nart)))))
+    (let ((next-id (1+ max)))
+      (set-id-index-next-id *nart-from-id* next-id)
+      next-id)))
 
 (defun register-nart-id (nart id)
   "[Cyc] Note that ID will be used as the id for NART."
@@ -95,6 +94,9 @@ and permission notice:
 
 (defstruct (nart (:conc-name "N-"))
   id)
+
+(deftype nart-p ()
+  'nart)
 
 (defmethod sxhash ((object nart))
   (let ((id (n-id object)))
@@ -120,9 +122,8 @@ and permission notice:
   "[Cyc] Create a sample invalid NART."
   (get-nart))
 
-;; TODO - uses same macroexpansion as set-next-nart-id, with the missing-larkc
-'(defun free-all-narts ()
-  )
+(defun free-all-narts ()
+  (clear-nart-table))
 
 (defun* reset-nart-id (nart new-id) (:inline t)
   "[Cyc] Primitively change the internal id for NART to NEW-ID."

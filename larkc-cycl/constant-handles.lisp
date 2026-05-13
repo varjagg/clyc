@@ -53,6 +53,9 @@ and permission notice:
   ;; TODO - String, but a lot of code tests for stringp of this in terms of registering it in tables. Why?
   name)
 
+(deftype constant-p ()
+  'constant)
+
 ;; (defun print-constant (object stream depth) ...) -- active declareFunction; body inlined into defmethod print-object
 
 (defmethod print-object ((object constant) stream)

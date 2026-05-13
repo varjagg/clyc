@@ -957,14 +957,22 @@ and permission notice:
                       (setf sofar (+ sofar 1))
                       (note-percent-progress sofar total)
                       (when (integerp dump-id)
-                        ;; Likely did (load-nart-index dump-id stream-86) —
-                        ;; the load-nart-index declareFunction is commented-out.
-                        (missing-larkc 10571))))))
+                        (load-nart-index dump-id stream-86))))))
            (let ((*is-thread-performing-cleanup?* t))
              (when (streamp stream)
                (close stream))))
          (discard-dump-filename filename-var)))))
   nil)
+
+(defun load-nart-index (dump-id stream)
+  (let ((nart (find-nart-by-dump-id dump-id)))
+    (reset-nart-index nart (cfasl-input stream))))
+
+(defun load-nart-index-from-cache (dump-id stream)
+  (let ((index nil))
+    (let ((*within-cfasl-externalization* nil))
+      (setf index (load-nart-index dump-id stream)))
+    index))
 
 (defun load-unrepresented-term-indices (directory-path)
   (let ((cfasl-file (kb-dump-file "unrepresented-term-indices" directory-path))
@@ -1102,9 +1110,7 @@ and permission notice:
                         ((eq dump-id :eof))
                       (note-percent-progress (get-file-position stream-112) total)
                       (when (integerp dump-id)
-                        ;; Likely did (load-nart-hl-formula dump-id stream-112) —
-                        ;; the load-nart-hl-formula declareFunction is commented-out.
-                        (missing-larkc 10568))))))
+                        (load-nart-hl-formula dump-id stream-112))))))
            (let ((*is-thread-performing-cleanup?* t))
              (when (streamp stream)
                (close stream))))
@@ -1535,4 +1541,5 @@ and permission notice:
 (note-funcall-helper-function 'load-kb-hl-support-def-from-cache)
 (note-funcall-helper-function 'load-constant-index-from-cache)
 (note-funcall-helper-function 'load-nart-index-from-cache)
+(note-funcall-helper-function 'load-nart-hl-formula-from-cache)
 (note-funcall-helper-function 'load-unrepresented-term-index-from-cache)

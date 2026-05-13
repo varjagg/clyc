@@ -46,6 +46,9 @@ and permission notice:
   (or (constant-p object)
       (nart-p object)))
 
+(deftype fort-p ()
+  '(or constant nart))
+
 (defun* non-fort-p (object) (:inline t)
   (not (fort-p object)))
 
@@ -57,7 +60,7 @@ and permission notice:
   "[Cyc] Primitively change the assertion index for FORT to NEW-INDEX."
   (if (constant-p fort)
       (reset-constant-index fort new-index)
-      (missing-larkc 208)))
+      (reset-nart-index fort new-index)))
 
 (defun valid-fort? (fort)
   "[Cyc] Return T if FORT is a valid FORT."

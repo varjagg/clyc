@@ -103,6 +103,9 @@ and permission notice:
 (defparameter *within-wff?* nil
   "[Cyc] Transient state variable; is T during the execution of WFF?.")
 
+(defparameter *within-wff-p* nil
+  "[Cyc] Compatibility spelling for *WITHIN-WFF?*.")
+
 (deflexical *wff-modes* (list :strict :lenient)
   "[Cyc] See *wff-mode*")
 

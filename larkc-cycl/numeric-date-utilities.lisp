@@ -181,7 +181,7 @@ and permission notice:
 
 (defun decode-elapsed-seconds (elapsed-seconds)
   "[Cyc] Decode ELAPSED-SECONDS into 4 return values: seconds minutes hours elapsed-days"
-  (declare ((integer 0) elapsed-seconds))
+  (declare ((real 0) elapsed-seconds))
   (multiple-value-bind (truncated-exact-seconds partial-seconds) (truncate elapsed-seconds)
     (destructuring-bind (whole-seconds &optional (minutes 0) (hours 0) (elapsed-days 0))
         (decode-integer-multiples truncated-exact-seconds (list *seconds-in-a-minute*
@@ -301,5 +301,4 @@ The Julian date for the start of Aug 1, 2001 is 2452122.5.")
     "[Cyc] HACK")
 (defconstant *seconds-in-an-odd-millenium* 31556908800)
 (defconstant *seconds-in-an-even-millenium* 31556995200)
-
 

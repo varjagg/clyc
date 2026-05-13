@@ -59,7 +59,7 @@ and permission notice:
 
 (defun new-kb-object-manager (name size lru-size-percentage load-func exact-size?)
   (let ((kbom (make-kb-object-manager :name name
-                                      :content-lock (bt:make-lock
+                                      :content-lock (bt:make-recursive-lock
                                                      (format nil "~a content manager lock" name))
                                       :lru-size-percentage lru-size-percentage
                                       :usage-table :uninitialized
@@ -76,7 +76,7 @@ and permission notice:
   "[Cyc] EXACT?: Whether SIZE is the exact desired size.  If so, we'll allocate the table in static space, otherwise we'll wait for OPTIMIZE-KB-OBJECT-CONTENT-TABLE to do that."
   (declare (ignore exact?))
   (let ((did-setup? nil))
-    (bt:with-lock-held ((kbom-content-lock kbom))
+    (bt:with-recursive-lock-held ((kbom-content-lock kbom))
       (let ((content-table (kbom-content-table kbom)))
         (unless (id-index-p content-table)
           (setf (kbom-content-table kbom) (new-id-index size 0))
@@ -122,7 +122,7 @@ and permission notice:
         (kb-object-content-file-vector-p file-vector)))))
 
 (defun clear-kb-object-content-table (kbom)
-  (bt:with-lock-held ((kbom-content-lock kbom))
+  (bt:with-recursive-lock-held ((kbom-content-lock kbom))
     (let ((usage-table (kbom-usage-table kbom)))
       (when (id-index-p usage-table)
         (clear-id-index usage-table)))
@@ -154,7 +154,7 @@ and permission notice:
 
 (defun lookup-kb-object-content (kbom id)
   (let ((content nil))
-    (bt:with-lock-held ((kbom-content-lock kbom))
+    (bt:with-recursive-lock-held ((kbom-content-lock kbom))
       (let ((content-table (kb-object-manager-content-table kbom)))
         (setf content (id-index-lookup content-table id (uninitialized)))
         (if (uninitialized-p content)
@@ -174,13 +174,13 @@ and permission notice:
 
 (defun register-kb-object-content (kbom id kb-object-content)
   "[Cyc] Note that ID will be used as the id for KB-OBJECT-CONTENT."
-  (bt:with-lock-held ((kbom-content-lock kbom))
+  (bt:with-recursive-lock-held ((kbom-content-lock kbom))
     (id-index-enter (kb-object-manager-content-table kbom) id kb-object-content))
   kb-object-content)
 
 (defun deregister-kb-object-content (kbom id)
   "[Cyc] Note that ID is not in use as an KB-OBJECT-CONTENT id."
-  (bt:with-lock-held ((kbom-content-lock kbom))
+  (bt:with-recursive-lock-held ((kbom-content-lock kbom))
     (prog1 (id-index-remove (kb-object-manager-content-table kbom) id)
       (drop-kb-object-usage kbom id))))
 
@@ -276,5 +276,3 @@ and permission notice:
                             1)))
       (id-index-enter usage-table id new-counter)))
   id)
-
-

@@ -51,6 +51,30 @@ and permission notice:
                                                     #'load-nart-index-from-cache
                                                     exact?)))
 
+(defun* cached-nart-index-count () (:inline t)
+  "[Cyc] Return the number of nart indices currently cached in memory."
+  (cached-kb-object-count *nart-index-manager*))
+
+(defun* lookup-nart-index (id) (:inline t)
+  (lookup-kb-object-content *nart-index-manager* id))
+
+(defun register-nart-index (id nart-index)
+  "[Cyc] Note that ID will be used as the id for NART-INDEX."
+  (register-kb-object-content *nart-index-manager* id nart-index))
+
+(defun deregister-nart-index (id)
+  (deregister-kb-object-content *nart-index-manager* id))
+
+(defun nart-index (nart)
+  "[Cyc] Return the indexing structure for NART."
+  (let ((id (n-id nart)))
+    (and id (lookup-nart-index id))))
+
+(defun reset-nart-index (nart new-index)
+  "[Cyc] Primitively change the assertion index for NART to NEW-INDEX."
+  (register-nart-index (n-id nart) new-index)
+  nart)
+
 (defun swap-out-all-pristine-nart-indices ()
   (swap-out-all-pristine-kb-objects-int *nart-index-manager*))
 

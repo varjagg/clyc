@@ -40,7 +40,7 @@ and permission notice:
 (defun sbhl-all-forward-true-nodes (module node &optional mt tv)
   "[Cyc] @return listp; all forward true nodes accessible to NODE via MODULE."
   (declare (type (satisfies sbhl-module-p) module))
-  (let ((result nil)
+  (let* ((result nil)
         (*sbhl-search-module* module)
         (*sbhl-search-module-type* (get-sbhl-module-type module))
         (*sbhl-add-node-to-result-test* (get-sbhl-add-node-to-result-test module))
@@ -71,7 +71,7 @@ and permission notice:
                                 (*sbhl-nodes-previous-marking* nil)
                                 (*genl-inverse-mode-p* nil))
                             (with-rw-read-lock (*sbhl-rw-lock*)
-                              (let ((*sbhl-search-behavior*
+                              (let* ((*sbhl-search-behavior*
                                       (determine-sbhl-search-behavior
                                        (get-sbhl-search-module)
                                        (get-sbhl-search-direction)
@@ -123,7 +123,7 @@ and permission notice:
                                 (*sbhl-nodes-previous-marking* nil)
                                 (*genl-inverse-mode-p* nil))
                             (with-rw-read-lock (*sbhl-rw-lock*)
-                              (let ((*sbhl-search-behavior*
+                              (let* ((*sbhl-search-behavior*
                                       (determine-sbhl-search-behavior
                                        (get-sbhl-search-module)
                                        (get-sbhl-search-direction)
@@ -258,7 +258,7 @@ direction, and truth."
                                 (*genl-inverse-mode-p* nil))
                             (with-rw-read-lock (*sbhl-rw-lock*)
                               (sbhl-check-type function function-spec-p)
-                              (let ((*sbhl-search-behavior*
+                              (let* ((*sbhl-search-behavior*
                                       (determine-sbhl-search-behavior
                                        (get-sbhl-search-module)
                                        (get-sbhl-search-direction)
@@ -342,7 +342,7 @@ the first non-nil result. @see sbhl-gather-first-among-closure"
                                 (*genl-inverse-mode-p* nil))
                             (with-rw-read-lock (*sbhl-rw-lock*)
                               (sbhl-check-type fn function-spec-p)
-                              (let ((*sbhl-search-behavior*
+                              (let* ((*sbhl-search-behavior*
                                       (determine-sbhl-search-behavior
                                        (get-sbhl-search-module)
                                        (get-sbhl-search-direction)
@@ -397,7 +397,7 @@ the first non-nil result. @see sbhl-gather-first-among-closure"
                                 (*genl-inverse-mode-p* nil))
                             (with-rw-read-lock (*sbhl-rw-lock*)
                               (sbhl-check-type fn function-spec-p)
-                              (let ((*sbhl-add-node-to-result-test* nil)
+                              (let* ((*sbhl-add-node-to-result-test* nil)
                                     (*sbhl-search-behavior*
                                       (determine-sbhl-search-behavior
                                        (get-sbhl-search-module)
@@ -461,7 +461,7 @@ to sbhl-gather-first-non-nil-result. Then performs sbhl-transitive-closure."
                                 (*genl-inverse-mode-p* nil))
                             (with-rw-read-lock (*sbhl-rw-lock*)
                               (sbhl-check-type fn function-spec-p)
-                              (let ((*sbhl-add-node-to-result-test* nil)
+                              (let* ((*sbhl-add-node-to-result-test* nil)
                                     (*sbhl-search-behavior*
                                       (determine-sbhl-search-behavior
                                        (get-sbhl-search-module)
@@ -548,7 +548,7 @@ All unmarked nodes are returned, as they are the extremal ones."
                                     (*sbhl-nodes-previous-marking* nil)
                                     (*genl-inverse-mode-p* nil))
                                 (with-rw-read-lock (*sbhl-rw-lock*)
-                                  (let ((*sbhl-search-behavior*
+                                  (let* ((*sbhl-search-behavior*
                                           (determine-sbhl-search-behavior
                                            (get-sbhl-search-module)
                                            (get-sbhl-search-direction)
@@ -646,7 +646,7 @@ if each node of NODES has any node subsuming it (and not coextensional) among th
                                       (*sbhl-nodes-previous-marking* nil)
                                       (*genl-inverse-mode-p* nil))
                                   (with-rw-read-lock (*sbhl-rw-lock*)
-                                    (let ((*sbhl-search-behavior*
+                                    (let* ((*sbhl-search-behavior*
                                             (determine-sbhl-search-behavior
                                              (get-sbhl-search-module)
                                              (get-sbhl-search-direction)
@@ -740,7 +740,7 @@ if each node of NODES has any node subsuming it (and not coextensional) among th
                                     (*sbhl-nodes-previous-marking* nil)
                                     (*genl-inverse-mode-p* nil))
                                 (with-rw-read-lock (*sbhl-rw-lock*)
-                                  (let ((*sbhl-search-behavior*
+                                  (let* ((*sbhl-search-behavior*
                                           (determine-sbhl-search-behavior
                                            (get-sbhl-search-module)
                                            (get-sbhl-search-direction)
@@ -836,7 +836,7 @@ just one arbitrary node from each cycle."
                                       (*sbhl-nodes-previous-marking* nil)
                                       (*genl-inverse-mode-p* nil))
                                   (with-rw-read-lock (*sbhl-rw-lock*)
-                                    (let ((*sbhl-search-behavior*
+                                    (let* ((*sbhl-search-behavior*
                                             (determine-sbhl-search-behavior
                                              (get-sbhl-search-module)
                                              (get-sbhl-search-direction)
@@ -919,7 +919,7 @@ true closures of each of NODES. If CANDIDATES are provided, the answer will subs
                                      (*sbhl-nodes-previous-marking* nil)
                                      (*genl-inverse-mode-p* nil))
                                  (with-rw-read-lock (*sbhl-rw-lock*)
-                                   (let ((*sbhl-search-behavior*
+                                   (let* ((*sbhl-search-behavior*
                                            (determine-sbhl-search-behavior
                                             (get-sbhl-search-module)
                                             (get-sbhl-search-direction)
@@ -982,7 +982,7 @@ true closures of each of NODES. If CANDIDATES are provided, the answer will subs
                                 (*sbhl-nodes-previous-marking* nil)
                                 (*genl-inverse-mode-p* nil))
                             (with-rw-read-lock (*sbhl-rw-lock*)
-                              (let ((*sbhl-search-behavior*
+                              (let* ((*sbhl-search-behavior*
                                       (determine-sbhl-search-behavior
                                        (get-sbhl-search-module)
                                        (get-sbhl-search-direction)
@@ -1175,7 +1175,7 @@ and ensures that a new sbhl space is used."
 (defun sbhl-path-from-node-to-node-p (node1 node2)
   "[Cyc] @return booleanp; whether there is a path from NODE1 to NODE2."
   (increment-sbhl-graph-attempt-historical-count)
-  (let ((result nil)
+  (let* ((result nil)
         (*sbhl-search-type* :boolean)
         (*sbhl-search-behavior*
           (determine-sbhl-search-behavior
@@ -1248,7 +1248,7 @@ and ensures that a new sbhl space is used."
 
 (defun sbhl-path-from-node-to-any-of-nodes-p (node nodes)
   "[Cyc] @return booleanp; whether there is a path from NODE to any of NODES."
-  (let ((result nil)
+  (let* ((result nil)
         (*sbhl-search-behavior*
           (determine-sbhl-search-behavior
            (get-sbhl-search-module)
@@ -1349,7 +1349,7 @@ and ensures that a new sbhl space is used."
 
 (defun sbhl-path-from-any-of-nodes-to-node-p (nodes node)
   "[Cyc] @return booleanp; whether there is a path from any of NODES to NODE."
-  (let ((result nil)
+  (let* ((result nil)
         (*sbhl-search-type* :boolean)
         (*sbhl-search-behavior*
           (determine-sbhl-search-behavior
